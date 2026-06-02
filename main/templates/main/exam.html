@@ -1,0 +1,378 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static "css/content.css" %}">
+{% endblock css %}
+
+{% block content %}
+<section class="intro-section">
+  <img src="{% static 'images/background.jpg' %}" alt="bg" class="background-image" />
+  <div class="overlay"></div>
+  <div class="intro-content">
+    <h1 class="inner_cont">Голосовий екзамен</h1>
+    <p class="inner_cont">
+      Система озвучує запитання, фіксує ваш погляд через камеру та аналізує голосові відповіді за допомогою нейромереж.
+      Після завершення ви отримаєте підсумкову оцінку й Excel‑звіт.
+    </p>
+  </div>
+</section>
+
+<div class="container-main">
+  <div class="h-title">
+    <h1 id="main_title">Екзамен: {{ survey.title|default:"Без назви" }}</h1>
+  </div>
+
+  <!-- ПІБ з клавіатури -->
+  <div class="form-group mb-md">
+    <label for="studentName">ПІБ студента:</label>
+    <input id="studentName" type="text" class="input-medium" placeholder="Прізвище Ім'я По батькові">
+    <button id="startExamBtn">Почати екзамен</button>
+  </div>
+
+  <!-- Поточне запитання та статус -->
+  <div class="question-answer">
+    <div class="inner">
+      <p id="question">Після старту тут з’являться запитання.</p>
+    </div>
+    <div class="inner">
+      <p id="status">Екзамен ще не розпочато.</p>
+      <p id="feedback"></p>
+      <p id="progress" class="text-small text-muted"></p>
+      <button id="stopAnswerBtn" disabled>Завершити відповідь</button>
+    </div>
+  </div>
+
+  <!-- Лог Q/A -->
+  <div class="log-container">
+    <div id="log" class="text-small"></div>
+  </div>
+
+  <!-- Блок перевірки погляду -->
+  <div class="video-frame">
+    <input type="hidden" id="gazeSid" value="">
+
+    <div class="video-controls">
+      <button id="manualOnBtn" onclick="enableManual()" disabled>Ручний режим порогу</button>
+      <button id="manualOffBtn" onclick="disableManual()" disabled>Вимкнути ручний режим</button>
+      <div id="gazeStatus">Погляд: —</div>
+      <div id="cheatPct">Час неуваги: 0%</div>
+    </div>
+
+    <div class="video-preview">
+      <video id="cam" muted playsinline></video>
+
+      <div id="previewPanel" class="preview-panel">
+        <div class="preview-controls">
+          <label>Поріг:</label>
+          <input id="threshSlider" type="range" min="1" max="255" value="170" oninput="onThreshChange(event)" disabled />
+          <span id="threshVal">170</span>
+        </div>
+        <div class="preview-images">
+          <div class="preview-image-container">
+            <div class="preview-image-label">Ліве око</div>
+            <img id="leftPrev" alt="Left preview" class="preview-image" />
+          </div>
+          <div class="preview-image-container">
+            <div class="preview-image-label">Праве око</div>
+            <img id="rightPrev" alt="Right preview" class="preview-image" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const key = "{{ sid }}";
+
+  const questionEl = document.getElementById('question');
+  const statusEl = document.getElementById('status');
+  const feedbackEl = document.getElementById('feedback');
+  const progressEl = document.getElementById('progress');
+  const logEl = document.getElementById('log');
+
+  const nameInput = document.getElementById('studentName');
+  const startBtn = document.getElementById('startExamBtn');
+  const stopBtn = document.getElementById('stopAnswerBtn');
+
+  const gazeSidInput = document.getElementById('gazeSid');
+  const gazeStartBtn = null;
+  const gazeStopBtn = null;
+  const manualOnBtn = document.getElementById('manualOnBtn');
+  const manualOffBtn = document.getElementById('manualOffBtn');
+
+  let answerTimeSec = 10;
+  let totalRaw = 0;
+  let totalExam = 0;
+  let mediaRecorder = null;
+  let audioStream = null;
+  let chunks = [];
+  let countdownId = null;
+  let examFinished = false;
+
+  async function ensureAudioStream() {
+    if (audioStream) return audioStream;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Браузер не підтримує запис з мікрофона.");
+      throw new Error("no getUserMedia");
+    }
+    audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    return audioStream;
+  }
+
+  function stopCountdown() {
+    if (countdownId) {
+      clearInterval(countdownId);
+      countdownId = null;
+    }
+  }
+
+  async function startRecordingAndSend() {
+    if (examFinished) return;
+    const stream = await ensureAudioStream();
+
+    chunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) chunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      stopCountdown();
+      statusEl.textContent = "Обробка відповіді...";
+      stopBtn.disabled = true;
+
+      const webmBlob = new Blob(chunks, { type: 'audio/webm' });
+
+      // Декодуємо webm в браузері і перекодуємо у WAV, щоб Whisper міг прочитати без ffmpeg
+      try {
+        const arrayBuffer = await webmBlob.arrayBuffer();
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioCtx();
+        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+        const wavBlob = audioBufferToWavBlob(audioBuffer);
+
+        const formData = new FormData();
+        formData.append('audio', wavBlob, 'answer.wav');
+
+        const rr = await fetch(`/api/exam/voice_answer/${key}/`, {
+          method: 'POST',
+          body: formData
+        });
+        const dd = await rr.json();
+
+        if (!rr.ok || dd.error) {
+          statusEl.textContent = dd.error || 'Помилка під час обробки голосу.';
+          return;
+        }
+
+        const qtxt = questionEl.textContent;
+        if (dd.answer) {
+          logEl.innerHTML += `<div class="log-entry"><b>Q:</b> ${qtxt}<br><b>A:</b> ${dd.answer}</div>`;
+        }
+
+        if (dd.feedback) {
+          feedbackEl.textContent = `Відгук: ${dd.feedback} (точність: ${dd.accuracy_score})`;
+        }
+
+        if (dd.done) {
+          examFinished = true;
+          questionEl.textContent = 'Екзамен завершено.';
+          progressEl.textContent = '';
+          statusEl.textContent = 'Екзамен завершено, результати збережено.';
+
+      if (dd.summary && dd.saved) {
+            logEl.innerHTML += `<div class="exam-summary">
+              <div class="exam-summary-title">Підсумок:</div>
+              ${dd.summary.dialogue_result}<br>
+              <b>Середня точність відповіді:</b> ${dd.summary.overall_accuracy}%<br>
+              <b>Показник запозичень (плагіат):</b> ${dd.summary.plagiarism_score}<br>
+              <b>Оцінка (1-5):</b> ${dd.saved.grade_5}<br>
+              <b>% часу не дивився на екран:</b> ${dd.saved.gaze_not_looking_pct}%<br>
+              <b>Тривалість сесії:</b> ${dd.saved.duration_sec} c
+            </div>`;
+
+            // Автоматичне завантаження Excel (CSV)
+            if (dd.saved.session_id) {
+              window.location.href = `/api/exam/export/${dd.saved.session_id}/`;
+            }
+          }
+
+          stopBtn.disabled = true;
+          if (manualOnBtn) manualOnBtn.disabled = true;
+          if (manualOffBtn) manualOffBtn.disabled = true;
+          return;
+        }
+
+        // Наступне запитання
+        const idx = dd.idx;
+        const total = dd.total;
+        totalRaw = total;
+        totalExam = Math.max(0, totalRaw - 1);
+        questionEl.textContent = dd.next_question;
+        progressEl.textContent = `Питання ${idx} з ${totalExam}`;
+        statusEl.textContent = 'Слухаю наступну відповідь...';
+
+        // Озвучити поточне запитання
+        await fetch(`/api/exam/speak/${key}/`, { method: 'POST' });
+
+        // Запустити наступний цикл запису
+        await startRecordingWithCountdown();
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = 'Помилка при обробці або надсиланні аудіо.';
+      }
+    };
+
+    mediaRecorder.start();
+    stopBtn.disabled = false;
+
+    let secondsLeft = answerTimeSec;
+    statusEl.textContent = `Слухаю відповідь... ${secondsLeft} c`;
+    stopCountdown();
+    countdownId = setInterval(() => {
+      secondsLeft -= 1;
+      if (secondsLeft >= 0) {
+        statusEl.textContent = `Слухаю відповідь... ${secondsLeft} c`;
+      }
+      if (secondsLeft <= 0 && mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+        stopCountdown();
+      }
+    }, 1000);
+  }
+
+  async function startRecordingWithCountdown() {
+    try {
+      await startRecordingAndSend();
+    } catch (e) {
+      console.error(e);
+      statusEl.textContent = 'Не вдалося розпочати запис з мікрофона.';
+    }
+  }
+
+  stopBtn.addEventListener('click', () => {
+    if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+      stopCountdown();
+    }
+  });
+
+  startBtn.addEventListener('click', async () => {
+    const fullname = (nameInput.value || "").trim();
+    if (!fullname) {
+      alert("Введіть ПІБ студента.");
+      return;
+    }
+    const parts = fullname.split(/\s+/).filter(Boolean);
+    if (parts.length < 2 || fullname.length < 5) {
+      alert("ПІБ має складатися щонайменше з двох слів і бути довшим за 5 символів.");
+      return;
+    }
+
+    try {
+      statusEl.textContent = "Підготовка екзамену...";
+
+      // 1) Старт екзамену – отримуємо тривалість відповіді
+      const initResp = await fetch(`/api/exam/start/${key}/`, { method: 'POST' });
+      const initData = await initResp.json();
+      if (!initResp.ok || !initData.ok) {
+        alert("Не вдалося запустити екзамен.");
+        return;
+      }
+      answerTimeSec = initData.answer_time_sec || 10;
+
+      // 2) Надсилаємо ПІБ як першу відповідь (без голосу)
+      const nameResp = await fetch(`/api/exam/answer/${key}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answer: fullname })
+      });
+      const nameData = await nameResp.json();
+      if (!nameResp.ok || nameData.error) {
+        alert(nameData.error || "Помилка збереження ПІБ.");
+        return;
+      }
+
+      totalRaw = nameData.total;
+      totalExam = Math.max(0, totalRaw - 1);
+
+      // Поточне запитання – перше екзаменаційне
+      questionEl.textContent = nameData.next_question;
+      progressEl.textContent = `Питання ${nameData.idx} з ${totalExam}`;
+
+      // Запускаємо gaze тільки після ПІБ
+      if (gazeSidInput) gazeSidInput.value = key;
+      // Автостарт перевірки погляду після введення ПІБ
+      try {
+        startGaze();
+      } catch (e) {
+        console.error("startGaze error:", e);
+      }
+      if (manualOnBtn && manualOffBtn) {
+        manualOnBtn.disabled = false;
+        manualOffBtn.disabled = true;
+      }
+
+      // Озвучуємо перше запитання
+      await fetch(`/api/exam/speak/${key}/`, { method: 'POST' });
+
+      statusEl.textContent = "Слухаю відповідь...";
+      startBtn.disabled = true;
+      nameInput.disabled = true;
+
+      // Запускаємо перший голосовий цикл
+      await startRecordingWithCountdown();
+    } catch (e) {
+      console.error(e);
+      statusEl.textContent = "Помилка під час старту екзамену.";
+    }
+  });
+})();
+
+// Допоміжна функція: перетворити AudioBuffer у WAV Blob (16-bit PCM, mono)
+function audioBufferToWavBlob(audioBuffer) {
+  const numChannels = 1;
+  const sampleRate = audioBuffer.sampleRate;
+  const channelData = audioBuffer.getChannelData(0);
+  const length = channelData.length * numChannels * 2 + 44; // 16-bit PCM + заголовок WAV
+
+  const buffer = new ArrayBuffer(length);
+  const view = new DataView(buffer);
+
+  // WAV header
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + channelData.length * 2, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);        // Subchunk1Size
+  view.setUint16(20, 1, true);         // PCM
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * 2, true); // byte rate
+  view.setUint16(32, numChannels * 2, true);              // block align
+  view.setUint16(34, 16, true);       // bits per sample
+  writeString(view, 36, 'data');
+  view.setUint32(40, channelData.length * 2, true);
+
+  // PCM samples
+  let offset = 44;
+  for (let i = 0; i < channelData.length; i++, offset += 2) {
+    let s = Math.max(-1, Math.min(1, channelData[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+
+  return new Blob([buffer], { type: 'audio/wav' });
+}
+
+function writeString(view, offset, str) {
+  for (let i = 0; i < str.length; i++) {
+    view.setUint8(offset + i, str.charCodeAt(i));
+  }
+}
+</script>
+{% endblock content %}

@@ -1,0 +1,38 @@
+:root {
+    --black: #311F09;
+    --orange: #FF8A00;
+    --green: #3FA72F;
+    --white-orange: #FFE6C9;
+}
+
+body, html {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 20px;
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+h1, h2, h3, h4, p {
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1237px;
+    margin: 0px auto;
+}
+
+
+/* HEADER */
+
+
+
+/* MAIN */
+
+
+

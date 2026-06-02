@@ -1,0 +1,139 @@
+/* ============================================
+   LAYOUT - Утиліти для розміщення контенту
+   ============================================ */
+
+/* Flexbox контейнери */
+.flex {
+    display: flex;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.gap-sm {
+    gap: 8px;
+}
+
+.gap-md {
+    gap: 16px;
+}
+
+.gap-lg {
+    gap: 30px;
+}
+
+/* Відступи */
+.mt-sm { margin-top: 10px; }
+.mt-md { margin-top: 20px; }
+.mt-lg { margin-top: 30px; }
+
+.mb-sm { margin-bottom: 10px; }
+.mb-md { margin-bottom: 20px; }
+.mb-lg { margin-bottom: 30px; }
+
+.mx-md { margin-left: 30px; margin-right: 30px; }
+
+.p-sm { padding: 10px; }
+.p-md { padding: 20px; }
+.p-lg { padding: 30px; }
+
+/* Блоки з картками */
+.card {
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-light {
+    background-color: #f5f5f5;
+}
+
+.card-success {
+    background-color: #e9f7ef;
+}
+
+/* Відео/медіа контейнер */
+.video-frame {
+    /* padding: 20px; */
+}
+
+.video-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin: 8px 0;
+    flex-wrap: wrap;
+}
+
+.video-preview {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin: 6px 0;
+}
+
+.video-preview video {
+    width: 320px;
+    height: 180px;
+    background: #111;
+    border-radius: 8px;
+}
+
+/* Панель попереднього перегляду */
+.preview-panel {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.preview-panel.active {
+    display: flex;
+}
+
+.preview-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.preview-images {
+    display: flex;
+    gap: 12px;
+}
+
+.preview-image-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-image-label {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 4px;
+}
+
+.preview-image {
+    width: 200px;
+    height: auto;
+    border: 1px solid #333;
+    border-radius: 6px;
+}

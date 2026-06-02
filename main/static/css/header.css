@@ -1,0 +1,59 @@
+/* ============================================
+   HEADER - Шапка сайту
+   ============================================ */
+
+header {
+    margin: 20px 0;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-content__last {
+    align-items: center;
+    display: flex;
+}
+
+.header-content__last a:last-of-type {
+    background-color: var(--green);
+    text-decoration: none;
+    color: #fff;
+    padding: 15px 34px;
+    border-radius: 133px;
+    transition: background-color .4s ease;
+}
+
+.header-content__last a:last-of-type:hover {
+    background-color: var(--orange);
+}
+
+.header-content__logo {
+    width: 150px;
+}
+
+/* Навігація */
+nav a {
+    text-decoration: none;
+    margin-right: 45px;
+    color: var(--black);
+    display: inline-block;
+    transition: all .4s ease;
+}
+
+nav a:hover {
+    color: var(--green);
+    transform: scale(1.05);
+}
+
+nav a:last-of-type {
+    margin-right: 0;
+}
+
+nav a.checked {
+    color: var(--orange);
+}
+
+

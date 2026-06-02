@@ -1,0 +1,126 @@
+/* ============================================
+   CONTENT - Основний контент
+   ============================================ */
+
+.container-main {
+    margin: 50px 0;
+    padding: 0 20px;
+}
+
+.h-title {
+    text-align: center;
+    margin: 30px;
+}
+
+/* Блок питання-відповідь */
+.question-answer {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.question-answer .inner {
+    flex: 1;
+    min-width: 280px;
+}
+
+#question, .default-back-panel {
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 18px;
+    line-height: 1.5;
+    min-height: 150px;
+}
+
+#answer {
+    background-color: #e9f7ef;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 18px;
+    line-height: 1.5;
+    min-height: 150px;
+}
+
+#status {
+    font-size: 12px;
+}
+
+/* Форма завантаження файлів */
+form#fileForm {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#fileInput {
+    display: none;
+}
+
+#fileName {
+    font-size: 10px;
+    padding: 10px;
+    border-radius: 133px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+/* Intro секція */
+.intro-section {
+    position: relative;
+    color: white;
+    text-align: center;
+    padding: 80px 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.intro-content {
+    position: relative;
+    padding: 60px 30px;
+    text-align: center;
+    text-shadow: 1px 1px 3px black;
+}
+
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -10;
+    opacity: 0.3;
+}
+
+.inner_cont {
+    margin: 20px auto;
+    max-width: 800px;
+}
+
+.overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    top: 0;
+    left: 0;
+    z-index: -5;
+}
+
+.chat-buttons {
+  margin: 20px 0;
+}
+
+.chat-buttons_buttons {
+  display: flex;
+  justify-content: space-between;
+}

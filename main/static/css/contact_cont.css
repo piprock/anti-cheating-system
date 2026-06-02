@@ -1,0 +1,12 @@
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Основний контент займає всю доступну висоту */
+.content {
+    flex: 1;
+    padding: 20px;
+  }
+  

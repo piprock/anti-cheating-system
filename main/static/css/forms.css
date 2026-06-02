@@ -1,0 +1,86 @@
+/* ============================================
+   FORMS - Стилі для форм та інпутів
+   ============================================ */
+
+/* Інпути */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: "Comfortaa", sans-serif;
+    font-size: 16px;
+    transition: border-color .3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--orange);
+}
+
+/* Повноширокі інпути */
+.input-full {
+    width: 100%;
+}
+
+.input-medium {
+    width: 60%;
+}
+
+/* Лейбли */
+label {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 16px;
+    color: var(--black);
+    margin-right: 8px;
+}
+
+/* Контейнер форми */
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.form-group-column {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Лог та текстові блоки */
+.log-container {
+    margin: 0 30px;
+}
+
+.log-entry {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+.text-small {
+    font-size: 12px;
+}
+
+.text-muted {
+    opacity: 0.7;
+}
+
+/* Результати екзамену */
+.exam-summary {
+    margin-top: 10px;
+    padding: 20px;
+    background-color: #e3e3e3;
+    border-radius: 8px;
+}
+
+.exam-summary-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+}

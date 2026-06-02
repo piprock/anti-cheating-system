@@ -1,0 +1,99 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static "css/content.css" %}">
+{% endblock css %}
+
+{% block content %}
+<section class="intro-section">
+  <img src="{% static 'images/background.jpg' %}" alt="Фон" class="background-image" />
+  <div class="overlay"></div>
+  <div class="intro-content">
+    <h1 class="inner_cont">AI-Агент для студентів</h1>
+    <p class="inner_cont">
+      Це інтерактивний цифровий агент, який може аналізувати документи, опитувати студентів голосом та відповідати на запитання.
+      Просто прикріпи файл або почни говорити — і агент розпочне роботу!
+    </p>
+  </div>
+  <div class="button-try-about">
+    <a class="try" href="#main_title">Спробувати</a>
+    <a class="add_inf" href="{% url "about" %}">Детальніше</a>
+  </div>
+</section>  
+
+
+
+
+<div class="container-main">
+
+  <div class="h-title">
+    <h1 id="main_title">Голосовий агент</h1>
+  </div>
+
+  <div class="question-answer">
+    <div class="inner">
+      <p id="question" class="default-back-panel">Очікування...</p>
+    </div>
+    <div class="inner">
+      <p id="answer" class="default-back-panel">Відповідь</p>
+    </div>
+  </div>
+
+  <div class="chat-buttons button-container-center">
+    <p id="status"></p>
+    <div class="chat-buttons_buttons">
+      <button onclick="sendRequest()" class="button">Записати голос</button>
+      <form id="fileForm" enctype="multipart/form-data">    
+          <label for="fileInput" class="custom-file-upload">
+            Вибрати файл
+          </label>
+          <span id="fileName">Файл не вибрано</span>
+          <input type="file" name="file" id="fileInput" accept=".txt,.docx,.pdf">
+          <button type="submit" class="btn-small">Надіслати</button>
+      </form>
+    </div>
+  </div>
+
+
+    <div class="video-frame default-back-panel">
+
+
+        <div class="video-controls">
+          <button onclick="startGaze()">Старт перевірки</button>
+          <button onclick="stopGaze()">Стоп</button>
+          <button id="manualOnBtn" onclick="enableManual()">Налаштувати вручну</button>
+          <button id="manualOffBtn" onclick="disableManual()" disabled>Авто</button>
+          <div id="gazeStatus">Очі: —</div>
+          <div id="cheatPct">Відвертався: 0%</div>
+        </div>
+
+        <div class="video-preview">
+          <video id="cam" muted playsinline></video>
+
+          <div id="previewPanel" class="preview-panel">
+            <div class="preview-controls">
+              <label>Поріг:</label>
+              <input id="threshSlider" type="range" min="1" max="255" value="170" oninput="onThreshChange(event)" disabled />
+              <span id="threshVal">170</span>
+            </div>
+            <div class="preview-images">
+              <div class="preview-image-container">
+                <div class="preview-image-label">Ліве око</div>
+                <img id="leftPrev" alt="Left preview" class="preview-image" />
+              </div>
+              <div class="preview-image-container">
+                <div class="preview-image-label">Праве око</div>
+                <img id="rightPrev" alt="Right preview" class="preview-image" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+    </div>
+
+
+</div>
+
+{% endblock content %}

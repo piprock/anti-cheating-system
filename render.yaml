@@ -1,0 +1,24 @@
+databases:
+  - name: anti-cheating-db
+    databaseName: anticheating
+    user: anticheating
+
+services:
+  - type: web
+    name: anti-cheating-app
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn agent.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: anti-cheating-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: ALLOWED_HOSTS
+        value: '.onrender.com'
+      - key: DEBUG
+        value: 'False'

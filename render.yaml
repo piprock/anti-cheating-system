@@ -7,6 +7,7 @@ services:
   - type: web
     name: anti-cheating-app
     env: python
+    pythonVersion: '3.11.9'
     buildCommand: "./build.sh"
     startCommand: "gunicorn agent.wsgi:application"
     envVars:

@@ -1,5 +1,8 @@
 # Use an official Python runtime as a parent image
-FROM python:3.11-slim
+FROM python:3.9-slim
+
+# Install system dependencies required by sounddevice
+RUN apt-get update && apt-get install -y portaudio19-dev
 
 # Set the working directory in the container
 WORKDIR /app

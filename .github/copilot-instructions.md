@@ -138,7 +138,7 @@ Concise, project-specific guidance for AI coding agents working here.
 - JSON parsing: ensure GPT responses maintain expected structure (use temperature=0.1 for determinism).
 
 ## Secrets / Env
-Required env vars: `OPENAI_API_KEY`, `ELEVENLABS_API_KEY`, optional `AGENT_ID`. Load via `.env` (`python-dotenv`).
+Required env vars: `OPENAI_API_KEY`, `ELEVENLABS_API_KEY`, optional `AGENT_ID`, `SECRET_KEY`. Load via `.env` (`python-dotenv`).
 
 ## Typical Commands
 ```bash

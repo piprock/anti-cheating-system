@@ -25,4 +25,4 @@ RUN python manage.py collectstatic --no-input
 EXPOSE 8000
 
 # Run the application
-CMD ["gunicorn", "main.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "agent.wsgi:application", "--bind", "0.0.0.0:8000"]

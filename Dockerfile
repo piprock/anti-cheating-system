@@ -10,8 +10,10 @@ WORKDIR /app
 # Copy the requirements file into the container at /app
 COPY requirements.txt /app/
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Install python packages.
+# Set CMAKE_BUILD_PARALLEL_LEVEL=1 to limit dlib compilation to a single core
+# to prevent out-of-memory errors on platforms with limited resources.
+RUN CMAKE_BUILD_PARALLEL_LEVEL=1 pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application's code into the container at /app
 COPY . /app/

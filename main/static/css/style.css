@@ -5,45 +5,44 @@
    Режими для дальтоніків (Протанопія, Дейтеранопія, Тританопія, Високий контраст)
    ============================================ */
 
-:root {
-    /* Основна брендова палітра (помаранчевий та білий) */
-    --orange: #FF8A00;
-    --orange-hover: #E67600;
-    --orange-active: #CC6600;
-    --orange-subtle: #FFF7ED;
-    --orange-light: #FFEDD5;
+:root,
+[data-theme="dark"] {
+    /* Основна брендова палітра (темна тема - ЗА ЗАМОВЧУВАННЯМ) */
+    --orange: #FF9820;
+    --orange-hover: #FFAE4D;
+    --orange-active: #E68200;
+    --orange-subtle: rgba(255, 152, 32, 0.15);
+    --orange-light: rgba(255, 152, 32, 0.25);
 
-    /* Функціональні статусні кольори (за замовчуванням) */
-    --green: #2E8540;
-    --green-hover: #246B33;
-    --green-subtle: #F0FDF4;
-    --red: #DC2626;
-    --red-hover: #B91C1C;
-    --red-subtle: #FEF2F2;
+    /* Функціональні статусні кольори (темна тема) */
+    --green: #22C55E;
+    --green-hover: #16A34A;
+    --green-subtle: rgba(34, 197, 94, 0.15);
+    --red: #EF4444;
+    --red-hover: #DC2626;
+    --red-subtle: rgba(239, 68, 68, 0.15);
 
-    /* СВІТЛА ТЕМА (Теплі тони без темно-синього) */
-    --bg-page: #FAF7F2;          /* Теплий світлий алебастр / пісочний */
-    --bg-card: #FFFFFF;          /* Чистий білий для карток */
-    --bg-subtle: #F5EFEB;        /* Теплий бежевий/пісочний для підкладок */
-    --bg-hero: linear-gradient(180deg, #FFF9F2 0%, #FAEDE0 100%);
-    --bg-hero-overlay: rgba(255, 255, 255, 0.45);
-    --bg-footer: #FAF6F0;
-    --bg-video: #1C1917;         /* Нейтральне вугільне тло камери */
+    /* ТЕМНА ТЕМА - ЗА ЗАМОВЧУВАННЯМ */
+    --bg-page: #18181B;
+    --bg-card: #27272A;
+    --bg-subtle: #323238;
+    --bg-hero: linear-gradient(180deg, #242220 0%, #1C1A18 100%);
+    --bg-hero-overlay: rgba(0, 0, 0, 0.4);
+    --bg-footer: #18181B;
+    --bg-video: #09090B;
 
-    /* Текстові кольори (Теплі вугільні, без холодного синього) */
-    --black: #292524;
-    --text-main: #292524;        /* Глибокий теплий камінь/вугілля */
-    --text-muted: #78716C;       /* Середній теплий тон */
-    --text-light: #A8A29E;       /* Світлий допоміжний тон */
-    --hero-title: #292524;
-    --hero-subtitle: #57534E;
-    --footer-text: #57534E;
-    --footer-border: #E7DFD5;
+    --black: #F4F4F5;
+    --text-main: #F4F4F5;
+    --text-muted: #A1A1AA;
+    --text-light: #71717A;
+    --hero-title: #FFFFFF;
+    --hero-subtitle: #D4D4D8;
+    --footer-text: #A1A1AA;
+    --footer-border: #27272A;
 
-    /* Бордери (Теплі чисті лінії, без синяви) */
-    --border-color: #E7DFD5;
-    --border-color-hover: #D4C9BC;
-    --border-color-focus: #FF8A00;
+    --border-color: #3F3F46;
+    --border-color-hover: #52525B;
+    --border-color-focus: #FF9820;
 
     /* Базова типографіка Comfortaa */
     --font-main: "Comfortaa", sans-serif;
@@ -88,44 +87,44 @@
 }
 
 /* ============================================
-   ТЕМНА (НІЧНА) ТЕМА [data-theme="dark"]
-   Глибокі вугільні тони з яскравим помаранчевим акцентом
+   СВІТЛА ТЕМА [data-theme="light"]
+   Теплі тони без темно-синього (слонова кістка, камінь, помаранчевий)
    ============================================ */
-[data-theme="dark"] {
-    --bg-page: #18181B;
-    --bg-card: #27272A;
-    --bg-subtle: #323238;
-    --bg-hero: linear-gradient(180deg, #242220 0%, #1C1A18 100%);
-    --bg-hero-overlay: rgba(0, 0, 0, 0.4);
-    --bg-footer: #18181B;
-    --bg-video: #09090B;
+[data-theme="light"] {
+    --bg-page: #FAF7F2;          /* Теплий світлий алебастр / пісочний */
+    --bg-card: #FFFFFF;          /* Чистий білий для карток */
+    --bg-subtle: #F5EFEB;        /* Теплий бежевий/пісочний для підкладок */
+    --bg-hero: linear-gradient(180deg, #FFF9F2 0%, #FAEDE0 100%);
+    --bg-hero-overlay: rgba(255, 255, 255, 0.45);
+    --bg-footer: #FAF6F0;
+    --bg-video: #1C1917;         /* Нейтральне вугільне тло камери */
 
-    --black: #F4F4F5;
-    --text-main: #F4F4F5;
-    --text-muted: #A1A1AA;
-    --text-light: #71717A;
-    --hero-title: #FFFFFF;
-    --hero-subtitle: #D4D4D8;
-    --footer-text: #A1A1AA;
-    --footer-border: #27272A;
+    --black: #292524;
+    --text-main: #292524;        /* Глибокий теплий камінь/вугілля */
+    --text-muted: #78716C;       /* Середній теплий тон */
+    --text-light: #A8A29E;       /* Світлий допоміжний тон */
+    --hero-title: #292524;
+    --hero-subtitle: #57534E;
+    --footer-text: #57534E;
+    --footer-border: #E7DFD5;
 
-    --border-color: #3F3F46;
-    --border-color-hover: #52525B;
-    --border-color-focus: #FF9820;
+    --border-color: #E7DFD5;
+    --border-color-hover: #D4C9BC;
+    --border-color-focus: #FF8A00;
 
-    --orange: #FF9820;
-    --orange-hover: #FFAE4D;
-    --orange-active: #E68200;
-    --orange-subtle: rgba(255, 152, 32, 0.15);
-    --orange-light: rgba(255, 152, 32, 0.25);
+    --orange: #FF8A00;
+    --orange-hover: #E67600;
+    --orange-active: #CC6600;
+    --orange-subtle: #FFF7ED;
+    --orange-light: #FFEDD5;
 
-    --green: #22C55E;
-    --green-hover: #16A34A;
-    --green-subtle: rgba(34, 197, 94, 0.15);
+    --green: #2E8540;
+    --green-hover: #246B33;
+    --green-subtle: #F0FDF4;
 
-    --red: #EF4444;
-    --red-hover: #DC2626;
-    --red-subtle: rgba(239, 68, 68, 0.15);
+    --red: #DC2626;
+    --red-hover: #B91C1C;
+    --red-subtle: #FEF2F2;
 }
 
 /* ============================================
@@ -329,4 +328,12 @@ a:hover {
     max-width: 1200px;
     margin: 0 auto;
     padding: var(--space-8) var(--space-6);
+}
+
+/* Універсальні SVG-іконки */
+.ui-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+    transition: stroke var(--transition-fast), fill var(--transition-fast);
 }

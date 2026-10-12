@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="uk" data-theme="light" data-font-scale="normal" data-colorblind="none">
+<html lang="uk" data-theme="dark" data-font-scale="normal" data-colorblind="none">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,17 +14,19 @@
                     if (s.theme) document.documentElement.setAttribute('data-theme', s.theme);
                     if (s.fontScale) document.documentElement.setAttribute('data-font-scale', s.fontScale);
                     if (s.colorblind) document.documentElement.setAttribute('data-colorblind', s.colorblind);
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
                 }
             } catch(e) {}
         })();
     </script>
-    <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.2">
-    <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.2">
-    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.2">
-    <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.2">
-    <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.2">
-    <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.2">
-    <link rel="stylesheet" href="{% static "css/a11y.css" %}?v=2.2">
+    <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.4">
+    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/a11y.css" %}?v=2.3">
     {% block css %}{% endblock css %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,14 +50,29 @@
                 </nav>
 
                 <div class="header-actions">
-                    <!-- Швидке перемикання нічного / світлого режиму -->
-                    <button id="themeQuickBtn" class="theme-quick-btn" type="button" aria-label="Перемкнути нічну тему" title="Перемкнути нічну тему">
-                        <span id="themeQuickIcon" aria-hidden="true">🌙</span>
+                    <!-- Швидке перемикання нічного / світлого режиму (за замовчуванням темна тема) -->
+                    <button id="themeQuickBtn" class="theme-quick-btn" type="button" aria-label="Перемкнути на світлу тему" title="Увімкнути світлу тему">
+                        <span id="themeQuickIcon" class="flex-center" aria-hidden="true">
+                            <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                        </span>
                     </button>
 
                     <!-- Кнопка відкриття меню доступності та зору -->
                     <button id="a11yOpenBtn" class="a11y-open-btn" type="button" aria-label="Налаштування зору та доступності" title="Налаштування зору та доступності">
-                        <span aria-hidden="true">👁️</span>
+                        <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
                         <span>Доступність</span>
                     </button>
 
@@ -72,6 +89,32 @@
 
     <!-- FOOTER -->
     <footer class="footer">
+        <!-- Циклічний рядок з великим жирним текстом, що біжить вліво -->
+        <div class="footer-marquee" aria-hidden="true">
+            <div class="footer-marquee__track">
+                <div class="footer-marquee__group">
+                    <span>TEACHAI</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>СИСТЕМА КОНТРОЛЮ ЗНАНЬ</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>AI PROCTORING</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>ЧЕСНІ ЕКЗАМЕНИ</span>
+                    <span class="marquee-bullet">•</span>
+                </div>
+                <div class="footer-marquee__group">
+                    <span>TEACHAI</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>СИСТЕМА КОНТРОЛЮ ЗНАНЬ</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>AI PROCTORING</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>ЧЕСНІ ЕКЗАМЕНИ</span>
+                    <span class="marquee-bullet">•</span>
+                </div>
+            </div>
+        </div>
+
         <div class="footer-container">
             <div class="footer-logo">
                 <h2>TeachAI</h2>
@@ -100,23 +143,48 @@
         <div class="a11y-modal">
             <div class="a11y-modal__header">
                 <h2 id="a11yModalTitle" class="a11y-modal__title">
-                    <span aria-hidden="true">👁️</span> Налаштування доступності
+                    <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Налаштування доступності</span>
                 </h2>
-                <button id="a11yCloseBtn" class="a11y-close-btn" type="button" aria-label="Закрити вікно">✕</button>
+                <button id="a11yCloseBtn" class="a11y-close-btn" type="button" aria-label="Закрити вікно">
+                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
 
             <!-- 1. Тема оформлення -->
             <div class="a11y-section">
                 <div class="a11y-section__title">Тема оформлення</div>
-                <div class="a11y-section__desc">Виберіть світлу (теплу) або нічну контрастну тему</div>
+                <div class="a11y-section__desc">Виберіть нічну контрастну або світлу (теплу) тему</div>
                 <div class="a11y-btn-group">
-                    <button class="a11y-option-btn active" type="button" data-theme-choice="light">
-                        <span class="a11y-option-icon">☀️</span>
-                        <span>Світла (тепла)</span>
-                    </button>
-                    <button class="a11y-option-btn" type="button" data-theme-choice="dark">
-                        <span class="a11y-option-icon">🌙</span>
+                    <button class="a11y-option-btn active" type="button" data-theme-choice="dark">
+                        <span class="a11y-option-icon">
+                            <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                        </span>
                         <span>Нічна (темна)</span>
+                    </button>
+                    <button class="a11y-option-btn" type="button" data-theme-choice="light">
+                        <span class="a11y-option-icon">
+                            <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                        </span>
+                        <span>Світла (тепла)</span>
                     </button>
                 </div>
             </div>

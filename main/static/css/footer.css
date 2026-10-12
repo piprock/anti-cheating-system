@@ -6,12 +6,69 @@
 .footer {
     background-color: var(--bg-footer);
     color: var(--footer-text);
-    padding: var(--space-10) var(--space-6) var(--space-6); /* 40px 24px 24px */
+    padding: var(--space-6) 0 var(--space-6);
     border-top: 1px solid var(--footer-border);
     transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
+/* ============================================
+   FOOTER RUNNING TEXT (MARQUEE ВЛІВО)
+   Великий жирний текст, що постійно повільно біжить вліво
+   ============================================ */
+.footer-marquee {
+    width: 100%;
+    overflow: hidden;
+    user-select: none;
+    pointer-events: none;
+    margin-bottom: var(--space-8);
+    padding: var(--space-2) 0 var(--space-6);
+    border-bottom: 1px solid var(--footer-border);
+}
+
+.footer-marquee__track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation: marqueeScrollLeft 48s linear infinite;
+}
+
+.footer-marquee__group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    flex-shrink: 0;
+    padding-right: var(--space-6);
+    font-family: var(--font-main);
+    font-size: clamp(48px, 6.5vw, 92px);
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    color: var(--text-main);
+    opacity: 0.18;
+}
+
+[data-theme="dark"] .footer-marquee__group {
+    opacity: 0.22;
+}
+
+.footer-marquee__group .marquee-bullet {
+    color: var(--orange);
+    opacity: 0.8;
+}
+
+@keyframes marqueeScrollLeft {
+    0% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
 .footer-container {
+    padding: 0 var(--space-6);
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -97,7 +154,7 @@
     font-size: var(--font-size-xs);
     color: var(--text-muted);
     border-top: 1px solid var(--footer-border);
-    padding-top: var(--space-4); /* 16px */
+    padding: var(--space-4) var(--space-6) 0; /* 16px 24px 0 */
 }
 
 .footer-bottom p {

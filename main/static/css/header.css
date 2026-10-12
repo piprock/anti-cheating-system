@@ -77,14 +77,18 @@ nav a.checked {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
     transition: all var(--transition-fast);
 }
 
 .theme-quick-btn:hover {
-    border-color: var(--orange);
-    background-color: var(--orange-subtle);
+    border-color: var(--orange-hover);
+    background-color: var(--orange);
+    color: #ffffff;
     transform: translateY(-1px);
+}
+
+.theme-quick-btn:hover svg {
+    stroke: #ffffff;
 }
 
 /* Кнопка відкриття панелі доступності */
@@ -105,10 +109,14 @@ nav a.checked {
 }
 
 .a11y-open-btn:hover {
-    border-color: var(--orange);
-    background-color: var(--orange-subtle);
-    color: var(--orange);
+    border-color: var(--orange-hover);
+    background-color: var(--orange);
+    color: #ffffff;
     transform: translateY(-1px);
+}
+
+.a11y-open-btn:hover svg {
+    stroke: #ffffff;
 }
 
 .header-content__last {

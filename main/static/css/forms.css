@@ -106,6 +106,7 @@ label {
 #cheatPct {
     display: inline-flex;
     align-items: center;
+    gap: var(--space-1);
     padding: var(--space-2) var(--space-3); /* 8px 12px */
     border-radius: var(--radius-sm);
     font-size: var(--font-size-xs);

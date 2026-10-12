@@ -279,17 +279,17 @@ function buildGazeQueryParams() {
 /**
  * Update gaze tracking UI with server response
  */
-  // Update gaze status with colorblind-friendly classes and symbols
+  // Update gaze status with colorblind-friendly classes and SVG icons
   const gazeStatusEl = document.getElementById("gazeStatus");
   if (gazeStatusEl) {
     if (data.isLooking) {
-      gazeStatusEl.textContent = "✓ Фокус на екрані";
+      gazeStatusEl.innerHTML = `<svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>Фокус на екрані</span>`;
       gazeStatusEl.classList.remove("gaze-status--not-looking");
       gazeStatusEl.classList.add("gaze-status--looking");
       gazeStatusEl.style.color = "";
     } else {
-      const statusText = data.face ? "⚠ Погляд відведено" : "⚠ Обличчя не знайдено";
-      gazeStatusEl.textContent = statusText;
+      const statusText = data.face ? "Погляд відведено" : "Обличчя не знайдено";
+      gazeStatusEl.innerHTML = `<svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> <span>${statusText}</span>`;
       gazeStatusEl.classList.remove("gaze-status--looking");
       gazeStatusEl.classList.add("gaze-status--not-looking");
       gazeStatusEl.style.color = "";

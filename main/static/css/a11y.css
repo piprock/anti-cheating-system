@@ -85,9 +85,13 @@
 }
 
 .a11y-close-btn:hover {
-    color: var(--orange);
-    border-color: var(--orange);
-    background-color: var(--orange-subtle);
+    color: #ffffff;
+    border-color: var(--orange-hover);
+    background-color: var(--orange);
+}
+
+.a11y-close-btn:hover svg {
+    stroke: #ffffff;
 }
 
 /* Секції налаштувань */

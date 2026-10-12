@@ -21,7 +21,7 @@
         })();
     </script>
     <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.3">
-    <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.4">
+    <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.6">
     <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.3">
@@ -89,7 +89,26 @@
 
     <!-- FOOTER -->
     <footer class="footer">
-        <!-- Циклічний рядок з великим жирним текстом, що біжить вліво -->
+        <!-- 1. Верхній блок футера (логотип, посилання, соцмережі) -->
+        <div class="footer-container">
+            <div class="footer-logo">
+                <h2>TeachAI</h2>
+                <p>Платформа тестування та моніторингу знань</p>
+            </div>
+
+            <div class="footer-links">
+                <a href="{% url "about" %}">Про нас</a>
+                <a href="{% url "contact" %}">Контакти</a>
+            </div>
+
+            <div class="footer-social">
+                <a href="#" aria-label="Facebook"><img src="{% static "images/facebook.svg" %}" alt="Facebook"></a>
+                <a href="#" aria-label="Instagram"><img src="{% static "images/inst.svg" %}" alt="Instagram"></a>
+                <a href="#" aria-label="YouTube"><img src="{% static "images/youtube.svg" %}" alt="YouTube"></a>
+            </div>
+        </div>
+
+        <!-- 2. Циклічний рядок з великим жирним текстом (між елементами футера) -->
         <div class="footer-marquee" aria-hidden="true">
             <div class="footer-marquee__track">
                 <div class="footer-marquee__group">
@@ -115,24 +134,7 @@
             </div>
         </div>
 
-        <div class="footer-container">
-            <div class="footer-logo">
-                <h2>TeachAI</h2>
-                <p>Платформа тестування та моніторингу знань</p>
-            </div>
-
-            <div class="footer-links">
-                <a href="{% url "about" %}">Про нас</a>
-                <a href="{% url "contact" %}">Контакти</a>
-            </div>
-
-            <div class="footer-social">
-                <a href="#" aria-label="Facebook"><img src="{% static "images/facebook.svg" %}" alt="Facebook"></a>
-                <a href="#" aria-label="Instagram"><img src="{% static "images/inst.svg" %}" alt="Instagram"></a>
-                <a href="#" aria-label="YouTube"><img src="{% static "images/youtube.svg" %}" alt="YouTube"></a>
-            </div>
-        </div>
-
+        <!-- 3. Нижній блок футера (копірайт) -->
         <div class="footer-bottom">
             <p>© 2025 TeachAI. Всі права захищені.</p>
         </div>

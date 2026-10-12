@@ -6,27 +6,31 @@
 .footer {
     background-color: var(--bg-footer);
     color: var(--footer-text);
-    padding: var(--space-6) 0 var(--space-6);
+    padding: var(--space-8) 0 var(--space-6);
     border-top: 1px solid var(--footer-border);
     transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
 /* ============================================
    FOOTER RUNNING TEXT (MARQUEE ВЛІВО)
-   Великий жирний текст, що постійно повільно біжить вліво
+   Великий жирний текст між двома блоками футера
    ============================================ */
 .footer-marquee {
     width: 100%;
     overflow: hidden;
     user-select: none;
     pointer-events: none;
-    margin-bottom: var(--space-8);
-    padding: var(--space-2) 0 var(--space-6);
+    margin-bottom: var(--space-6);
+    padding: var(--space-6) 0 var(--space-4); /* 24px зверху, 16px знизу для оптичного центрування з урахуванням виносних елементів шрифту */
+    border-top: 1px solid var(--footer-border);
     border-bottom: 1px solid var(--footer-border);
+    display: flex;
+    align-items: center;
 }
 
 .footer-marquee__track {
     display: flex;
+    align-items: center;
     width: max-content;
     will-change: transform;
     animation: marqueeScrollLeft 48s linear infinite;
@@ -41,7 +45,7 @@
     font-family: var(--font-main);
     font-size: clamp(48px, 6.5vw, 92px);
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1;
     text-transform: uppercase;
     letter-spacing: 2px;
     white-space: nowrap;
@@ -74,7 +78,7 @@
     justify-content: space-between;
     align-items: flex-start;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0 auto var(--space-8);
     gap: var(--space-6);
 }
 
@@ -150,11 +154,11 @@
 
 .footer-bottom {
     text-align: center;
-    margin-top: var(--space-8); /* 32px */
+    margin-top: 0;
     font-size: var(--font-size-xs);
     color: var(--text-muted);
-    border-top: 1px solid var(--footer-border);
-    padding: var(--space-4) var(--space-6) 0; /* 16px 24px 0 */
+    border-top: none;
+    padding: var(--space-2) var(--space-6) 0; /* 8px 24px 0 */
 }
 
 .footer-bottom p {

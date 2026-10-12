@@ -1,5 +1,6 @@
 /* ============================================
    HEADER - Шапка сайту
+   Підтримка теми, кнопки доступності та швидкого перемикання теми
    ============================================ */
 
 header {
@@ -9,6 +10,7 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .header-content {
@@ -55,7 +57,60 @@ nav a.checked {
     background-color: var(--orange-subtle);
 }
 
-/* Кнопка входу */
+/* Блок дій у шапці (Доступність, Тема, Вхід) */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* Кнопка швидкого перемикання теми (Сонце / Місяць) */
+.theme-quick-btn {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all var(--transition-fast);
+}
+
+.theme-quick-btn:hover {
+    border-color: var(--orange);
+    background-color: var(--orange-subtle);
+    transform: translateY(-1px);
+}
+
+/* Кнопка відкриття панелі доступності */
+.a11y-open-btn {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: var(--space-2) var(--space-3); /* 8px 12px */
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-main);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-fast);
+}
+
+.a11y-open-btn:hover {
+    border-color: var(--orange);
+    background-color: var(--orange-subtle);
+    color: var(--orange);
+    transform: translateY(-1px);
+}
+
 .header-content__last {
     display: flex;
     align-items: center;
@@ -82,5 +137,3 @@ nav a.checked {
     color: var(--orange);
     background-color: var(--orange-subtle);
 }
-
-

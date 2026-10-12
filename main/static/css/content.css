@@ -1,5 +1,7 @@
 /* ============================================
    CONTENT - Основний контент та робочий простір екзамену
+   Тепла світла палітра (помаранчевий + білий + теплий пісочний)
+   Повна підтримка світлої / темної теми
    ============================================ */
 
 /* Заголовок сторінки */
@@ -15,20 +17,15 @@
     margin: 0;
 }
 
-.intro-section #main_title,
-.intro-content #main_title {
-    color: #ffffff;
-}
-
 /* ============================================
    INTRO / HERO СЕКЦІЯ
-   Сфокусована, компактна, без зайвого розмиття й важких тіней
+   Світла, тепла, привітна (без темно-синього)
    ============================================ */
 
 .intro-section {
     position: relative;
-    background-color: #0F172A;
-    color: #ffffff;
+    background: var(--bg-hero);
+    color: var(--text-main);
     text-align: center;
     padding: var(--space-10) var(--space-6); /* 40px 24px */
     display: flex;
@@ -37,6 +34,7 @@
     align-items: center;
     overflow: hidden;
     border-bottom: 1px solid var(--border-color);
+    transition: background var(--transition-normal);
 }
 
 .background-image {
@@ -47,18 +45,20 @@
     height: 100%;
     object-fit: cover;
     z-index: 1;
-    opacity: 0.15;
-    filter: grayscale(60%);
+    opacity: 0.06;
+    filter: grayscale(100%);
+    pointer-events: none;
 }
 
 .overlay {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.98) 100%);
+    background: var(--bg-hero-overlay);
     top: 0;
     left: 0;
     z-index: 2;
+    pointer-events: none;
 }
 
 .intro-content {
@@ -69,10 +69,12 @@
 }
 
 .intro-content h1,
-h1.inner_cont {
+h1.inner_cont,
+.intro-section #main_title,
+.intro-content #main_title {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
-    color: #ffffff;
+    color: var(--hero-title) !important;
     margin: 0 0 var(--space-3) 0;
     line-height: var(--line-height-tight);
 }
@@ -80,15 +82,21 @@ h1.inner_cont {
 .intro-content p,
 p.inner_cont {
     font-size: var(--font-size-sm);
-    color: #94A3B8;
+    color: var(--hero-subtitle);
     line-height: var(--line-height-relaxed);
-    margin: 0 auto var(--space-2) auto;
+    margin: 0 auto var(--space-4) auto;
     max-width: 640px;
 }
 
 .button-try-about {
     position: relative;
     z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+    flex-wrap: wrap;
 }
 
 /* ============================================
@@ -111,7 +119,7 @@ p.inner_cont {
 .question-answer .inner {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-2);
 }
 
 /* Картка запитання */
@@ -128,6 +136,7 @@ p.inner_cont {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Картка відповіді */
@@ -140,19 +149,22 @@ p.inner_cont {
     line-height: var(--line-height-normal);
     min-height: 140px;
     color: var(--text-main);
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Статус процесу (Слухаю відповідь... тощо) */
 #status {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
-    color: var(--text-muted);
+    color: var(--text-main);
     padding: var(--space-2) var(--space-3);
     background-color: var(--bg-subtle);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     margin: 0;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
 }
 
 /* Прогрес екзамену (Питання N з M) */
@@ -161,7 +173,7 @@ p.inner_cont {
     font-weight: var(--font-weight-bold);
     color: var(--orange);
     background-color: var(--orange-subtle);
-    border: 1px solid rgba(255, 138, 0, 0.2);
+    border: 1px solid rgba(255, 138, 0, 0.25);
     padding: var(--space-1) var(--space-2);
     border-radius: var(--radius-sm);
     display: inline-block;

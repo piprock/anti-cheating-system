@@ -1,9 +1,19 @@
+/* ============================================
+   DESIGN SYSTEM & TOKENS - TEACHAI
+   Підтримка: Світла (тепла) / Темна теми,
+   Масштабування для людей з порушеннями зору,
+   Режими для дальтоніків (Протанопія, Дейтеранопія, Тританопія, Високий контраст)
+   ============================================ */
+
 :root {
-    /* Brand & Accent Colors */
+    /* Основна брендова палітра (помаранчевий та білий) */
     --orange: #FF8A00;
     --orange-hover: #E67600;
     --orange-active: #CC6600;
     --orange-subtle: #FFF7ED;
+    --orange-light: #FFEDD5;
+
+    /* Функціональні статусні кольори (за замовчуванням) */
     --green: #2E8540;
     --green-hover: #246B33;
     --green-subtle: #F0FDF4;
@@ -11,23 +21,31 @@
     --red-hover: #B91C1C;
     --red-subtle: #FEF2F2;
 
-    /* Neutrals & Text */
-    --black: #1E293B;
-    --text-main: #1E293B;
-    --text-muted: #64748B;
-    --text-light: #94A3B8;
+    /* СВІТЛА ТЕМА (Теплі тони без темно-синього) */
+    --bg-page: #FAF7F2;          /* Теплий світлий алебастр / пісочний */
+    --bg-card: #FFFFFF;          /* Чистий білий для карток */
+    --bg-subtle: #F5EFEB;        /* Теплий бежевий/пісочний для підкладок */
+    --bg-hero: linear-gradient(180deg, #FFF9F2 0%, #FAEDE0 100%);
+    --bg-hero-overlay: rgba(255, 255, 255, 0.45);
+    --bg-footer: #FAF6F0;
+    --bg-video: #1C1917;         /* Нейтральне вугільне тло камери */
 
-    /* Backgrounds */
-    --bg-page: #F8FAFC;
-    --bg-card: #FFFFFF;
-    --bg-subtle: #F1F5F9;
+    /* Текстові кольори (Теплі вугільні, без холодного синього) */
+    --black: #292524;
+    --text-main: #292524;        /* Глибокий теплий камінь/вугілля */
+    --text-muted: #78716C;       /* Середній теплий тон */
+    --text-light: #A8A29E;       /* Світлий допоміжний тон */
+    --hero-title: #292524;
+    --hero-subtitle: #57534E;
+    --footer-text: #57534E;
+    --footer-border: #E7DFD5;
 
-    /* Clean Borders (No blurry shadows) */
-    --border-color: #E2E8F0;
-    --border-color-hover: #CBD5E1;
+    /* Бордери (Теплі чисті лінії, без синяви) */
+    --border-color: #E7DFD5;
+    --border-color-hover: #D4C9BC;
     --border-color-focus: #FF8A00;
 
-    /* Typography Scale */
+    /* Базова типографіка Comfortaa */
     --font-main: "Comfortaa", sans-serif;
     --font-size-xs: 12px;
     --font-size-sm: 14px;
@@ -58,7 +76,7 @@
     --space-12: 48px;
     --space-16: 64px;
 
-    /* Unified Radii (No rounded-3xl or 133px pill-mania) */
+    /* Радіуси */
     --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 12px;
@@ -68,6 +86,164 @@
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
 }
+
+/* ============================================
+   ТЕМНА (НІЧНА) ТЕМА [data-theme="dark"]
+   Глибокі вугільні тони з яскравим помаранчевим акцентом
+   ============================================ */
+[data-theme="dark"] {
+    --bg-page: #18181B;
+    --bg-card: #27272A;
+    --bg-subtle: #323238;
+    --bg-hero: linear-gradient(180deg, #242220 0%, #1C1A18 100%);
+    --bg-hero-overlay: rgba(0, 0, 0, 0.4);
+    --bg-footer: #18181B;
+    --bg-video: #09090B;
+
+    --black: #F4F4F5;
+    --text-main: #F4F4F5;
+    --text-muted: #A1A1AA;
+    --text-light: #71717A;
+    --hero-title: #FFFFFF;
+    --hero-subtitle: #D4D4D8;
+    --footer-text: #A1A1AA;
+    --footer-border: #27272A;
+
+    --border-color: #3F3F46;
+    --border-color-hover: #52525B;
+    --border-color-focus: #FF9820;
+
+    --orange: #FF9820;
+    --orange-hover: #FFAE4D;
+    --orange-active: #E68200;
+    --orange-subtle: rgba(255, 152, 32, 0.15);
+    --orange-light: rgba(255, 152, 32, 0.25);
+
+    --green: #22C55E;
+    --green-hover: #16A34A;
+    --green-subtle: rgba(34, 197, 94, 0.15);
+
+    --red: #EF4444;
+    --red-hover: #DC2626;
+    --red-subtle: rgba(239, 68, 68, 0.15);
+}
+
+/* ============================================
+   МАСШТАБУВАННЯ ДЛЯ ЛЮДЕЙ З ПОРУШЕННЯМИ ЗОРУ
+   [data-font-scale="large"] та [data-font-scale="xlarge"]
+   ============================================ */
+[data-font-scale="large"] {
+    --font-size-xs: 14px;
+    --font-size-sm: 16px;
+    --font-size-base: 19px;
+    --font-size-lg: 21px;
+    --font-size-xl: 23px;
+    --font-size-2xl: 28px;
+    --font-size-3xl: 34px;
+    --space-3: 14px;
+    --space-4: 18px;
+    --space-5: 22px;
+}
+
+[data-font-scale="xlarge"] {
+    --font-size-xs: 16px;
+    --font-size-sm: 18px;
+    --font-size-base: 22px;
+    --font-size-lg: 25px;
+    --font-size-xl: 28px;
+    --font-size-2xl: 34px;
+    --font-size-3xl: 42px;
+    --space-3: 16px;
+    --space-4: 20px;
+    --space-5: 26px;
+}
+
+/* ============================================
+   РЕЖИМИ ДЛЯ ДАЛЬТОНІКІВ [data-colorblind="..."]
+   ============================================ */
+
+/* 1. Протанопія та Дейтеранопія (Червоно-зелена сліпота) */
+/* Заміна: Зелений -> Волошковий синій, Червоний -> Насичений бурштиновий */
+[data-colorblind="protanopia-deuteranopia"] {
+    --green: #2563EB;
+    --green-hover: #1D4ED8;
+    --green-subtle: #EFF6FF;
+    --red: #D97706;
+    --red-hover: #B45309;
+    --red-subtle: #FEF3C7;
+}
+
+[data-theme="dark"][data-colorblind="protanopia-deuteranopia"] {
+    --green: #3B82F6;
+    --green-hover: #60A5FA;
+    --green-subtle: rgba(59, 130, 246, 0.2);
+    --red: #F59E0B;
+    --red-hover: #FBBF24;
+    --red-subtle: rgba(245, 158, 11, 0.2);
+}
+
+/* 2. Тританопія (Синьо-жовта сліпота) */
+/* Заміна: Зелений -> Глибокий смарагд, Червоний -> Пурпурово-рожевий */
+[data-colorblind="tritanopia"] {
+    --green: #059669;
+    --green-hover: #047857;
+    --green-subtle: #ECFDF5;
+    --red: #E11D48;
+    --red-hover: #BE123C;
+    --red-subtle: #FFE4E6;
+}
+
+[data-theme="dark"][data-colorblind="tritanopia"] {
+    --green: #10B981;
+    --green-hover: #34D399;
+    --green-subtle: rgba(16, 185, 129, 0.2);
+    --red: #F43F5E;
+    --red-hover: #FB7185;
+    --red-subtle: rgba(244, 63, 94, 0.2);
+}
+
+/* 3. Режим високого контрасту (High Contrast) */
+[data-colorblind="high-contrast"] {
+    --border-color: #000000;
+    --border-color-hover: #000000;
+    --text-main: #000000;
+    --text-muted: #1A1A1A;
+    --bg-page: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --bg-subtle: #F0F0F0;
+    --orange: #D96B00;
+    --green: #006020;
+    --red: #B91C1C;
+}
+
+[data-theme="dark"][data-colorblind="high-contrast"] {
+    --border-color: #FFFFFF;
+    --border-color-hover: #FFFFFF;
+    --text-main: #FFFFFF;
+    --text-muted: #E5E5E5;
+    --bg-page: #000000;
+    --bg-card: #121212;
+    --bg-subtle: #242424;
+    --orange: #FFA433;
+    --green: #4ADE80;
+    --red: #F87171;
+}
+
+[data-colorblind="high-contrast"] .card,
+[data-colorblind="high-contrast"] .video-frame,
+[data-colorblind="high-contrast"] input[type="text"],
+[data-colorblind="high-contrast"] button,
+[data-colorblind="high-contrast"] .btn {
+    border-width: 2px !important;
+}
+
+[data-colorblind="high-contrast"] a {
+    text-decoration: underline !important;
+}
+
+/* ============================================
+   БАЗОВІ СТИЛІ ТА СКИДАННЯ
+   ============================================ */
 
 *, *::before, *::after {
     box-sizing: border-box;
@@ -83,9 +259,10 @@ html, body {
     padding: 0;
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
+    transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* Typography Hierarchy */
+/* Ієрархія заголовків */
 h1, .h1 {
     font-family: var(--font-main);
     font-size: var(--font-size-3xl);
@@ -141,7 +318,7 @@ a:hover {
     color: var(--orange-hover);
 }
 
-/* Containers */
+/* Контейнери */
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -153,6 +330,3 @@ a:hover {
     margin: 0 auto;
     padding: var(--space-8) var(--space-6);
 }
-
-
-

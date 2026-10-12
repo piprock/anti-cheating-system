@@ -1,12 +1,14 @@
 /* ============================================
    FOOTER - Підвал сайту
+   Світле тепле оформлення в тон оранжевому та білому
    ============================================ */
 
 .footer {
-    background-color: #0F172A;
-    color: #94A3B8;
+    background-color: var(--bg-footer);
+    color: var(--footer-text);
     padding: var(--space-10) var(--space-6) var(--space-6); /* 40px 24px 24px */
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--footer-border);
+    transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
 .footer-container {
@@ -20,7 +22,7 @@
 }
 
 .footer-logo h2 {
-    color: #ffffff;
+    color: var(--black);
     font-family: var(--font-main);
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-bold);
@@ -28,7 +30,7 @@
 }
 
 .footer-logo p {
-    color: #64748B;
+    color: var(--text-muted);
     font-size: var(--font-size-sm);
     margin: 0;
 }
@@ -40,14 +42,14 @@
 }
 
 .footer-links a {
-    color: #94A3B8;
+    color: var(--footer-text);
     text-decoration: none;
     font-size: var(--font-size-sm);
     transition: color var(--transition-fast);
 }
 
 .footer-links a:hover {
-    color: #ffffff;
+    color: var(--orange);
 }
 
 .footer-social {
@@ -63,21 +65,26 @@
     width: 36px;
     height: 36px;
     border-radius: var(--radius-sm);
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
     transition: all var(--transition-fast);
 }
 
 .footer-social a:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--orange-subtle);
+    border-color: var(--orange);
 }
 
 .footer-social img {
     width: 20px;
     height: 20px;
-    opacity: 0.8;
-    transition: opacity var(--transition-fast);
+    filter: brightness(0.35); /* Чіткі темні іконки на світлому фоні */
+    opacity: 0.85;
+    transition: opacity var(--transition-fast), filter var(--transition-fast);
+}
+
+[data-theme="dark"] .footer-social img {
+    filter: brightness(1); /* Світлі іконки на темному фоні */
 }
 
 .footer-social a:hover img {
@@ -88,8 +95,8 @@
     text-align: center;
     margin-top: var(--space-8); /* 32px */
     font-size: var(--font-size-xs);
-    color: #64748B;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    border-top: 1px solid var(--footer-border);
     padding-top: var(--space-4); /* 16px */
 }
 

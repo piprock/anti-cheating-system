@@ -1,5 +1,6 @@
 /* ============================================
    FORMS - Стилі для форм, інпутів та індикаторів
+   Тепла палітра без синього, адаптація під темну тему
    ============================================ */
 
 /* Текстові поля */
@@ -13,8 +14,8 @@ textarea {
     font-family: var(--font-main);
     font-size: var(--font-size-base);
     color: var(--text-main);
-    background-color: #ffffff;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    background-color: var(--bg-card);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
     line-height: var(--line-height-normal);
 }
 
@@ -80,6 +81,7 @@ label {
     border-radius: var(--radius-lg);
     margin-bottom: var(--space-6);
     flex-wrap: wrap;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 /* Статус файлу в формі завантаження */
@@ -90,7 +92,7 @@ label {
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-color);
     background-color: var(--bg-subtle);
-    color: var(--text-muted);
+    color: var(--text-main);
     display: inline-block;
     max-width: 240px;
     white-space: nowrap;
@@ -99,7 +101,7 @@ label {
     vertical-align: middle;
 }
 
-/* Індикатори уваги та погляду (Gaze badges) */
+/* Індикатори уваги та погляду (Gaze badges) - світлі та адаптивні */
 #gazeStatus,
 #cheatPct {
     display: inline-flex;
@@ -108,10 +110,24 @@ label {
     border-radius: var(--radius-sm);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
-    background-color: #0F172A;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #F8FAFC;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
     letter-spacing: 0.2px;
+    transition: all var(--transition-fast);
+}
+
+/* Стани погляду зі статусною кольоровою схемою (з підтримкою дальтонізму) */
+.gaze-status--looking {
+    background-color: var(--green-subtle) !important;
+    border-color: var(--green) !important;
+    color: var(--green) !important;
+}
+
+.gaze-status--not-looking {
+    background-color: var(--red-subtle) !important;
+    border-color: var(--red) !important;
+    color: var(--red) !important;
 }
 
 /* Слайдер налаштування порогу */
@@ -132,6 +148,7 @@ input[type="range"]:disabled {
     border: 1px solid var(--border-color);
     padding: var(--space-1) var(--space-2);
     border-radius: var(--radius-sm);
+    color: var(--text-main);
 }
 
 /* Лог відповідей (Transcript Log) */
@@ -151,6 +168,7 @@ input[type="range"]:disabled {
     border-left: 3px solid var(--orange);
     font-size: var(--font-size-sm);
     line-height: var(--line-height-normal);
+    color: var(--text-main);
 }
 
 .log-entry:last-child {
@@ -166,10 +184,11 @@ input[type="range"]:disabled {
     margin-top: var(--space-4);
     padding: var(--space-6); /* 24px */
     background-color: var(--green-subtle);
-    border: 1px solid #86EFAC;
+    border: 1.5px solid var(--green);
     border-radius: var(--radius-md);
     line-height: var(--line-height-relaxed);
     font-size: var(--font-size-sm);
+    color: var(--text-main);
 }
 
 .exam-summary-title {

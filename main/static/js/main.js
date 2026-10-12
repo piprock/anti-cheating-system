@@ -134,10 +134,16 @@ function initFileUploadHandlers() {
     fileInput.addEventListener("change", function() {
       if (this.files.length > 0) {
         fileNameSpan.textContent = this.files[0].name;
-        fileNameSpan.style.backgroundColor = "#3FA72F";
+        fileNameSpan.style.backgroundColor = "var(--green-subtle)";
+        fileNameSpan.style.borderColor = "var(--green)";
+        fileNameSpan.style.color = "var(--green)";
+        fileNameSpan.style.fontWeight = "bold";
       } else {
         fileNameSpan.textContent = "Оберіть файл для аналізу";
-        fileNameSpan.style.backgroundColor = "transparent";
+        fileNameSpan.style.backgroundColor = "";
+        fileNameSpan.style.borderColor = "";
+        fileNameSpan.style.color = "";
+        fileNameSpan.style.fontWeight = "";
       }
     });
   }
@@ -273,13 +279,21 @@ function buildGazeQueryParams() {
 /**
  * Update gaze tracking UI with server response
  */
-function updateGazeUI(data) {
-  // Update gaze status
-  if (data.isLooking) {
-    updateElementWithStyle("gazeStatus", "Погляд спрямований на екран", "lime");
-  } else {
-    const statusText = data.face ? "Погляд відведено" : "Обличчя не знайдено";
-    updateElementWithStyle("gazeStatus", statusText, "tomato");
+  // Update gaze status with colorblind-friendly classes and symbols
+  const gazeStatusEl = document.getElementById("gazeStatus");
+  if (gazeStatusEl) {
+    if (data.isLooking) {
+      gazeStatusEl.textContent = "✓ Фокус на екрані";
+      gazeStatusEl.classList.remove("gaze-status--not-looking");
+      gazeStatusEl.classList.add("gaze-status--looking");
+      gazeStatusEl.style.color = "";
+    } else {
+      const statusText = data.face ? "⚠ Погляд відведено" : "⚠ Обличчя не знайдено";
+      gazeStatusEl.textContent = statusText;
+      gazeStatusEl.classList.remove("gaze-status--looking");
+      gazeStatusEl.classList.add("gaze-status--not-looking");
+      gazeStatusEl.style.color = "";
+    }
   }
 
   // Update cheat percentage

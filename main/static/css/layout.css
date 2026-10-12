@@ -90,12 +90,13 @@
     }
 }
 
-/* Картки та контейнери (чисті бордери, без важких розмитих тіней) */
+/* Картки та контейнери */
 .card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: var(--space-6); /* 24px */
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .card-header {
@@ -122,7 +123,7 @@
 
 .card-success {
     background-color: var(--green-subtle);
-    border-color: #86EFAC;
+    border-color: var(--green);
 }
 
 /* Відео / Нагляд за поглядом */
@@ -131,6 +132,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: var(--space-5); /* 20px */
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .video-controls {
@@ -152,7 +154,7 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     max-height: 240px;
-    background: #0F172A;
+    background: var(--bg-video);
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
     object-fit: cover;
@@ -180,6 +182,7 @@
     gap: var(--space-2);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
+    color: var(--text-main);
 }
 
 .preview-images {

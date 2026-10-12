@@ -1,5 +1,6 @@
 /* ============================================
    BUTTONS - Загальні стилі для кнопок та карток вибору
+   Підтримка темної теми та режимів доступності
    ============================================ */
 
 button,
@@ -46,7 +47,7 @@ button:focus-visible,
     outline-offset: 2px;
 }
 
-/* Виправлення контрасту для вимкнених кнопок (жодної каламуті) */
+/* Виправлення контрасту для вимкнених кнопок */
 button:disabled,
 .btn:disabled,
 .btn[disabled] {
@@ -59,7 +60,7 @@ button:disabled,
     box-shadow: none;
 }
 
-/* Зелена кнопка (успішна дія / старт) */
+/* Зелена кнопка (успішна дія / старт) - автоматично адаптується під дальтонізм */
 .btn-green,
 .btn-success {
     background-color: var(--green);
@@ -75,11 +76,11 @@ button:disabled,
 
 .btn-green:active:not(:disabled),
 .btn-success:active:not(:disabled) {
-    background-color: #1E5C2C;
-    border-color: #1E5C2C;
+    background-color: var(--green-hover);
+    border-color: var(--green-hover);
 }
 
-/* Кнопка зупинки / небезпечної дії (завершити запис, стоп) */
+/* Кнопка зупинки / небезпечної дії (завершити запис, стоп) - адаптується під дальтонізм */
 .btn-danger {
     background-color: var(--red);
     border-color: var(--red);
@@ -94,7 +95,7 @@ button:disabled,
 /* Вторинна кнопка (outline) */
 .btn-secondary,
 .btn-outline {
-    background-color: #ffffff;
+    background-color: var(--bg-card);
     border-color: var(--border-color);
     color: var(--text-main);
 }
@@ -119,7 +120,7 @@ button:disabled,
     justify-content: center;
     align-items: center;
     gap: var(--space-4); /* 16px */
-    margin-top: var(--space-6); /* 24px */
+    margin-top: var(--space-4); /* 16px */
     flex-wrap: wrap;
 }
 
@@ -141,6 +142,7 @@ button:disabled,
 .button-try-about .try {
     background-color: var(--orange);
     border-color: var(--orange);
+    color: #ffffff;
 }
 
 .button-try-about .try:hover {
@@ -150,15 +152,15 @@ button:disabled,
 }
 
 .button-try-about .add_inf {
-    background-color: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #ffffff;
-    backdrop-filter: blur(4px);
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-main);
 }
 
 .button-try-about .add_inf:hover {
-    background-color: rgba(255, 255, 255, 0.25);
-    border-color: #ffffff;
+    background-color: var(--bg-subtle);
+    border-color: var(--orange);
+    color: var(--orange);
     transform: translateY(-1px);
 }
 
@@ -170,7 +172,7 @@ button:disabled,
     padding: var(--space-3) var(--space-4); /* 12px 16px */
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
-    background-color: #ffffff;
+    background-color: var(--bg-card);
     color: var(--text-main);
     font-family: var(--font-main);
     font-size: var(--font-size-sm);
@@ -255,7 +257,7 @@ button:disabled,
 .choice-card:active,
 .option-card:active {
     transform: translateY(0);
-    background-color: #E2E8F0;
+    background-color: var(--bg-subtle);
 }
 
 /* Selected стан (обраний варіант) */
@@ -265,7 +267,7 @@ button:disabled,
 .option-card[aria-selected="true"] {
     border: 1.5px solid var(--orange);
     background-color: var(--orange-subtle);
-    color: var(--black);
+    color: var(--text-main);
     font-weight: var(--font-weight-medium);
 }
 

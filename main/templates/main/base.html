@@ -1,15 +1,30 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" data-theme="light" data-font-scale="normal" data-colorblind="none">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.0">
-    <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.0">
-    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.0">
-    <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.0">
-    <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.0">
-    <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.0">
+    <!-- Антифлікер скрипт: миттєве застосування теми та шрифту до першого рендерингу -->
+    <script>
+        (function() {
+            try {
+                var saved = localStorage.getItem('teachai_a11y_settings');
+                if (saved) {
+                    var s = JSON.parse(saved);
+                    if (s.theme) document.documentElement.setAttribute('data-theme', s.theme);
+                    if (s.fontScale) document.documentElement.setAttribute('data-font-scale', s.fontScale);
+                    if (s.colorblind) document.documentElement.setAttribute('data-colorblind', s.colorblind);
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.2">
+    <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.2">
+    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.2">
+    <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.2">
+    <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.2">
+    <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.2">
+    <link rel="stylesheet" href="{% static "css/a11y.css" %}?v=2.2">
     {% block css %}{% endblock css %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,8 +47,21 @@
                     <a class="{% if request.resolver_match.url_name == 'contact' %}checked{% endif %}" href="{% url "contact" %}">Контактна інформація</a>
                 </nav>
 
-                <div class="header-content__last">
-                    <a href="#">Увійти</a>
+                <div class="header-actions">
+                    <!-- Швидке перемикання нічного / світлого режиму -->
+                    <button id="themeQuickBtn" class="theme-quick-btn" type="button" aria-label="Перемкнути нічну тему" title="Перемкнути нічну тему">
+                        <span id="themeQuickIcon" aria-hidden="true">🌙</span>
+                    </button>
+
+                    <!-- Кнопка відкриття меню доступності та зору -->
+                    <button id="a11yOpenBtn" class="a11y-open-btn" type="button" aria-label="Налаштування зору та доступності" title="Налаштування зору та доступності">
+                        <span aria-hidden="true">👁️</span>
+                        <span>Доступність</span>
+                    </button>
+
+                    <div class="header-content__last">
+                        <a href="#">Увійти</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -67,6 +95,119 @@
         </div>
     </footer>
 
+    <!-- МОДАЛЬНЕ ВІКНО ДОСТУПНОСТІ ТА НАЛАШТУВАНЬ ЗОРУ -->
+    <div id="a11yBackdrop" class="a11y-backdrop" role="dialog" aria-modal="true" aria-labelledby="a11yModalTitle" hidden>
+        <div class="a11y-modal">
+            <div class="a11y-modal__header">
+                <h2 id="a11yModalTitle" class="a11y-modal__title">
+                    <span aria-hidden="true">👁️</span> Налаштування доступності
+                </h2>
+                <button id="a11yCloseBtn" class="a11y-close-btn" type="button" aria-label="Закрити вікно">✕</button>
+            </div>
+
+            <!-- 1. Тема оформлення -->
+            <div class="a11y-section">
+                <div class="a11y-section__title">Тема оформлення</div>
+                <div class="a11y-section__desc">Виберіть світлу (теплу) або нічну контрастну тему</div>
+                <div class="a11y-btn-group">
+                    <button class="a11y-option-btn active" type="button" data-theme-choice="light">
+                        <span class="a11y-option-icon">☀️</span>
+                        <span>Світла (тепла)</span>
+                    </button>
+                    <button class="a11y-option-btn" type="button" data-theme-choice="dark">
+                        <span class="a11y-option-icon">🌙</span>
+                        <span>Нічна (темна)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Розмір контенту для слабозорих -->
+            <div class="a11y-section">
+                <div class="a11y-section__title">Розмір тексту та контенту</div>
+                <div class="a11y-section__desc">Збільшення розміру шрифтів та елементів інтерфейсу для комфортного читання</div>
+                <div class="a11y-btn-group">
+                    <button class="a11y-option-btn active" type="button" data-scale-choice="normal">
+                        <span style="font-size: 16px; font-weight: bold;">A</span>
+                        <span>Стандартний (100%)</span>
+                    </button>
+                    <button class="a11y-option-btn" type="button" data-scale-choice="large">
+                        <span style="font-size: 20px; font-weight: bold;">A+</span>
+                        <span>Збільшений (125%)</span>
+                    </button>
+                    <button class="a11y-option-btn" type="button" data-scale-choice="xlarge">
+                        <span style="font-size: 24px; font-weight: bold;">A++</span>
+                        <span>Великий (150%)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. Режими для людей з дальтонізмом -->
+            <div class="a11y-section">
+                <div class="a11y-section__title">Режим кольорокорекції для дальтоніків</div>
+                <div class="a11y-section__desc">Адаптація колірної палітри статусів та відповідей під різні типи зору</div>
+                <div class="a11y-radio-list">
+                    <label class="a11y-radio-card active" data-colorblind-choice="none">
+                        <input type="radio" name="colorblindRadio" value="none" checked>
+                        <div class="a11y-radio-label">
+                            <span class="a11y-radio-title">Стандартна палітра</span>
+                            <span class="a11y-radio-desc">Зелений для успіху / Червоний для помилок та завершення</span>
+                            <div class="a11y-swatch-preview">
+                                <span class="a11y-swatch" style="background:#2E8540;"></span>
+                                <span class="a11y-swatch" style="background:#DC2626;"></span>
+                                <span class="a11y-swatch" style="background:#FF8A00;"></span>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="a11y-radio-card" data-colorblind-choice="protanopia-deuteranopia">
+                        <input type="radio" name="colorblindRadio" value="protanopia-deuteranopia">
+                        <div class="a11y-radio-label">
+                            <span class="a11y-radio-title">Протанопія / Дейтеранопія (Червоно-зелена)</span>
+                            <span class="a11y-radio-desc">Синій (успіх/увага) та Бурштиновий (увага/помилка) з піктограмами</span>
+                            <div class="a11y-swatch-preview">
+                                <span class="a11y-swatch" style="background:#2563EB;"></span>
+                                <span class="a11y-swatch" style="background:#D97706;"></span>
+                                <span class="a11y-swatch" style="background:#FF8A00;"></span>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="a11y-radio-card" data-colorblind-choice="tritanopia">
+                        <input type="radio" name="colorblindRadio" value="tritanopia">
+                        <div class="a11y-radio-label">
+                            <span class="a11y-radio-title">Тританопія (Синьо-жовта)</span>
+                            <span class="a11y-radio-desc">Смарагдовий (успіх) та Пурпурово-рожевий (помилка)</span>
+                            <div class="a11y-swatch-preview">
+                                <span class="a11y-swatch" style="background:#059669;"></span>
+                                <span class="a11y-swatch" style="background:#E11D48;"></span>
+                                <span class="a11y-swatch" style="background:#FF8A00;"></span>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="a11y-radio-card" data-colorblind-choice="high-contrast">
+                        <input type="radio" name="colorblindRadio" value="high-contrast">
+                        <div class="a11y-radio-label">
+                            <span class="a11y-radio-title">Високий контраст (High Contrast)</span>
+                            <span class="a11y-radio-desc">Потовщені межі, максимальна контрастність тексту та підкреслення</span>
+                            <div class="a11y-swatch-preview">
+                                <span class="a11y-swatch" style="background:#000000; border:1px solid #999;"></span>
+                                <span class="a11y-swatch" style="background:#FFFFFF; border:1px solid #000;"></span>
+                                <span class="a11y-swatch" style="background:#D96B00;"></span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="a11y-modal__footer">
+                <button id="a11yResetBtn" class="a11y-reset-btn" type="button">Скинути за замовчуванням</button>
+                <button id="a11yDoneBtn" class="a11y-done-btn" type="button">Зберегти та закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static "js/a11y.js" %}?v=2.2"></script>
     <script src="{% static "js/main.js" %}"></script>
 </body>
 </html>

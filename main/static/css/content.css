@@ -1,93 +1,42 @@
 /* ============================================
-   CONTENT - Основний контент
+   CONTENT - Основний контент та робочий простір екзамену
    ============================================ */
 
-.container-main {
-    margin: 50px 0;
-    padding: 0 20px;
-}
-
+/* Заголовок сторінки */
 .h-title {
-    text-align: center;
-    margin: 30px;
+    margin-bottom: var(--space-6);
 }
 
-/* Блок питання-відповідь */
-.question-answer {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    flex-wrap: wrap;
+.h-title h1,
+#main_title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-main);
+    margin: 0;
 }
 
-.question-answer .inner {
-    flex: 1;
-    min-width: 280px;
+.intro-section #main_title,
+.intro-content #main_title {
+    color: #ffffff;
 }
 
-#question, .default-back-panel {
-    background-color: #f5f5f5;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    font-size: 18px;
-    line-height: 1.5;
-    min-height: 150px;
-}
+/* ============================================
+   INTRO / HERO СЕКЦІЯ
+   Сфокусована, компактна, без зайвого розмиття й важких тіней
+   ============================================ */
 
-#answer {
-    background-color: #e9f7ef;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    font-size: 18px;
-    line-height: 1.5;
-    min-height: 150px;
-}
-
-#status {
-    font-size: 12px;
-}
-
-/* Форма завантаження файлів */
-form#fileForm {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-#fileInput {
-    display: none;
-}
-
-#fileName {
-    font-size: 10px;
-    padding: 10px;
-    border-radius: 133px;
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-}
-
-/* Intro секція */
 .intro-section {
     position: relative;
-    color: white;
+    background-color: #0F172A;
+    color: #ffffff;
     text-align: center;
-    padding: 80px 20px;
-    min-height: 100vh;
+    padding: var(--space-10) var(--space-6); /* 40px 24px */
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-}
-
-.intro-content {
-    position: relative;
-    padding: 60px 30px;
-    text-align: center;
-    text-shadow: 1px 1px 3px black;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .background-image {
@@ -97,30 +46,160 @@ form#fileForm {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: -10;
-    opacity: 0.3;
-}
-
-.inner_cont {
-    margin: 20px auto;
-    max-width: 800px;
+    z-index: 1;
+    opacity: 0.15;
+    filter: grayscale(60%);
 }
 
 .overlay {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.98) 100%);
     top: 0;
     left: 0;
-    z-index: -5;
+    z-index: 2;
 }
 
+.intro-content {
+    position: relative;
+    z-index: 3;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.intro-content h1,
+h1.inner_cont {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: #ffffff;
+    margin: 0 0 var(--space-3) 0;
+    line-height: var(--line-height-tight);
+}
+
+.intro-content p,
+p.inner_cont {
+    font-size: var(--font-size-sm);
+    color: #94A3B8;
+    line-height: var(--line-height-relaxed);
+    margin: 0 auto var(--space-2) auto;
+    max-width: 640px;
+}
+
+.button-try-about {
+    position: relative;
+    z-index: 3;
+}
+
+/* ============================================
+   БЛОК ПИТАННЯ ТА ВІДПОВІДІ (QUESTION & ANSWER)
+   ============================================ */
+
+.question-answer {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4); /* 16px */
+    margin-bottom: var(--space-4);
+}
+
+@media (min-width: 768px) {
+    .question-answer {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.question-answer .inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+/* Картка запитання */
+#question,
+.default-back-panel {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-5); /* 20px */
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    min-height: 140px;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/* Картка відповіді */
+#answer {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    min-height: 140px;
+    color: var(--text-main);
+}
+
+/* Статус процесу (Слухаю відповідь... тощо) */
+#status {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-muted);
+    padding: var(--space-2) var(--space-3);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    margin: 0;
+    display: inline-block;
+}
+
+/* Прогрес екзамену (Питання N з M) */
+#progress {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    color: var(--orange);
+    background-color: var(--orange-subtle);
+    border: 1px solid rgba(255, 138, 0, 0.2);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    margin: 0;
+}
+
+/* Зворотний зв'язок по питанню */
+#feedback {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Панель дій та кнопок чату */
 .chat-buttons {
-  margin: 20px 0;
+    margin: var(--space-4) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
 }
 
 .chat-buttons_buttons {
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+}
+
+/* Форма файлу */
+form#fileForm {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+#fileInput {
+    display: none;
 }

@@ -1,8 +1,9 @@
 /* ============================================
-   LAYOUT - Утиліти для розміщення контенту
+   LAYOUT - Утиліти для розміщення контенту та сітка
+   Сувора 4px/8px система відступів
    ============================================ */
 
-/* Flexbox контейнери */
+/* Flexbox утиліти */
 .flex {
     display: flex;
 }
@@ -28,81 +29,145 @@
     flex-wrap: wrap;
 }
 
-.gap-sm {
-    gap: 8px;
+/* Відступи між елементами (Gaps) */
+.gap-xs { gap: var(--space-1); } /* 4px */
+.gap-sm { gap: var(--space-2); } /* 8px */
+.gap-md { gap: var(--space-4); } /* 16px */
+.gap-lg { gap: var(--space-6); } /* 24px */
+.gap-xl { gap: var(--space-8); } /* 32px */
+
+/* Зовнішні відступи (Margins) */
+.mt-xs { margin-top: var(--space-1); } /* 4px */
+.mt-sm { margin-top: var(--space-2); } /* 8px */
+.mt-md { margin-top: var(--space-4); } /* 16px */
+.mt-lg { margin-top: var(--space-6); } /* 24px */
+.mt-xl { margin-top: var(--space-8); } /* 32px */
+
+.mb-xs { margin-bottom: var(--space-1); } /* 4px */
+.mb-sm { margin-bottom: var(--space-2); } /* 8px */
+.mb-md { margin-bottom: var(--space-4); } /* 16px */
+.mb-lg { margin-bottom: var(--space-6); } /* 24px */
+.mb-xl { margin-bottom: var(--space-8); } /* 32px */
+
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mx-md { margin-left: var(--space-4); margin-right: var(--space-4); }
+
+/* Внутрішні відступи (Paddings) */
+.p-xs { padding: var(--space-1); } /* 4px */
+.p-sm { padding: var(--space-2); } /* 8px */
+.p-md { padding: var(--space-4); } /* 16px */
+.p-lg { padding: var(--space-6); } /* 24px */
+.p-xl { padding: var(--space-8); } /* 32px */
+
+/* Сітка інтерфейсу (Grid System) */
+.grid {
+    display: grid;
 }
 
-.gap-md {
-    gap: 16px;
+.grid-equal {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
 }
 
-.gap-lg {
-    gap: 30px;
+@media (min-width: 768px) {
+    .grid-equal {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
-/* Відступи */
-.mt-sm { margin-top: 10px; }
-.mt-md { margin-top: 20px; }
-.mt-lg { margin-top: 30px; }
+/* Двоколонковий робочий стіл екзамену (Питання зліва, Камера праворуч) */
+.exam-workspace {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6); /* 24px */
+    align-items: start;
+}
 
-.mb-sm { margin-bottom: 10px; }
-.mb-md { margin-bottom: 20px; }
-.mb-lg { margin-bottom: 30px; }
+@media (min-width: 992px) {
+    .exam-workspace {
+        grid-template-columns: 1.4fr 1fr;
+    }
+}
 
-.mx-md { margin-left: 30px; margin-right: 30px; }
-
-.p-sm { padding: 10px; }
-.p-md { padding: 20px; }
-.p-lg { padding: 30px; }
-
-/* Блоки з картками */
+/* Картки та контейнери (чисті бордери, без важких розмитих тіней) */
 .card {
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6); /* 24px */
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--space-4);
+}
+
+.card-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-main);
+    margin: 0;
 }
 
 .card-light {
-    background-color: #f5f5f5;
+    background-color: var(--bg-subtle);
+    border-color: var(--border-color);
 }
 
 .card-success {
-    background-color: #e9f7ef;
+    background-color: var(--green-subtle);
+    border-color: #86EFAC;
 }
 
-/* Відео/медіа контейнер */
+/* Відео / Нагляд за поглядом */
 .video-frame {
-    /* padding: 20px; */
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5); /* 20px */
 }
 
 .video-controls {
     display: flex;
-    gap: 12px;
+    gap: var(--space-2); /* 8px */
     align-items: center;
-    margin: 8px 0;
+    margin-bottom: var(--space-3); /* 12px */
     flex-wrap: wrap;
 }
 
 .video-preview {
     display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    margin: 6px 0;
+    flex-direction: column;
+    gap: var(--space-3); /* 12px */
+    align-items: stretch;
 }
 
 .video-preview video {
-    width: 320px;
-    height: 180px;
-    background: #111;
-    border-radius: 8px;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 240px;
+    background: #0F172A;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    object-fit: cover;
+    display: block;
 }
 
-/* Панель попереднього перегляду */
+/* Панель ручного налаштування порогу */
 .preview-panel {
     display: none;
     flex-direction: column;
-    gap: 8px;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background-color: var(--bg-subtle);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
 }
 
 .preview-panel.active {
@@ -112,28 +177,34 @@
 .preview-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-2);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
 }
 
 .preview-images {
     display: flex;
-    gap: 12px;
+    gap: var(--space-3);
+    justify-content: center;
 }
 
 .preview-image-container {
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .preview-image-label {
-    font-size: 12px;
-    opacity: 0.8;
-    margin-bottom: 4px;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-bottom: var(--space-1);
+    font-weight: var(--font-weight-medium);
 }
 
 .preview-image {
-    width: 200px;
+    width: 120px;
     height: auto;
-    border: 1px solid #333;
-    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background-color: #000000;
 }

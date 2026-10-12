@@ -1,74 +1,72 @@
 {% load static %}
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static "css/style.css" %}">
-    <link rel="stylesheet" href="{% static "css/footer.css" %}">
-    <link rel="stylesheet" href="{% static "css/header.css" %}">
-    <link rel="stylesheet" href="{% static "css/buttons.css" %}">
-    <link rel="stylesheet" href="{% static "css/layout.css" %}">
-    <link rel="stylesheet" href="{% static "css/forms.css" %}">
+    <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.0">
+    <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.0">
+    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.0">
+    <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.0">
+    <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.0">
+    <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.0">
     {% block css %}{% endblock css %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
-    <title>Teacher AI</title>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>TeachAI – Екзаменаційна платформа</title>
 </head>
 <body>
 
-<!--HEADER-->
+    <!-- HEADER -->
     <header>
         <div class="container">
             <div class="header-content">
-
-                <img class="header-content__logo" src="{% static "images/logo.png" %}" alt="">
+                <a href="{% url "main" %}" class="flex-center">
+                    <img class="header-content__logo" src="{% static "images/logo.png" %}" alt="TeachAI">
+                </a>
 
                 <nav>
-                    <a class="checked" href="{% url "main" %}">Головна</a>
-                    <a href="{% url "about" %}">Про нас</a>
-                    <a href="{% url "contact" %}">Контактна інформація</a>
+                    <a class="{% if request.resolver_match.url_name == 'main' %}checked{% endif %}" href="{% url "main" %}">Головна</a>
+                    <a class="{% if request.resolver_match.url_name == 'about' %}checked{% endif %}" href="{% url "about" %}">Про нас</a>
+                    <a class="{% if request.resolver_match.url_name == 'contact' %}checked{% endif %}" href="{% url "contact" %}">Контактна інформація</a>
                 </nav>
 
                 <div class="header-content__last">
                     <a href="#">Увійти</a>
                 </div>
-
             </div>
         </div>
     </header>
-{% block content %}
-{% endblock content %}
-  
-  <footer class="footer">
-    <div class="footer-container">
-      <div class="footer-logo">
-        <h2>TeachAI</h2>
-        <p>Голосовий аватар</p>
-      </div>
-      
-      <div class="footer-links">
-        <a href="#about">Про нас</a>
-        <a href="#contact">Контакти</a>
-      </div>
-  
-      <div class="footer-social">
-        <a href="#"><img src="{% static "images/facebook.svg" %}" alt="Facebook"></a>
-        <a href="#"><img src="{% static "images/inst.svg" %}" alt="Instagram"></a>
-        <a href="#"><img src="{% static "images/youtube.svg" %}" alt="YouTube"></a>
-      </div>
-    </div>
-  
-    <div class="footer-bottom">
-      <p>© 2025 TeachAI. Всі права захищені.</p>
-    </div>
-  </footer>
 
+    {% block content %}
+    {% endblock content %}
 
-  <script src="{% static "js/main.js" %}"></script>
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <h2>TeachAI</h2>
+                <p>Платформа тестування та моніторингу знань</p>
+            </div>
 
+            <div class="footer-links">
+                <a href="{% url "about" %}">Про нас</a>
+                <a href="{% url "contact" %}">Контакти</a>
+            </div>
+
+            <div class="footer-social">
+                <a href="#" aria-label="Facebook"><img src="{% static "images/facebook.svg" %}" alt="Facebook"></a>
+                <a href="#" aria-label="Instagram"><img src="{% static "images/inst.svg" %}" alt="Instagram"></a>
+                <a href="#" aria-label="YouTube"><img src="{% static "images/youtube.svg" %}" alt="YouTube"></a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2025 TeachAI. Всі права захищені.</p>
+        </div>
+    </footer>
+
+    <script src="{% static "js/main.js" %}"></script>
 </body>
 </html>

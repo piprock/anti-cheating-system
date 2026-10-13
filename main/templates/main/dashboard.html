@@ -25,6 +25,13 @@
         </div>
 
         <div class="dashboard-actions">
+            <a href="{% url 'settings' %}" class="table-btn">
+                <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Налаштування</span>
+            </a>
             <a href="{% url 'profile_edit' %}" class="table-btn">
                 <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -496,6 +503,70 @@
             }
         }
     </script>
+    {% endif %}
+
+    <!-- Для адміністратора: Заявки на статус викладача -->
+    {% if role == 'admin' and pending_applications %}
+    <div class="dashboard-card" style="border-left: 4px solid #F59E0B;">
+        <div class="dashboard-card__header">
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <h2 class="dashboard-card__title" style="margin: 0;">Заявки на статус викладача</h2>
+                <span class="badge" style="background-color: rgba(245, 158, 11, 0.2); border-color: #F59E0B; color: #F59E0B; font-weight: bold;">
+                    {{ pending_applications_count }} очікують розгляду
+                </span>
+            </div>
+            <a href="{% url 'admin:main_teacherapplication_changelist' %}" target="_blank" class="table-btn">
+                <span>Усі заявки в Django Admin</span>
+            </a>
+        </div>
+
+        <div class="history-table-container">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Користувач</th>
+                        <th>Кафедра / Факультет</th>
+                        <th>Посада</th>
+                        <th>Обґрунтування</th>
+                        <th>Дата</th>
+                        <th>Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in pending_applications %}
+                    <tr>
+                        <td>
+                            <strong>{{ app.user.profile.full_name }}</strong>
+                            <div style="font-size: var(--font-size-xs); color: var(--text-muted);">@{{ app.user.username }}</div>
+                        </td>
+                        <td>{{ app.department }}</td>
+                        <td>{{ app.position }}</td>
+                        <td style="max-width: 250px; font-size: var(--font-size-xs);" title="{{ app.reason }}">{{ app.reason|truncatechars:80 }}</td>
+                        <td style="white-space: nowrap; font-size: var(--font-size-xs);">{{ app.created_at|date:"d.m.Y H:i" }}</td>
+                        <td style="white-space: nowrap;">
+                            <div style="display: flex; gap: var(--space-2);">
+                                <form method="post" action="{% url 'review_teacher_application' app.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="table-btn" style="background-color: var(--green-subtle); color: var(--green); border-color: var(--green);" title="Схвалити та надати роль Викладач">
+                                        Схвалити
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'review_teacher_application' app.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="table-btn" style="background-color: var(--red-subtle); color: var(--red); border-color: var(--red);" title="Відхилити заявку">
+                                        Відхилити
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     {% endif %}
 
     <!-- Для адміністратора: Список зареєстрованих користувачів -->

@@ -39,6 +39,8 @@ from main.auth_views import (
     dashboard_view,
     session_detail_view,
     profile_edit_view,
+    settings_view,
+    review_teacher_application_view,
 )
 
 urlpatterns = [
@@ -51,12 +53,14 @@ urlpatterns = [
     path('record/', record_and_respond, name="record_and_respond"),
     path('anylizefile/', anylize_file, name="anylize_file"),
 
-    # Авторизація, реєстрація та кабінет
+    # Авторизація, реєстрація, налаштування та кабінет
     path('login/', login_view, name="login"),
     path('logout/', logout_view, name="logout"),
     path('register/', register_view, name="register"),
     path('dashboard/', dashboard_view, name="dashboard"),
     path('profile/', dashboard_view, name="profile"),
+    path('settings/', settings_view, name="settings"),
+    path('settings/review/<int:app_id>/', review_teacher_application_view, name="review_teacher_application"),
     path('profile/edit/', profile_edit_view, name="profile_edit"),
     path('session/<int:session_id>/', session_detail_view, name="session_detail"),
 

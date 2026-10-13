@@ -214,6 +214,42 @@ class UserProfileEditForm(forms.Form):
     email = forms.EmailField(label="Електронна пошта", required=False)
 
 
+class TeacherApplicationForm(forms.Form):
+    """Форма для подачі заявки на отримання ролі 'Викладач'."""
+    department = forms.CharField(
+        label="Кафедра / Факультет",
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            "placeholder": "Наприклад, Кафедра комп'ютерних наук",
+            "autocomplete": "organization",
+        })
+    )
+    position = forms.CharField(
+        label="Посада / Науковий ступінь",
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            "placeholder": "Наприклад, Доцент, Асистент, Старший викладач",
+            "autocomplete": "organization-title",
+        })
+    )
+    phone = forms.CharField(
+        label="Контактний телефон",
+        max_length=30,
+        required=False,
+        widget=forms.TextInput(attrs={
+            "placeholder": "+380 ... (необов'язково)",
+            "autocomplete": "tel",
+        })
+    )
+    reason = forms.CharField(
+        label="Обґрунтування запиту та мотивація",
+        widget=forms.Textarea(attrs={
+            "rows": 4,
+            "placeholder": "Опишіть дисципліни, які ви викладаєте, або мету використання системи Avatar AI...",
+        })
+    )
+
+
 __all__ = [
     "VoiceAnswerUploadForm",
     "FileAnalyzeForm",
@@ -223,4 +259,6 @@ __all__ = [
     "RegistrationStep2Form",
     "UserRegistrationForm",
     "UserProfileEditForm",
+    "TeacherApplicationForm",
 ]
+

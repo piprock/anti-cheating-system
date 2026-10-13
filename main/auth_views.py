@@ -1,19 +1,29 @@
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout
+from django.urls import reverse
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
 from django.db.models import Avg, Count, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth.models import User
 
-from .models import UserProfile, InterviewSession, Survey, Student, ActivityLog
+from .models import (
+    UserProfile,
+    InterviewSession,
+    Survey,
+    Student,
+    ActivityLog,
+    TeacherApplication,
+)
 from .forms import (
     UserLoginForm,
     RegistrationStep1Form,
     RegistrationStep2Form,
     UserRegistrationForm,
     UserProfileEditForm,
+    TeacherApplicationForm,
 )
 
 logger = logging.getLogger(__name__)
@@ -169,6 +179,11 @@ def dashboard_view(request):
         total_sessions_count = InterviewSession.objects.count()
         total_surveys_count = Survey.objects.count()
 
+        pending_applications = TeacherApplication.objects.filter(
+            status=TeacherApplication.STATUS_PENDING
+        ).select_related("user", "user__profile").order_by("-created_at")
+        pending_applications_count = pending_applications.count()
+
         avg_metrics = InterviewSession.objects.aggregate(
             avg_accuracy=Avg("overall_accuracy"),
             avg_grade=Avg("grade_5"),
@@ -188,6 +203,8 @@ def dashboard_view(request):
             "admins_count": admins_count,
             "total_sessions_count": total_sessions_count,
             "total_surveys_count": total_surveys_count,
+            "pending_applications": pending_applications,
+            "pending_applications_count": pending_applications_count,
             "avg_metrics": avg_metrics,
         }
         return render(request, "main/dashboard.html", context)
@@ -332,3 +349,167 @@ def profile_edit_view(request):
         })
 
     return render(request, "main/profile_edit.html", {"form": form, "profile": profile})
+
+
+@login_required
+def settings_view(request):
+    """
+    User settings view with multi-tab layout:
+    - profile: Edit personal details (ПІБ, group, email).
+    - teacher: Teacher role application / status review.
+    - security: Password change.
+    """
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    requested_tab = request.POST.get("active_tab") or request.GET.get("tab") or "profile"
+    if requested_tab not in ("profile", "teacher", "security"):
+        requested_tab = "profile"
+
+    profile_form = None
+    teacher_form = None
+    password_form = None
+
+    latest_teacher_app = TeacherApplication.objects.filter(user=request.user).first()
+    pending_teacher_app = TeacherApplication.objects.filter(
+        user=request.user, status=TeacherApplication.STATUS_PENDING
+    ).first()
+
+    if request.method == "POST":
+        form_action = request.POST.get("form_action")
+        if not form_action:
+            if "department" in request.POST:
+                form_action = "teacher_application"
+            elif "old_password" in request.POST:
+                form_action = "change_password"
+            elif "first_name" in request.POST:
+                form_action = "profile"
+
+        if form_action == "profile":
+            profile_form = UserProfileEditForm(data=request.POST)
+            if profile_form.is_valid():
+                cd = profile_form.cleaned_data
+                user = request.user
+                user.first_name = cd["first_name"].strip()
+                user.last_name = cd["last_name"].strip()
+                if cd.get("email"):
+                    user.email = cd["email"].strip()
+                user.save()
+
+                profile.middle_name = cd.get("middle_name", "").strip()
+                profile.group = cd.get("group", "").strip()
+                profile.save()
+
+                Student.objects.filter(user=user).update(
+                    first_name=user.first_name,
+                    last_name=user.last_name,
+                    middle_name=profile.middle_name,
+                    group=profile.group
+                )
+
+                ActivityLog.objects.create(
+                    user=user,
+                    action=ActivityLog.ACTION_PROFILE_UPDATE,
+                    details="Оновлено контактні дані та академічну групу в налаштуваннях."
+                )
+
+                messages.success(request, "Дані профілю успішно оновлено!")
+                return redirect(f"{reverse('settings')}?tab=profile")
+            else:
+                requested_tab = "profile"
+
+        elif form_action == "teacher_application":
+            if profile.is_teacher or profile.is_admin:
+                messages.info(request, "Ваш обліковий запис уже має розширений статус.")
+                return redirect(f"{reverse('settings')}?tab=teacher")
+
+            if pending_teacher_app:
+                messages.warning(request, "У вас уже є активна заявка на розгляді адміністратора.")
+                return redirect(f"{reverse('settings')}?tab=teacher")
+
+            teacher_form = TeacherApplicationForm(data=request.POST)
+            if teacher_form.is_valid():
+                cd = teacher_form.cleaned_data
+                TeacherApplication.objects.create(
+                    user=request.user,
+                    department=cd["department"].strip(),
+                    position=cd["position"].strip(),
+                    phone=cd.get("phone", "").strip(),
+                    reason=cd["reason"].strip(),
+                )
+
+                ActivityLog.objects.create(
+                    user=request.user,
+                    action=ActivityLog.ACTION_TEACHER_REQUEST,
+                    details=f"Подано заявку на роль 'Викладач' ({cd['department'].strip()}, {cd['position'].strip()})."
+                )
+
+                messages.success(
+                    request,
+                    "Заявку на отримання статусу 'Викладач' успішно надіслано! Очікуйте на підтвердження адміністратора."
+                )
+                return redirect(f"{reverse('settings')}?tab=teacher")
+            else:
+                requested_tab = "teacher"
+
+        elif form_action == "cancel_teacher_application":
+            if pending_teacher_app:
+                pending_teacher_app.status = TeacherApplication.STATUS_CANCELLED
+                pending_teacher_app.save(update_fields=["status"])
+                messages.info(request, "Заявку на отримання статусу викладача скасовано.")
+            return redirect(f"{reverse('settings')}?tab=teacher")
+
+        elif form_action == "change_password":
+            password_form = PasswordChangeForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Пароль успішно змінено!")
+                return redirect(f"{reverse('settings')}?tab=security")
+            else:
+                requested_tab = "security"
+
+    if profile_form is None:
+        profile_form = UserProfileEditForm(initial={
+            "first_name": request.user.first_name,
+            "last_name": request.user.last_name,
+            "middle_name": profile.middle_name,
+            "group": profile.group,
+            "email": request.user.email,
+        })
+
+    if teacher_form is None:
+        teacher_form = TeacherApplicationForm()
+
+    if password_form is None:
+        password_form = PasswordChangeForm(user=request.user)
+
+    context = {
+        "profile": profile,
+        "active_tab": requested_tab,
+        "profile_form": profile_form,
+        "teacher_form": teacher_form,
+        "password_form": password_form,
+        "latest_teacher_app": latest_teacher_app,
+        "pending_teacher_app": pending_teacher_app,
+    }
+    return render(request, "main/settings.html", context)
+
+
+@login_required
+def review_teacher_application_view(request, app_id: int):
+    """Admin endpoint to approve or reject a teacher application."""
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if not profile.is_admin:
+        return HttpResponseForbidden("Тільки адміністратор має доступ до розгляду заявок.")
+
+    app = get_object_or_404(TeacherApplication, id=app_id)
+    if request.method == "POST":
+        action = request.POST.get("action")
+        notes = request.POST.get("notes", "").strip()
+        if action == "approve":
+            app.approve(admin_user=request.user, notes=notes)
+            messages.success(request, f"Заявку користувача {app.user.username} схвалено. Надано статус 'Викладач'.")
+        elif action == "reject":
+            app.reject(admin_user=request.user, notes=notes)
+            messages.info(request, f"Заявку користувача {app.user.username} відхилено.")
+    return redirect(request.POST.get("next") or "dashboard")
+

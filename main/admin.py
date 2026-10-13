@@ -1,7 +1,15 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
-from .models import UserProfile, Student, Survey, InterviewSession, Answer, ActivityLog
+from .models import (
+    UserProfile,
+    Student,
+    Survey,
+    InterviewSession,
+    Answer,
+    ActivityLog,
+    TeacherApplication,
+)
 
 
 class UserProfileInline(admin.StackedInline):
@@ -70,3 +78,52 @@ class ActivityLogAdmin(admin.ModelAdmin):
     list_filter = ("action", "created_at")
     search_fields = ("user__username", "details")
     readonly_fields = ("created_at",)
+
+
+@admin.register(TeacherApplication)
+class TeacherApplicationAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "user",
+        "get_full_name",
+        "department",
+        "position",
+        "status",
+        "created_at",
+        "reviewed_by",
+        "reviewed_at",
+    )
+    list_filter = ("status", "created_at", "department")
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "department",
+        "position",
+        "reason",
+    )
+    readonly_fields = ("created_at", "updated_at")
+    actions = ["approve_applications", "reject_applications"]
+
+    def get_full_name(self, obj):
+        return obj.user.profile.full_name if hasattr(obj.user, "profile") else obj.user.username
+    get_full_name.short_description = "ПІБ користувача"
+
+    @admin.action(description="Схвалити обрані заявки (призначити роль 'Викладач')")
+    def approve_applications(self, request, queryset):
+        count = 0
+        for app in queryset:
+            if app.status != TeacherApplication.STATUS_APPROVED:
+                app.approve(admin_user=request.user)
+                count += 1
+        self.message_user(request, f"Успішно схвалено {count} заявок та оновлено роль на 'Викладач'.")
+
+    @admin.action(description="Відхилити обрані заявки")
+    def reject_applications(self, request, queryset):
+        count = 0
+        for app in queryset:
+            if app.status != TeacherApplication.STATUS_REJECTED:
+                app.reject(admin_user=request.user)
+                count += 1
+        self.message_user(request, f"Відхилено {count} заявок.")
+

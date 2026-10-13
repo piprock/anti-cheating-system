@@ -4,7 +4,15 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.management import call_command
 
-from main.models import UserProfile, Student, Survey, InterviewSession, Answer, ActivityLog
+from main.models import (
+    UserProfile,
+    Student,
+    Survey,
+    InterviewSession,
+    Answer,
+    ActivityLog,
+    TeacherApplication,
+)
 from main.persist import persist_session_from_payload
 from main.management.commands.seed_admin import seed_admin_user
 
@@ -322,5 +330,221 @@ def test_tooltips_on_dashboard_and_gaze(client):
     gaze_html = gaze_res.content.decode("utf-8")
     assert "Підказка: Зелене коло позначає виявлену область зіниці." in gaze_html
     assert "ui-tooltip" in gaze_html
+
+
+@pytest.mark.django_db
+def test_settings_page_view_and_tabs(client):
+    user = User.objects.create_user(
+        username="settings_user",
+        password="password123",
+        first_name="Іван",
+        last_name="Котляревський",
+    )
+    user.profile.group = "КН-11"
+    user.profile.save()
+
+    # Anonymous user redirected to login
+    anon_res = client.get(reverse("settings"))
+    assert anon_res.status_code == 302
+    assert "/login/" in anon_res.url
+
+    # Authenticated student access
+    client.force_login(user)
+    res = client.get(reverse("settings"))
+    assert res.status_code == 200
+    content = res.content.decode("utf-8")
+
+    # Has 3 tabs and layout
+    assert "settings-layout" in content
+    assert "Редагувати профіль" in content
+    assert "Статус викладача" in content
+    assert "Безпека та пароль" in content
+    assert "panel-profile" in content
+    assert "panel-teacher" in content
+    assert "panel-security" in content
+
+    # Header dropdown contains settings link
+    main_res = client.get(reverse("main"))
+    assert reverse("settings") in main_res.content.decode("utf-8")
+
+
+@pytest.mark.django_db
+def test_settings_profile_update(client):
+    user = User.objects.create_user(
+        username="updater_user",
+        password="password123",
+        first_name="СтареІмя",
+        last_name="СтареПрізвище",
+    )
+    user.profile.middle_name = "СтареПоБатькові"
+    user.profile.group = "СТ-01"
+    user.profile.save()
+    Student.objects.create(user=user, first_name="СтареІмя", last_name="СтареПрізвище", group="СТ-01")
+
+    client.force_login(user)
+    post_data = {
+        "form_action": "profile",
+        "first_name": "НовеІмя",
+        "last_name": "НовеПрізвище",
+        "middle_name": "НовеПоБатькові",
+        "group": "КІ-42",
+        "email": "new_email@avatar.ai",
+    }
+    res = client.post(reverse("settings"), post_data, follow=True)
+    assert res.status_code == 200
+
+    user.refresh_from_db()
+    assert user.first_name == "НовеІмя"
+    assert user.last_name == "НовеПрізвище"
+    assert user.email == "new_email@avatar.ai"
+    assert user.profile.middle_name == "НовеПоБатькові"
+    assert user.profile.group == "КІ-42"
+
+    # Synchronized with Student record
+    student = Student.objects.get(user=user)
+    assert student.first_name == "НовеІмя"
+    assert student.group == "КІ-42"
+
+    # Activity log created
+    log = ActivityLog.objects.filter(user=user, action=ActivityLog.ACTION_PROFILE_UPDATE).first()
+    assert log is not None
+
+
+@pytest.mark.django_db
+def test_settings_teacher_application_flow_and_admin_review(client):
+    # 1. Student registers and applies for teacher role
+    student_user = User.objects.create_user(
+        username="aspirant_petro",
+        password="password123",
+        first_name="Петро",
+        last_name="Могила",
+    )
+    student_user.profile.group = "АСП-2"
+    student_user.profile.save()
+
+    client.force_login(student_user)
+
+    # Submit teacher application
+    app_data = {
+        "form_action": "teacher_application",
+        "department": "Кафедра штучного інтелекту",
+        "position": "Асистент",
+        "phone": "+380501112233",
+        "reason": "Проведення лабораторних іспитів з комп'ютерного зору",
+    }
+    apply_res = client.post(reverse("settings"), app_data, follow=True)
+    assert apply_res.status_code == 200
+    res_text = apply_res.content.decode("utf-8")
+    assert "Заявку на отримання статусу" in res_text
+    assert "успішно надіслано" in res_text
+
+    # Application record exists
+    app = TeacherApplication.objects.filter(user=student_user).first()
+    assert app is not None
+    assert app.status == TeacherApplication.STATUS_PENDING
+    assert app.department == "Кафедра штучного інтелекту"
+    assert app.position == "Асистент"
+
+    # Activity log recorded
+    log = ActivityLog.objects.filter(user=student_user, action=ActivityLog.ACTION_TEACHER_REQUEST).first()
+    assert log is not None
+
+    # Tab shows pending banner
+    settings_res = client.get(f"{reverse('settings')}?tab=teacher")
+    assert "Ваша заявка знаходиться на розгляді адміністратора" in settings_res.content.decode("utf-8")
+
+    # 2. Admin reviews and approves the application
+    admin_user = User.objects.create_superuser(
+        username="sysadmin",
+        password="adminpassword123",
+        email="admin@avatar.ai",
+    )
+    client.force_login(admin_user)
+
+    # Admin dashboard displays pending application
+    dash_res = client.get(reverse("dashboard"))
+    assert "Заявки на статус викладача" in dash_res.content.decode("utf-8")
+    assert "aspirant_petro" in dash_res.content.decode("utf-8")
+
+    # Admin approves
+    approve_res = client.post(
+        reverse("review_teacher_application", kwargs={"app_id": app.id}),
+        {"action": "approve", "notes": "Документи підтверджено"},
+        follow=True
+    )
+    assert approve_res.status_code == 200
+
+    app.refresh_from_db()
+    assert app.status == TeacherApplication.STATUS_APPROVED
+    assert app.reviewed_by == admin_user
+    student_user.refresh_from_db()
+    assert student_user.profile.role == UserProfile.ROLE_TEACHER
+    assert student_user.profile.is_teacher is True
+
+    # 3. Student visits settings: now shows active teacher privileges banner
+    client.force_login(student_user)
+    student_settings = client.get(f"{reverse('settings')}?tab=teacher")
+    assert student_settings.status_code == 200
+    student_text = student_settings.content.decode("utf-8")
+    assert "Ваш акаунт має статус" in student_text
+    assert "Викладач" in student_text
+    assert "Доступні викладацькі функції в системі" in student_text
+    assert "teacher-bullet-list" in student_text
+    assert "settings-user-card" not in student_text
+
+    # 4. Admin also has active teacher status badge and banner
+    client.force_login(admin_user)
+    admin_settings = client.get(f"{reverse('settings')}?tab=teacher")
+    assert admin_settings.status_code == 200
+    admin_text = admin_settings.content.decode("utf-8")
+    assert "Активна" in admin_text
+    assert "Ваш акаунт має статус" in admin_text
+    assert "Викладач" in admin_text
+
+
+@pytest.mark.django_db
+def test_settings_teacher_application_cancellation(client):
+    user = User.objects.create_user(username="canceller", password="password123")
+    client.force_login(user)
+
+    # Submit application
+    client.post(reverse("settings"), {
+        "form_action": "teacher_application",
+        "department": "Кафедра ПЗ",
+        "position": "Викладач",
+        "reason": "Тест",
+    }, follow=True)
+
+    app = TeacherApplication.objects.filter(user=user).first()
+    assert app.status == TeacherApplication.STATUS_PENDING
+
+    # Cancel application
+    cancel_res = client.post(reverse("settings"), {
+        "form_action": "cancel_teacher_application",
+    }, follow=True)
+    assert cancel_res.status_code == 200
+    assert "Заявку на отримання статусу викладача скасовано" in cancel_res.content.decode("utf-8")
+
+    app.refresh_from_db()
+    assert app.status == TeacherApplication.STATUS_CANCELLED
+
+
+@pytest.mark.django_db
+def test_settings_change_password(client):
+    user = User.objects.create_user(username="pass_user", password="oldPassword123!")
+    client.force_login(user)
+
+    res = client.post(reverse("settings"), {
+        "form_action": "change_password",
+        "old_password": "oldPassword123!",
+        "new_password1": "newSecurePassword456!",
+        "new_password2": "newSecurePassword456!",
+    }, follow=True)
+    assert res.status_code == 200
+    assert "Пароль успішно змінено!" in res.content.decode("utf-8")
+
+    user.refresh_from_db()
+    assert user.check_password("newSecurePassword456!") is True
+
 
 

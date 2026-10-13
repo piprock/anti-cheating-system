@@ -1,0 +1,501 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}Налаштування акаунту – Avatar AI{% endblock title %}
+
+{% block content %}
+<main class="container settings-page">
+    <!-- Шапка розділу налаштувань -->
+    <div class="settings-header">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
+            <div>
+                <h1 class="settings-title">Налаштування акаунту</h1>
+                <p class="settings-subtitle">Керуйте персональними даними, статусом викладача та безпекою облікового запису</p>
+            </div>
+            <div>
+                <a href="{% url 'dashboard' %}" class="table-btn">
+                    <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    <span>До кабінету</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основна розмітка: вкладки зліва, контент в центрі -->
+    <div class="settings-layout">
+        <!-- Ліва колонка: список вкладок -->
+        <aside class="settings-sidebar">
+            <nav class="settings-nav" role="tablist" aria-label="Вкладки налаштувань" id="settingsTabNav">
+                <!-- Вкладка 1: Редагувати профіль -->
+                <button type="button" 
+                        class="settings-tab-btn {% if active_tab == 'profile' %}settings-tab-btn--active{% endif %}"
+                        role="tab"
+                        id="tab-btn-profile"
+                        data-tab-target="panel-profile"
+                        aria-selected="{% if active_tab == 'profile' %}true{% else %}false{% endif %}"
+                        aria-controls="panel-profile">
+                    <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    <span>Редагувати профіль</span>
+                </button>
+
+                <!-- Вкладка 2: Статус викладача -->
+                <button type="button" 
+                        class="settings-tab-btn {% if active_tab == 'teacher' %}settings-tab-btn--active{% endif %}"
+                        role="tab"
+                        id="tab-btn-teacher"
+                        data-tab-target="panel-teacher"
+                        aria-selected="{% if active_tab == 'teacher' %}true{% else %}false{% endif %}"
+                        aria-controls="panel-teacher">
+                    <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                    <span>Статус викладача</span>
+                    {% if pending_teacher_app %}
+                        <span class="settings-tab-badge" title="Заявка на розгляді">Очікує</span>
+                    {% elif profile.is_teacher or profile.is_admin %}
+                        <span class="settings-tab-badge settings-tab-badge--success" title="Роль активна">Активна</span>
+                    {% endif %}
+                </button>
+
+                <!-- Вкладка 3: Безпека та пароль -->
+                <button type="button" 
+                        class="settings-tab-btn {% if active_tab == 'security' %}settings-tab-btn--active{% endif %}"
+                        role="tab"
+                        id="tab-btn-security"
+                        data-tab-target="panel-security"
+                        aria-selected="{% if active_tab == 'security' %}true{% else %}false{% endif %}"
+                        aria-controls="panel-security">
+                    <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span>Безпека та пароль</span>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Центральна частина: Контент поточної вкладки -->
+        <section class="settings-content">
+            <!-- ПАНЕЛЬ 1: РЕДАГУВАТИ ПРОФІЛЬ -->
+            <div id="panel-profile" 
+                 class="settings-tab-panel {% if active_tab == 'profile' %}settings-tab-panel--active{% endif %}" 
+                 role="tabpanel" 
+                 aria-labelledby="tab-btn-profile">
+                <div class="settings-card">
+                    <div class="settings-card__header">
+                        <h2 class="settings-card__title">Редагування профілю</h2>
+                        <p class="settings-card__desc">Оновіть ваші персональні дані (ПІБ), академічну групу та адресу електронної пошти.</p>
+                    </div>
+
+                    <form method="post" action="{% url 'settings' %}" class="auth-form" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="form_action" value="profile">
+                        <input type="hidden" name="active_tab" value="profile">
+
+                        {% if profile_form.non_field_errors %}
+                            <div class="alert alert--error">
+                                {% for error in profile_form.non_field_errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="{{ profile_form.last_name.id_for_label }}">{{ profile_form.last_name.label }}</label>
+                            {{ profile_form.last_name }}
+                            {% if profile_form.last_name.errors %}
+                                <span class="form-group__error">{{ profile_form.last_name.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ profile_form.first_name.id_for_label }}">{{ profile_form.first_name.label }}</label>
+                            {{ profile_form.first_name }}
+                            {% if profile_form.first_name.errors %}
+                                <span class="form-group__error">{{ profile_form.first_name.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ profile_form.middle_name.id_for_label }}">{{ profile_form.middle_name.label }}</label>
+                            {{ profile_form.middle_name }}
+                            <span class="form-group__hint">По батькові студента або викладача (за наявності)</span>
+                            {% if profile_form.middle_name.errors %}
+                                <span class="form-group__error">{{ profile_form.middle_name.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ profile_form.group.id_for_label }}">{{ profile_form.group.label }}</label>
+                            {{ profile_form.group }}
+                            <span class="form-group__hint">Наприклад, КН-41 або номер навчального потоку</span>
+                            {% if profile_form.group.errors %}
+                                <span class="form-group__error">{{ profile_form.group.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ profile_form.email.id_for_label }}">{{ profile_form.email.label }}</label>
+                            {{ profile_form.email }}
+                            <span class="form-group__hint">Електронна пошта для системних повідомлень</span>
+                            {% if profile_form.email.errors %}
+                                <span class="form-group__error">{{ profile_form.email.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div style="display: flex; gap: var(--space-4); align-items: center; margin-top: var(--space-4);">
+                            <button type="submit" class="auth-btn-submit" style="max-width: 240px; margin-top: 0;">
+                                Зберегти зміни
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ПАНЕЛЬ 2: СТАТУС ВИКЛАДАЧА / РОЗШИРЕННЯ ПРАВ -->
+            <div id="panel-teacher" 
+                 class="settings-tab-panel {% if active_tab == 'teacher' %}settings-tab-panel--active{% endif %}" 
+                 role="tabpanel" 
+                 aria-labelledby="tab-btn-teacher">
+                <div class="settings-card">
+                    <div class="settings-card__header">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2);">
+                            <h2 class="settings-card__title">Статус викладача</h2>
+                            <span class="badge badge-role badge-role--{{ profile.role }}">
+                                Поточна роль: {{ profile.get_role_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if profile.is_teacher or profile.is_admin %}
+                        <!-- СТАН 1: Користувач уже має статус Викладач або Адміністратор -->
+                        <div class="status-banner status-banner--approved">
+                            <div class="status-banner__icon" style="color: var(--green);">
+                                <svg class="ui-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </div>
+                            <div class="status-banner__body">
+                                <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); margin: 0; color: var(--text-main);">
+                                    Ваш акаунт має статус "Викладач"
+                                </h3>
+                            </div>
+                        </div>
+
+                        <!-- Перелік можливостей викладача -->
+                        <div style="margin-top: var(--space-6);">
+                            <h4 style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-3); color: var(--text-main);">
+                                Доступні викладацькі функції в системі:
+                            </h4>
+                            <ul class="teacher-bullet-list">
+                                <li>Перегляд відповідей усіх студентів з фільтрацією за групами</li>
+                                <li>Аналіз індексу антиплагіату та AI-оцінювання знань</li>
+                                <li>Моніторинг погляду й відхилень уваги студентів (Gaze Tracking)</li>
+                                <li>Експорт детальних відомостей сесій у файл CSV</li>
+                            </ul>
+                        </div>
+
+                    {% elif pending_teacher_app %}
+                        <!-- СТАН 2: Заявка подана та перебуває на розгляді -->
+                        <div class="status-banner status-banner--pending">
+                            <div class="status-banner__icon" style="color: #F59E0B;">
+                                <svg class="ui-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="status-banner__body">
+                                <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); margin-bottom: var(--space-1); color: var(--text-main);">
+                                    Ваша заявка знаходиться на розгляді адміністратора
+                                </h3>
+                                <p style="font-size: var(--font-size-sm); color: var(--text-muted); line-height: var(--line-height-normal);">
+                                    Заявку передано відповідальному адміністратору системи. Після розгляду та підтвердження ваш обліковий запис автоматично отримає роль "Викладач".
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Деталі поданої заявки -->
+                        <div class="application-details-card">
+                            <h4 style="font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin-bottom: var(--space-3); color: var(--text-main);">
+                                Інформація про надіслану заявку:
+                            </h4>
+                            <div class="application-details-grid">
+                                <div class="application-detail-item">
+                                    <span class="application-detail-label">Дата подачі:</span>
+                                    <span class="application-detail-val">{{ pending_teacher_app.created_at|date:"d.m.Y H:i" }}</span>
+                                </div>
+                                <div class="application-detail-item">
+                                    <span class="application-detail-label">Кафедра / Факультет:</span>
+                                    <span class="application-detail-val">{{ pending_teacher_app.department }}</span>
+                                </div>
+                                <div class="application-detail-item">
+                                    <span class="application-detail-label">Посада / Статус:</span>
+                                    <span class="application-detail-val">{{ pending_teacher_app.position }}</span>
+                                </div>
+                                {% if pending_teacher_app.phone %}
+                                    <div class="application-detail-item">
+                                        <span class="application-detail-label">Контактний телефон:</span>
+                                        <span class="application-detail-val">{{ pending_teacher_app.phone }}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="application-detail-item application-detail-item--full">
+                                    <span class="application-detail-label">Обґрунтування запиту:</span>
+                                    <span class="application-detail-val" style="white-space: pre-wrap;">{{ pending_teacher_app.reason }}</span>
+                                </div>
+                            </div>
+
+                            <form method="post" action="{% url 'settings' %}" style="margin-top: var(--space-5);">
+                                {% csrf_token %}
+                                <input type="hidden" name="form_action" value="cancel_teacher_application">
+                                <input type="hidden" name="active_tab" value="teacher">
+                                <button type="submit" class="table-btn" style="color: var(--red); border-color: var(--red);">
+                                    <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                    <span>Відкликати заявку</span>
+                                </button>
+                            </form>
+                        </div>
+
+                    {% else %}
+                        <!-- СТАН 3: Студент може подати заявку на отримання викладацького статусу -->
+                        {% if latest_teacher_app and latest_teacher_app.is_rejected %}
+                            <div class="status-banner status-banner--rejected">
+                                <div class="status-banner__icon" style="color: var(--red);">
+                                    <svg class="ui-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                                    </svg>
+                                </div>
+                                <div class="status-banner__body">
+                                    <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); margin-bottom: var(--space-1); color: var(--text-main);">
+                                        Попередню заявку було відхилено
+                                    </h3>
+                                    <p style="font-size: var(--font-size-sm); color: var(--text-muted); line-height: var(--line-height-normal);">
+                                        {% if latest_teacher_app.admin_notes %}
+                                            Коментар адміністратора: {{ latest_teacher_app.admin_notes }}
+                                        {% else %}
+                                            Адміністратор відхилив попередній запит. Ви можете уточнити дані та подати заявку повторно нижче.
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Блок переваг статусу викладача -->
+                        <div class="teacher-promo-box">
+                            <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); margin-bottom: var(--space-2); color: var(--text-main);">
+                                Можливості викладача в Avatar AI
+                            </h3>
+                            <p style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--space-4);">
+                                Отримавши підтверджений статус викладача, ви зможете проводити автоматизовані іспити та тестування з контролем академічної доброчесності.
+                            </p>
+                            <div class="teacher-benefits">
+                                <div class="teacher-benefit-item">
+                                    <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>Управління тестуваннями та екзаменаційними питаннями</span>
+                                </div>
+                                <div class="teacher-benefit-item">
+                                    <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>Моніторинг напрямку погляду студентів під час відповідей</span>
+                                </div>
+                                <div class="teacher-benefit-item">
+                                    <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>Автоматичне ШІ-оцінювання точності та виявлення плагіату</span>
+                                </div>
+                                <div class="teacher-benefit-item">
+                                    <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    <span>Перегляд протоколів сесій та експорт у формат CSV</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Форма подачі заявки на статус викладача -->
+                        <form method="post" action="{% url 'settings' %}" class="auth-form" novalidate style="margin-top: var(--space-6);">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_action" value="teacher_application">
+                            <input type="hidden" name="active_tab" value="teacher">
+
+                            {% if teacher_form.non_field_errors %}
+                                <div class="alert alert--error">
+                                    {% for error in teacher_form.non_field_errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="form-group">
+                                <label for="{{ teacher_form.department.id_for_label }}">{{ teacher_form.department.label }}</label>
+                                {{ teacher_form.department }}
+                                <span class="form-group__hint">Вкажіть ваш навчальний заклад, факультет або кафедру</span>
+                                {% if teacher_form.department.errors %}
+                                    <span class="form-group__error">{{ teacher_form.department.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ teacher_form.position.id_for_label }}">{{ teacher_form.position.label }}</label>
+                                {{ teacher_form.position }}
+                                <span class="form-group__hint">Наприклад: Доцент, Асистент, Старший викладач, Вчитель</span>
+                                {% if teacher_form.position.errors %}
+                                    <span class="form-group__error">{{ teacher_form.position.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ teacher_form.phone.id_for_label }}">{{ teacher_form.phone.label }}</label>
+                                {{ teacher_form.phone }}
+                                <span class="form-group__hint">Контактний номер для верифікації (необов'язково)</span>
+                                {% if teacher_form.phone.errors %}
+                                    <span class="form-group__error">{{ teacher_form.phone.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ teacher_form.reason.id_for_label }}">{{ teacher_form.reason.label }}</label>
+                                {{ teacher_form.reason }}
+                                <span class="form-group__hint">Опишіть дисципліни або навчальні групи, для яких планується тестування</span>
+                                {% if teacher_form.reason.errors %}
+                                    <span class="form-group__error">{{ teacher_form.reason.errors.0 }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div style="margin-top: var(--space-4);">
+                                <button type="submit" class="auth-btn-submit" style="max-width: 320px; margin-top: 0;">
+                                    Подати заявку на статус викладача
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ПАНЕЛЬ 3: БЕЗПЕКА ТА ПАРОЛЬ -->
+            <div id="panel-security" 
+                 class="settings-tab-panel {% if active_tab == 'security' %}settings-tab-panel--active{% endif %}" 
+                 role="tabpanel" 
+                 aria-labelledby="tab-btn-security">
+                <div class="settings-card">
+                    <div class="settings-card__header">
+                        <h2 class="settings-card__title">Безпека та пароль</h2>
+                        <p class="settings-card__desc">Змініть ваш пароль для збереження безпеки облікового запису.</p>
+                    </div>
+
+                    <form method="post" action="{% url 'settings' %}" class="auth-form" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="form_action" value="change_password">
+                        <input type="hidden" name="active_tab" value="security">
+
+                        {% if password_form.non_field_errors %}
+                            <div class="alert alert--error">
+                                {% for error in password_form.non_field_errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="{{ password_form.old_password.id_for_label }}">{{ password_form.old_password.label }}</label>
+                            {{ password_form.old_password }}
+                            {% if password_form.old_password.errors %}
+                                <span class="form-group__error">{{ password_form.old_password.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ password_form.new_password1.id_for_label }}">{{ password_form.new_password1.label }}</label>
+                            {{ password_form.new_password1 }}
+                            <span class="form-group__hint">Мінімум 6 символів, уникайте очевидних комбінацій</span>
+                            {% if password_form.new_password1.errors %}
+                                <span class="form-group__error">{{ password_form.new_password1.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ password_form.new_password2.id_for_label }}">{{ password_form.new_password2.label }}</label>
+                            {{ password_form.new_password2 }}
+                            {% if password_form.new_password2.errors %}
+                                <span class="form-group__error">{{ password_form.new_password2.errors.0 }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div style="margin-top: var(--space-4);">
+                            <button type="submit" class="auth-btn-submit" style="max-width: 240px; margin-top: 0;">
+                                Змінити пароль
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script>
+    // Інтерактивне перемикання вкладок на клієнті
+    document.addEventListener("DOMContentLoaded", function () {
+        var tabBtns = document.querySelectorAll("#settingsTabNav .settings-tab-btn");
+        var panels = document.querySelectorAll(".settings-content .settings-tab-panel");
+
+        function activateTab(targetId, updateHistory) {
+            tabBtns.forEach(function (btn) {
+                var isTarget = btn.getAttribute("data-tab-target") === targetId;
+                btn.classList.toggle("settings-tab-btn--active", isTarget);
+                btn.setAttribute("aria-selected", isTarget ? "true" : "false");
+            });
+
+            panels.forEach(function (panel) {
+                var isTarget = panel.id === targetId;
+                panel.classList.toggle("settings-tab-panel--active", isTarget);
+            });
+
+            if (updateHistory) {
+                var tabKey = targetId.replace("panel-", "");
+                try {
+                    var newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set("tab", tabKey);
+                    window.history.replaceState({}, "", newUrl.toString());
+                } catch (e) {}
+            }
+        }
+
+        tabBtns.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                var target = this.getAttribute("data-tab-target");
+                if (target) {
+                    activateTab(target, true);
+                }
+            });
+        });
+
+        // Підтримка хешу або параметра URL при завантаженні
+        try {
+            var params = new URLSearchParams(window.location.search);
+            var tabParam = params.get("tab");
+            if (tabParam) {
+                var panelId = "panel-" + tabParam;
+                if (document.getElementById(panelId)) {
+                    activateTab(panelId, false);
+                }
+            }
+        } catch (e) {}
+    });
+</script>
+{% endblock content %}

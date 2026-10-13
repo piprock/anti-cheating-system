@@ -52,7 +52,16 @@
         {% if role == 'student' %}
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Пройдено тестів</span>
+                    <span class="stat-card__label">
+                        Пройдено тестів
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Успішно складено: {{ passed_count }}">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -61,12 +70,20 @@
                     </span>
                 </div>
                 <span class="stat-card__value">{{ total_taken }}</span>
-                <span class="stat-card__sub">Успішно складено: {{ passed_count }}</span>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Середня оцінка</span>
+                    <span class="stat-card__label">
+                        Середня оцінка
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Шкала від 1 до 5">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -77,12 +94,20 @@
                     {% if stats.avg_grade %}{{ stats.avg_grade|floatformat:1 }}{% else %}—{% endif %}
                     <small style="font-size: var(--font-size-base); color: var(--text-muted);">/ 5</small>
                 </span>
-                <span class="stat-card__sub">Шкала від 1 до 5</span>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Середня точність</span>
+                    <span class="stat-card__label">
+                        Середня точність
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Оцінювання відповідей ШІ">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -93,12 +118,20 @@
                 <span class="stat-card__value">
                     {% if stats.avg_accuracy %}{{ stats.avg_accuracy|floatformat:0 }}%{% else %}—{% endif %}
                 </span>
-                <span class="stat-card__sub">Оцінювання відповідей ШІ</span>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Контроль погляду</span>
+                    <span class="stat-card__label">
+                        Контроль погляду
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Середній час поза екраном">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -109,13 +142,21 @@
                 <span class="stat-card__value">
                     {% if stats.avg_gaze %}{{ stats.avg_gaze|floatformat:1 }}%{% else %}0.0%{% endif %}
                 </span>
-                <span class="stat-card__sub">Середній час поза екраном</span>
             </div>
 
         {% elif role == 'teacher' %}
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Здано робіт</span>
+                    <span class="stat-card__label">
+                        Здано робіт
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Всіма студентами">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -123,12 +164,20 @@
                     </span>
                 </div>
                 <span class="stat-card__value">{{ total_sessions_count }}</span>
-                <span class="stat-card__sub">Всіма студентами</span>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Студентів у базі</span>
+                    <span class="stat-card__label">
+                        Студентів у базі
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="З академічними групами">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -137,12 +186,20 @@
                     </span>
                 </div>
                 <span class="stat-card__value">{{ students.count }}</span>
-                <span class="stat-card__sub">З академічними групами</span>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Середній бал</span>
+                    <span class="stat-card__label">
+                        Середній бал
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Середня точність: {{ avg_metrics.avg_accuracy|floatformat:0|default:'0' }}%">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -152,12 +209,20 @@
                 <span class="stat-card__value">
                     {% if avg_metrics.avg_grade %}{{ avg_metrics.avg_grade|floatformat:1 }}{% else %}—{% endif %}
                 </span>
-                <span class="stat-card__sub">Середня точність: {{ avg_metrics.avg_accuracy|floatformat:0|default:"0" }}%</span>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Підозри на списування</span>
+                    <span class="stat-card__label">
+                        Підозри на списування
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Gaze &gt;35% або плагіат &gt;20%">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon" style="color: var(--red);">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
@@ -167,14 +232,22 @@
                     </span>
                 </div>
                 <span class="stat-card__value" style="color: var(--red);">{{ suspicious_count }}</span>
-                <span class="stat-card__sub">Gaze &gt;35% або плагіат &gt;20%</span>
             </div>
 
         {% else %}
             <!-- Admin Stats -->
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Всього користувачів</span>
+                    <span class="stat-card__label">
+                        Всього користувачів
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Студентів: {{ students_count }}, Викладачів: {{ teachers_count }}">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -183,12 +256,20 @@
                     </span>
                 </div>
                 <span class="stat-card__value">{{ total_users_count }}</span>
-                <span class="stat-card__sub">Студентів: {{ students_count }}, Викладачів: {{ teachers_count }}</span>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Всього сесій</span>
+                    <span class="stat-card__label">
+                        Всього сесій
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="У {{ total_surveys_count }} тестах">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -196,12 +277,20 @@
                     </span>
                 </div>
                 <span class="stat-card__value">{{ total_sessions_count }}</span>
-                <span class="stat-card__sub">У {{ total_surveys_count }} тестах</span>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Середній бал системи</span>
+                    <span class="stat-card__label">
+                        Середній бал системи
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Точність: {{ avg_metrics.avg_accuracy|floatformat:0|default:'0' }}%">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -211,12 +300,20 @@
                 <span class="stat-card__value">
                     {% if avg_metrics.avg_grade %}{{ avg_metrics.avg_grade|floatformat:1 }}{% else %}—{% endif %}
                 </span>
-                <span class="stat-card__sub">Точність: {{ avg_metrics.avg_accuracy|floatformat:0|default:"0" }}%</span>
             </div>
 
             <div class="stat-card">
                 <div class="stat-card__top">
-                    <span class="stat-card__label">Контроль погляду</span>
+                    <span class="stat-card__label">
+                        Контроль погляду
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Середній час поза екраном">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </span>
                     <span class="stat-card__icon">
                         <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -227,7 +324,6 @@
                 <span class="stat-card__value">
                     {% if avg_metrics.avg_gaze %}{{ avg_metrics.avg_gaze|floatformat:1 }}%{% else %}0.0%{% endif %}
                 </span>
-                <span class="stat-card__sub">Середній рівень погляду</span>
             </div>
         {% endif %}
     </div>
@@ -353,11 +449,15 @@
     {% if recent_logs %}
     <div class="dashboard-card">
         <div class="dashboard-card__header">
-            <div>
-                <h2 class="dashboard-card__title">Журнал активності</h2>
-                <p style="font-size: var(--font-size-xs); color: var(--text-muted); margin-top: 4px;">
-                    Хронологія дій (вхід, початок тесту, завершення, оновлення профілю)
-                </p>
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <h2 class="dashboard-card__title" style="margin: 0;">Журнал активності</h2>
+                <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Хронологія дій (вхід, початок тесту, завершення, оновлення профілю)">
+                    <svg class="ui-icon ui-tooltip__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </span>
             </div>
             <button id="toggleActivityBtn" type="button" class="table-btn" onclick="toggleActivityLog()">
                 <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -402,11 +502,15 @@
     {% if role == 'admin' and users %}
     <div class="dashboard-card">
         <div class="dashboard-card__header">
-            <div>
-                <h2 class="dashboard-card__title">Керування користувачами</h2>
-                <p style="font-size: var(--font-size-xs); color: var(--text-muted); margin-top: 4px;">
-                    Список усіх облікових записів системи з їхніми ролями та академічними групами
-                </p>
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <h2 class="dashboard-card__title" style="margin: 0;">Керування користувачами</h2>
+                <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Список усіх облікових записів системи з їхніми ролями та академічними групами">
+                    <svg class="ui-icon ui-tooltip__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </span>
             </div>
         </div>
 

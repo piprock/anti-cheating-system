@@ -13,15 +13,20 @@ header {
     transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
-/* 1-й РЯДОК: Тема, доступність, профіль */
+/* 1-й РЯДОК: Логотип, тема, доступність, профіль */
 .header-topbar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     gap: var(--space-3);
     padding-bottom: var(--space-2);
     border-bottom: 1px solid var(--border-color);
     margin-bottom: var(--space-2);
+}
+
+.header-topbar__left {
+    display: flex;
+    align-items: center;
 }
 
 .header-topbar__right {
@@ -31,12 +36,18 @@ header {
     margin-left: auto;
 }
 
-/* 2-й РЯДОК: Логотип та навігація */
+/* 2-й РЯДОК: Основна навігація (зліва), Бургер (справа) */
 .header-mainbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     gap: var(--space-4);
+    position: relative;
+    width: 100%;
+}
+
+.header-mainbar .burger-btn {
+    margin-left: auto;
 }
 
 .header-content {
@@ -193,15 +204,22 @@ nav a.checked {
     line-height: var(--line-height-normal);
 }
 
-.nav-dropdown__item:hover {
-    color: var(--orange);
-    background-color: var(--orange-subtle);
+.nav-dropdown__item:hover,
+.nav-dropdown__item:focus-visible {
+    color: #ffffff;
+    background-color: var(--orange);
 }
 
 .nav-dropdown__item.checked {
     color: var(--orange);
     font-weight: var(--font-weight-semibold);
     background-color: var(--orange-subtle);
+}
+
+.nav-dropdown__item.checked:hover,
+.nav-dropdown__item.checked:focus-visible {
+    color: #ffffff;
+    background-color: var(--orange);
 }
 
 .nav-dropdown__item:focus-visible {
@@ -375,18 +393,35 @@ nav a.checked {
     text-align: left;
 }
 
-.profile-dropdown__item:hover {
-    background-color: var(--orange-subtle);
-    color: var(--orange);
+.profile-dropdown__item:hover,
+.profile-dropdown__item:focus-visible {
+    background-color: var(--orange);
+    color: #ffffff;
+}
+
+.profile-dropdown__item:hover svg,
+.profile-dropdown__item:focus-visible svg {
+    stroke: #ffffff;
+}
+
+.profile-dropdown__item:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: -2px;
 }
 
 .profile-dropdown__item--logout {
     color: var(--red);
 }
 
-.profile-dropdown__item--logout:hover {
-    background-color: var(--red-subtle);
-    color: var(--red);
+.profile-dropdown__item--logout:hover,
+.profile-dropdown__item--logout:focus-visible {
+    background-color: var(--red);
+    color: #ffffff;
+}
+
+.profile-dropdown__item--logout:hover svg,
+.profile-dropdown__item--logout:focus-visible svg {
+    stroke: #ffffff;
 }
 
 /* Кнопка швидкого перемикання теми (Сонце / Місяць) */
@@ -626,6 +661,14 @@ nav a.checked {
         font-size: var(--font-size-sm);
         min-height: 40px;
         border-radius: var(--radius-sm);
+    }
+
+    .nav-dropdown__item:hover,
+    .nav-dropdown__item:focus-visible,
+    .nav-dropdown__item.checked:hover,
+    .nav-dropdown__item.checked:focus-visible {
+        background-color: var(--orange);
+        color: #ffffff;
     }
 }
 

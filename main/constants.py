@@ -20,7 +20,7 @@ from const.exam.metrics import (
     GAZE_STATE_TIMEOUT,
     CHAT_HISTORY_TIMEOUT,
 )
-from const.validation.extremes import (
+from const.validation.bounds import (
     MIN_VOICE_ANSWER_CHARS,
     MAX_SESSION_DURATION_SEC,
     MAX_AUDIO_FILE_BYTES,

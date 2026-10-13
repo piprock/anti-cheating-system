@@ -25,8 +25,8 @@
     <link rel="shortcut icon" type="image/x-icon" href="{% static "images/icon.ico" %}">
     <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.4">
     <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.6">
-    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.6">
-    <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.8">
+    <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.4">
     <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/a11y.css" %}?v=2.3">
@@ -41,12 +41,13 @@
     <!-- HEADER (2 Рядки) -->
     <header>
         <div class="container">
-            <!-- 1-й РЯДОК: Тема, Доступність, Кнопка профілю / Авторизація -->
+            <!-- 1-й РЯДОК: Логотип, Тема, Доступність, Кнопка профілю / Авторизація -->
             <div class="header-topbar">
                 <div class="header-topbar__left">
-                    <span style="font-size: var(--font-size-xs); color: var(--text-muted);">
-                        Avatar AI – Інтелектуальна система екзаменації
-                    </span>
+                    <a href="{% url "main" %}" class="flex-center" title="Avatar AI - Головна">
+                        <img class="header-content__logo header-content__logo--dark" src="{% static "images/dark_theme_logo.png" %}" alt="Avatar AI">
+                        <img class="header-content__logo header-content__logo--light" src="{% static "images/light_theme_logo.png" %}" alt="Avatar AI">
+                    </a>
                 </div>
 
                 <div class="header-topbar__right">
@@ -126,7 +127,7 @@
                                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                         <polyline points="9 22 9 12 15 12 15 22"></polyline>
                                     </svg>
-                                    <span>Особистий кабінет / Історія</span>
+                                    <span>Особистий кабінет</span>
                                 </a>
                                 <a role="menuitem" class="profile-dropdown__item" href="{% url 'profile_edit' %}">
                                     <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -164,13 +165,8 @@
                 </div>
             </div>
 
-            <!-- 2-й РЯДОК: Логотип, Основна навігація, Бургер -->
+            <!-- 2-й РЯДОК: Основна навігація (зліва), Бургер -->
             <div class="header-mainbar">
-                <a href="{% url "main" %}" class="flex-center">
-                    <img class="header-content__logo header-content__logo--dark" src="{% static "images/dark_theme_logo.png" %}" alt="Avatar AI">
-                    <img class="header-content__logo header-content__logo--light" src="{% static "images/light_theme_logo.png" %}" alt="Avatar AI">
-                </a>
-
                 <nav id="headerNav" class="header-nav" aria-label="Основна навігація">
                     <a class="{% if request.resolver_match.url_name == 'main' %}checked{% endif %}" href="{% url "main" %}">Головна</a>
                     <a class="{% if request.resolver_match.url_name == 'gaze' %}checked{% endif %}" href="{% url "gaze" %}">Моніторинг погляду</a>

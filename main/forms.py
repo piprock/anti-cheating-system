@@ -17,7 +17,7 @@ from const.errors.messages import (
     ERR_AUDIO_TOO_LARGE,
     ERR_DOCUMENT_TOO_LARGE,
 )
-from const.validation.extremes import (
+from const.validation.bounds import (
     MAX_AUDIO_FILE_BYTES,
     MAX_DOC_FILE_BYTES,
     MIN_USERNAME_LEN,

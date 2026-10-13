@@ -246,7 +246,7 @@ def test_two_step_registration_flow(client):
 def test_const_package_exports():
     import const
     from const.errors import messages
-    from const.validation import extremes
+    from const.validation import bounds
     from const.exam import metrics
 
     assert hasattr(const, "ERR_INVALID_CREDENTIALS")
@@ -255,7 +255,7 @@ def test_const_package_exports():
     assert hasattr(const, "GAZE_PENALTY_THRESHOLD_PCT")
 
     assert messages.SUCCESS_REGISTRATION == "Реєстрація успішна! Ласкаво просимо до Avatar AI."
-    assert extremes.MIN_PASSWORD_LEN == 6
+    assert bounds.MIN_PASSWORD_LEN == 6
     assert metrics.GAZE_PENALTY_THRESHOLD_PCT == 35.0
 
 
@@ -292,5 +292,35 @@ def test_header_two_rows_and_profile_dropdown(client):
 
     # "Кабінет" button removed from main navigation
     assert '<a class="" href="/dashboard/">Кабінет</a>' not in content
-    assert "Особистий кабінет / Історія" in content  # Present in profile dropdown
+    assert "Особистий кабінет" in content  # Present in profile dropdown
+
+    # Row 1 contains logo, subtitle removed
+    assert "Avatar AI – Інтелектуальна система екзаменації" not in content
+    assert "header-topbar__left" in content
+
+
+@pytest.mark.django_db
+def test_tooltips_on_dashboard_and_gaze(client):
+    user = User.objects.create_user(
+        username="tooltip_user",
+        password="password123",
+        first_name="Олена",
+        last_name="Теліга",
+    )
+    client.force_login(user)
+
+    # Dashboard tooltips
+    dash_res = client.get(reverse("dashboard"))
+    assert dash_res.status_code == 200
+    dash_html = dash_res.content.decode("utf-8")
+    assert 'data-tooltip="Успішно складено:' in dash_html
+    assert 'data-tooltip="Шкала від 1 до 5"' in dash_html
+
+    # Gaze monitoring tooltip
+    gaze_res = client.get(reverse("gaze"))
+    assert gaze_res.status_code == 200
+    gaze_html = gaze_res.content.decode("utf-8")
+    assert "Підказка: Зелене коло позначає виявлену область зіниці." in gaze_html
+    assert "ui-tooltip" in gaze_html
+
 

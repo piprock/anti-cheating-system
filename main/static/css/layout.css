@@ -211,3 +211,98 @@
     border-radius: var(--radius-sm);
     background-color: #000000;
 }
+
+/* ============================================
+   TOOLTIPS - Інформаційні спливаючі підказки
+   ============================================ */
+
+.ui-tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: help;
+    border-radius: var(--radius-full);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+    padding: 2px;
+    vertical-align: middle;
+    line-height: 1;
+}
+
+.ui-tooltip:hover,
+.ui-tooltip:focus-visible {
+    color: var(--orange);
+    outline: none;
+}
+
+.ui-tooltip__icon {
+    display: block;
+    flex-shrink: 0;
+}
+
+/* Спливаючий текст підказки */
+.ui-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.28);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-main);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-normal);
+    text-transform: none;
+    letter-spacing: normal;
+    white-space: normal;
+    width: max-content;
+    max-width: 260px;
+    text-align: left;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
+    z-index: 1000;
+}
+
+/* Стрілочка підказки */
+.ui-tooltip::before {
+    content: "";
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    border-width: 6px 6px 0 6px;
+    border-style: solid;
+    border-color: var(--border-color) transparent transparent transparent;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-fast), transform var(--transition-fast), visibility var(--transition-fast);
+    z-index: 1000;
+}
+
+.ui-tooltip:hover::after,
+.ui-tooltip:hover::before,
+.ui-tooltip:focus-visible::after,
+.ui-tooltip:focus-visible::before {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Спеціальний режим для широких підказок */
+.ui-tooltip--wide::after {
+    max-width: 320px;
+}
+
+[data-theme="light"] .ui-tooltip::after {
+    box-shadow: 0 10px 25px rgba(41, 37, 36, 0.12);
+}
+

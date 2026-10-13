@@ -6,6 +6,8 @@ Concise, project-specific guidance for AI coding agents working in this reposito
 - `agent/`: Django project configuration (`settings.py`, `urls.py`, `wsgi.py`, `asgi.py`).
 - `main/`: Primary application package containing models, views, services, templates, and static assets.
 - **Models (`main/models.py`)**:
+  - `UserProfile`: Role-based profile extending Django `User` (`role`: `student`, `teacher`, `admin`; `middle_name`, `group`, `full_name`).
+  - `ActivityLog`: User action audit trail (`action`: login, logout, profile update, exam start, exam submit).
   - `Student`: Full name (`first_name`, `last_name`, `middle_name`) and creation timestamp.
   - `Survey`: Exam definition (`key`, `title`, `control_questions` JSON list, `answer_time_sec`, `active`).
   - `InterviewSession`: Completed exam session with aggregated metrics (`overall_accuracy`, `plagiarism_score`, `gaze_not_looking_pct`, `grade_5`, `dialogue_result`, `raw_payload`, `status`).
@@ -13,6 +15,9 @@ Concise, project-specific guidance for AI coding agents working in this reposito
 - **Service Layer Architecture (`main/services/`)**: All business logic encapsulated into isolated, unit-tested service classes.
 - **Runtime State (`main/cache_utils.py`)**: All transient state (exam progress, gaze metrics, chat history) is stored in the Django cache rather than global variables.
 - **Central Modules**:
+  - `const/`: Centralized modular constants package (`const/errors/messages.py`, `const/validation/bounds.py`, `const/exam/metrics.py`). Validation limits must strictly use `bounds` (never `extremes`). Re-exported in `main/constants.py`.
+  - `main/auth_views.py`: Authentication views (login, logout), 2-step registration wizard, role-based dashboard, profile editor, session inspector.
+  - `main/management/commands/seed_admin.py`: Idempotent superuser seeding from root `.env` (`ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_EMAIL`).
   - `main/services/audio_service.py`: `AudioService` for microphone recording, Whisper speech recognition, and ElevenLabs TTS.
   - `main/services/gpt_service.py`: `GPTService` for chat, answer scoring, and exam summarization with OpenAI (`gpt-4o-mini`).
   - `main/services/exam_service.py`: `ExamService` for exam session progression, payload building, and 5-point grade calculation.
@@ -24,8 +29,8 @@ Concise, project-specific guidance for AI coding agents working in this reposito
   - `main/gaze.py`: Computer vision frame processor (`gaze_frame`) using dlib 68-landmark predictor and `GazeService`.
   - `main/cache_utils.py`: Unified cache API for exam state, gaze counters, and chat history.
   - `main/persist.py`: Session persistence (`persist_session_from_payload`) that creates `InterviewSession` and `Answer` database records.
-  - `main/constants.py`: Centralized thresholds and timeouts (e.g. `PLAGIARISM_PENALTY_THRESHOLD=20`, `GAZE_PENALTY_THRESHOLD_PCT=35.0`, `GRADE_BANDS`, `AUDIO_SAMPLE_RATE=16000`).
-  - `main/forms.py`: Django forms for request validation (`VoiceAnswerUploadForm`, `FileAnalyzeForm`, `SubmitInterviewForm`).
+  - `main/constants.py`: Re-exports modular constants from root `const/` package for backward compatibility.
+  - `main/forms.py`: Django forms for validation (`RegistrationStep1Form`, `RegistrationStep2Form`, `UserProfileForm`, `VoiceAnswerUploadForm`, `FileAnalyzeForm`, `SubmitInterviewForm`).
 - **Legacy Files (Deprecated)**:
   - `main/audio.py`, `main/file_extract.py`, `main/gaze_utils.py`, `main/gpt_utils.py`, `main/views.py`. These files are deprecated remnants from pre-service refactoring. Do not add new logic to or import from these legacy files.
 
@@ -134,11 +139,25 @@ All runtime state is isolated and managed through [`main/cache_utils.py`](file:/
 - **ElevenLabs**: TTS via ElevenLabs client, outputting 16 kHz PCM played through `sounddevice`.
 
 ## Environment Variables (.env)
+Root-level `.env` is the single source of truth (never duplicate in subdirectories).
 Required:
 - `OPENAI_API_KEY`: API key for OpenAI (`gpt-4o-mini`).
 - `ELEVENLABS_API_KEY`: API key for ElevenLabs TTS.
+Admin Seeding (Optional, defaults provided):
+- `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_EMAIL`: Seed credentials for the superuser.
 Optional:
 - `AGENT_ID`: Agent identification string if needed.
+
+## Authentication, Authorization & Roles
+- **Role Hierarchy (`UserProfile.role`)**:
+  - `student`: Standard exam taker; accesses personal dashboard with exam history, grades, and accuracy stats.
+  - `teacher`: Evaluator; views all student sessions, filterable by academic group, with CSV export capabilities.
+  - `admin`: Superuser; manages all user accounts, views global statistics, and accesses Django admin (`/admin/`).
+- **Registration**: 2-stage wizard strictly in 1 column with left-aligned labels:
+  - Stage 1: `username`, `email` (optional), `password`, `password_confirm` (cached in `request.session['reg_step1']`).
+  - Stage 2: `last_name`, `first_name`, `middle_name` (optional), `group` (optional) -> creates `User` + `UserProfile` and auto-logs in.
+- **Admin Seeding**: Automated on migrate or manually via `python manage.py seed_admin` (idempotent, reads credentials from root `.env`).
+- **Audit Trail (`ActivityLog`)**: Logs user events (login, logout, profile update, exam start/submit). On the dashboard, activity history is collapsed by default and toggled via `#toggleActivityBtn`.
 
 ## UI/UX Design System & Accessibility
 
@@ -167,10 +186,22 @@ Optional:
 
 ### Modular CSS Architecture
 - `main/static/css/style.css`: Design tokens (`:root`, themes), typography, grid, resets, utilities.
-- `main/static/css/header.css`: Fixed header, nav links, pure CSS theme-based logo switching, a11y trigger.
+- `main/static/css/header.css`: Fixed 2-row header, nav links, profile dropdown, pure CSS theme-based logo switching.
 - `main/static/css/footer.css`: 3-tier footer: `.footer-container` (columns) -> `.footer-marquee` (running ticker) -> `.footer-bottom` (copyright).
 - `main/static/css/a11y.css`: Accessible popover modal, font scaling modifiers, colorblind overrides.
+- `main/static/css/auth.css`: Authentication pages, role badges, history cards, toasters, step indicators.
+- `main/static/css/layout.css`: Layout utilities, micro-tooltips (`.ui-tooltip`).
+- `main/static/css/forms.css`: Left-aligned form fields and validation styles.
 - `main/static/css/exam.css`: Proctoring exam layout, camera viewport, question cards, gaze pills.
+
+### Header, Navigation, Toasts & Tooltips
+- **2-Row Header**:
+  - Row 1: Dual-theme Logo (left, no subtitle text) + Theme Quick Button, Accessibility trigger, and Profile Dropdown (right).
+  - Row 2: Main navigation links (left-aligned: "Головна", "Моніторинг погляду", "Про нас") + mobile burger toggle (right). Standalone "Кабінет" button is removed from nav and integrated into the Profile Dropdown.
+- **Profile Dropdown**: Displays short name "Ім'я Прізвище", opening into user card (full name, role badge, group, email, dashboard link, profile editor, Django admin link for superusers, and logout at bottom).
+- **Toaster Notifications (`#toastContainer`)**: Floating stack at top-right for flash messages (success, error, info), auto-dismissing after 4.5s (pauses on hover), with inline close button.
+- **Micro-Tooltips (`.ui-tooltip`)**: Accessible SVG hover/focus tooltips for secondary descriptions and metrics (e.g. grading scales, activity log purpose, pupil detection hints) to prevent visual clutter.
+- **Form Layout**: Strict 1-column layout, left-aligned labels, headings, and input fields.
 
 ### Marquee (Running Text)
 - Continuous ticker (`.footer-marquee`) animates leftward (`marqueeScrollLeft 48s linear infinite`).
@@ -186,6 +217,9 @@ python manage.py runserver
 python manage.py makemigrations main
 python manage.py migrate
 
+# Seed or ensure superuser from .env
+python manage.py seed_admin
+
 # Django interactive shell
 python manage.py shell
 
@@ -196,6 +230,7 @@ pytest
 ## Testing Guidelines
 - The project uses `pytest`, `pytest-django`, and `pytest-cov` configured in [`pytest.ini`](file:///c:/Users/yural/PycharmProjects/anti-cheating-system/pytest.ini).
 - All unit tests are located in [`main/tests/`](file:///c:/Users/yural/PycharmProjects/anti-cheating-system/main/tests/):
+  - `test_auth.py`: Authentication, roles, 2-step registration, dashboard stats, profile editing, and `const` exports.
   - `test_audio_service.py`: Recording, recognition, and TTS mocks.
   - `test_exam_service.py`: Exam initialization, answer recording, and grade computation.
   - `test_file_extractor.py`: Format parsing for TXT, CSV, PDF, DOCX, and RTF.
@@ -207,10 +242,12 @@ pytest
 ## Safe Changes Checklist
 - Always encapsulate business logic in `main/services/`, instantiating services at module level or dependency-injecting them.
 - Always use `main/cache_utils.py` functions for session state — never access `django.core.cache.cache` with arbitrary hardcoded keys.
+- Place constants in modular `const/` package; validation limits must strictly be named `bounds.py` (never `extremes`).
 - Preserve strict JSON schemas in `GPTService` completions.
 - Update both models (`main/models.py`) and persistence logic (`main/persist.py`) when adding new metrics or session fields.
 - Keep audio sample rate aligned to `AUDIO_SAMPLE_RATE = 16000` (`main/constants.py`).
-- Maintain UI consistency with single font `Comfortaa`, 4px/8px grid, and SVG icons.
+- Maintain UI consistency with single font `Comfortaa`, 4px/8px grid, SVG icons, and left-aligned 1-column form layouts.
+- Render secondary explanatory descriptions inside `.ui-tooltip` icons rather than plain paragraph clutter.
 - Ensure all UI changes support both `[data-theme="dark"]` and `[data-theme="light"]`, with status colors respecting `[data-colorblind]`.
 - Increment CSS cache version query string in templates (`?v=...`) whenever updating stylesheets.
 - Run `pytest` before finalizing changes to ensure service coverage and test integrity.

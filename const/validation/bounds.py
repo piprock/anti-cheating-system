@@ -1,5 +1,5 @@
 """
-Validation extremes and limits (file sizes, lengths, timeouts).
+Validation boundaries and limits (file sizes, lengths, timeouts).
 """
 
 # Розміри файлів у байтах

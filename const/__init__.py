@@ -3,7 +3,7 @@ Centralized const package for the Avatar AI exam system.
 
 Organized into modular sub-packages:
 - const.errors: Error codes and localized human-readable messages.
-- const.validation: Form validation boundaries, length limits, file size extremes.
+- const.validation: Form validation boundaries, length limits, file size bounds.
 - const.exam: Exam grading bands, penalties, gaze thresholds, cache timeouts.
 """
 

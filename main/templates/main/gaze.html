@@ -147,8 +147,17 @@
 
       <!-- Панель бінаризації та візуалізації зіниць -->
       <div id="previewPanel" class="eye-preview-section">
-        <div class="eye-preview-header">
-          <span class="text-small" style="font-weight: 600;">Маска склери та зіниці:</span>
+        <div class="eye-preview-header" style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: var(--space-2);">
+            <span class="text-small" style="font-weight: 600;">Маска склери та зіниці</span>
+            <span class="ui-tooltip ui-tooltip--wide" tabindex="0" role="tooltip" aria-label="Підказка щодо відстеження зіниці" data-tooltip="Підказка: Зелене коло позначає виявлену область зіниці. Вертикальні лінії ділять око на три зони (ліва, центральна, права). Якщо зіниця виходить за центральну зону — фіксується відхилення погляду.">
+              <svg class="ui-icon ui-tooltip__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </span>
+          </div>
           <span class="badge-status" style="font-size: 11px;">CV Preview</span>
         </div>
 
@@ -162,10 +171,6 @@
             <img id="rightPrev" alt="Праве око" class="eye-preview-img" />
           </div>
         </div>
-
-        <p class="eye-preview-caption">
-          <b>Підказка:</b> Зелене коло позначає виявлену область зіниці. Вертикальні лінії ділять око на три зони (ліва, центральна, права). Якщо зіниця виходить за центральну зону — фіксується відхилення погляду.
-        </p>
       </div>
     </div>
   </div>

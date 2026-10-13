@@ -1,0 +1,276 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static "css/content.css" %}?v=2.4">
+<link rel="stylesheet" href="{% static "css/gaze.css" %}?v=1.0">
+{% endblock css %}
+
+{% block content %}
+<section class="intro-section">
+  <div class="overlay"></div>
+  <div class="intro-content">
+    <h1 class="inner_cont">Моніторинг та налаштування погляду</h1>
+    <p class="inner_cont">
+      Спеціалізована лабораторія для перевірки вебкамери, калібрування чутливості алгоритму комп'ютерного зору та тестування детекції напрямку погляду перед проходженням екзаменів.
+    </p>
+    <div class="button-try-about">
+      <a class="try" href="#gaze_workspace">Почати тестування</a>
+      <a class="add_inf" href="#instructions">Інструкція з калібрування</a>
+    </div>
+  </div>
+</section>
+
+<div class="container-main" id="gaze_workspace">
+  <div class="h-title flex-between flex-wrap gap-sm">
+    <h1 id="main_title">Лабораторія контролю погляду</h1>
+    <div class="flex gap-xs align-center">
+      <span class="badge-status badge-status--info">Режим тестування</span>
+    </div>
+  </div>
+
+  <!-- Приховане поле для сесії gaze -->
+  <input type="hidden" id="gazeSid" value="">
+
+  <!-- Основний робочий простір: Камера (зліва) та Калібрування (справа) -->
+  <div class="gaze-workspace">
+    <!-- Ліва колонка: Відеопотік та живий статус -->
+    <div class="gaze-camera-card">
+      <div class="card-header">
+        <h3 class="card-title">Відеопотік з вебкамери</h3>
+        <div class="flex gap-xs flex-wrap align-center">
+          <div id="gazeStatus" class="gaze-status-pill">
+            <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>Погляд: не активний</span>
+          </div>
+          <div id="cheatPct" class="badge-status">Час неуваги: 0%</div>
+        </div>
+      </div>
+
+      <!-- Контейнер відео з індикатором стану -->
+      <div class="gaze-video-wrapper">
+        <div class="gaze-video-overlay">
+          <span id="camIndicatorDot" class="cam-indicator-dot"></span>
+          <span id="camIndicatorText">Камера вимкнена</span>
+        </div>
+        <video id="cam" muted playsinline></video>
+      </div>
+
+      <!-- Кнопки керування потоком -->
+      <div class="flex-between flex-wrap gap-sm mt-md">
+        <div class="flex gap-xs">
+          <button id="gazeStartBtn" onclick="startGaze()" class="btn btn-green">
+            <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Запустити камеру</span>
+          </button>
+          <button id="gazeStopBtn" onclick="stopGaze()" class="btn btn-danger" disabled>
+            <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="4" width="4" height="16"></rect>
+              <rect x="14" y="4" width="4" height="16"></rect>
+            </svg>
+            <span>Зупинити</span>
+          </button>
+        </div>
+        <button id="gazeResetBtn" onclick="resetGaze()" class="btn btn-secondary" title="Скинути лічильники та час неуваги">
+          <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          <span>Скинути метрики</span>
+        </button>
+      </div>
+
+      <!-- Сітка розпізнавання напрямку очей -->
+      <div class="gaze-detection-grid">
+        <div class="gaze-detection-item">
+          <span class="gaze-detection-label">Обличчя:</span>
+          <span id="faceDetectBadge" class="gaze-detection-val">—</span>
+        </div>
+        <div class="gaze-detection-item">
+          <span class="gaze-detection-label">Ліве око:</span>
+          <span id="leftEyeBadge" class="gaze-detection-val">—</span>
+        </div>
+        <div class="gaze-detection-item">
+          <span class="gaze-detection-label">Праве око:</span>
+          <span id="rightEyeBadge" class="gaze-detection-val">—</span>
+        </div>
+        <div class="gaze-detection-item">
+          <span class="gaze-detection-label">Центрування:</span>
+          <span id="centerPctVal" class="gaze-detection-val">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Права колонка: Калібрування порогу та маски очей -->
+    <div class="gaze-calib-card">
+      <div class="card-header">
+        <h3 class="card-title">Калібрування порогу</h3>
+        <span id="calibModeBadge" class="badge-status badge-status--info">Автоматичний</span>
+      </div>
+
+      <!-- Перемикач режимів -->
+      <div class="flex-between flex-wrap gap-xs">
+        <span class="text-small text-muted">Режим підбору:</span>
+        <div class="flex gap-xs">
+          <button id="manualOffBtn" onclick="disableManual()" class="btn btn-secondary btn-small" disabled>
+            Авторежим
+          </button>
+          <button id="manualOnBtn" onclick="enableManual()" class="btn btn-secondary btn-small">
+            Ручний поріг
+          </button>
+        </div>
+      </div>
+
+      <!-- Повзунок порогу бінаризації -->
+      <div>
+        <div class="flex-between align-center mb-xs">
+          <label for="threshSlider" class="text-small" style="font-weight: 600;">
+            Поріг яскравості склери:
+          </label>
+          <span id="threshVal" style="font-weight: 700; color: var(--orange); font-size: var(--font-size-base);">170</span>
+        </div>
+        <input id="threshSlider" type="range" min="1" max="255" value="170" oninput="onThreshChange(event)" disabled style="width: 100%;" />
+        
+        <div class="thresh-presets">
+          <span class="text-small text-muted" style="align-self: center; margin-right: 4px;">Пресети:</span>
+          <button type="button" class="thresh-preset-btn" onclick="setThresholdPreset(140)">Низьке світло (140)</button>
+          <button type="button" class="thresh-preset-btn" onclick="setThresholdPreset(170)">Стандарт (170)</button>
+          <button type="button" class="thresh-preset-btn" onclick="setThresholdPreset(200)">Яскраве (200)</button>
+        </div>
+      </div>
+
+      <!-- Панель бінаризації та візуалізації зіниць -->
+      <div id="previewPanel" class="eye-preview-section">
+        <div class="eye-preview-header">
+          <span class="text-small" style="font-weight: 600;">Маска склери та зіниці:</span>
+          <span class="badge-status" style="font-size: 11px;">CV Preview</span>
+        </div>
+
+        <div class="eye-preview-grid">
+          <div class="eye-preview-box">
+            <span>Ліве око</span>
+            <img id="leftPrev" alt="Ліве око" class="eye-preview-img" />
+          </div>
+          <div class="eye-preview-box">
+            <span>Праве око</span>
+            <img id="rightPrev" alt="Праве око" class="eye-preview-img" />
+          </div>
+        </div>
+
+        <p class="eye-preview-caption">
+          <b>Підказка:</b> Зелене коло позначає виявлену область зіниці. Вертикальні лінії ділять око на три зони (ліва, центральна, права). Якщо зіниця виходить за центральну зону — фіксується відхилення погляду.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Діагностична панель метрик -->
+  <div class="gaze-metrics-section">
+    <div class="h-title mb-md">
+      <h2 style="font-size: var(--font-size-xl); margin: 0;">Метрики діагностики</h2>
+    </div>
+
+    <div class="gaze-metrics-grid">
+      <!-- 1: Час неуваги -->
+      <div class="gaze-metric-card">
+        <div class="gaze-metric-header">
+          <span>Час неуваги</span>
+          <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 14 14"></polyline>
+          </svg>
+        </div>
+        <div id="cheatPctMetric" class="gaze-metric-val">0%</div>
+        <div class="gaze-metric-desc">Поріг штрафу на екзамені: 35%</div>
+        <div class="proctoring-gauge" title="Шкала часу неуваги">
+          <div id="proctoringGaugeFill" class="proctoring-gauge__fill"></div>
+        </div>
+      </div>
+
+      <!-- 2: Лічильник кадрів -->
+      <div class="gaze-metric-card">
+        <div class="gaze-metric-header">
+          <span>Оброблено кадрів</span>
+          <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+            <line x1="7" y1="2" x2="7" y2="22"></line>
+            <line x1="17" y1="2" x2="17" y2="22"></line>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+          </svg>
+        </div>
+        <div id="totalFramesMetric" class="gaze-metric-val">0</div>
+        <div class="gaze-metric-desc">
+          Неуважних кадрів: <b id="notLookingFramesMetric">0</b>
+        </div>
+      </div>
+
+      <!-- 3: Стан калібрування -->
+      <div class="gaze-metric-card">
+        <div class="gaze-metric-header">
+          <span>Стан калібрування</span>
+          <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+          </svg>
+        </div>
+        <div id="calibStatusMetric" class="gaze-metric-val" style="font-size: var(--font-size-lg);">Очікування</div>
+        <div class="gaze-metric-desc">
+          Поточний поріг: <b id="threshValMetric">170</b>
+        </div>
+      </div>
+
+      <!-- 4: Тривалість тестування -->
+      <div class="gaze-metric-card">
+        <div class="gaze-metric-header">
+          <span>Тривалість тесту</span>
+          <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div id="elapsedMetric" class="gaze-metric-val">0 с</div>
+        <div class="gaze-metric-desc">Час активної сесії тестування</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Інструкція та чекліст калібрування -->
+  <div id="instructions" class="gaze-instructions-card">
+    <div class="card-header">
+      <h3 class="card-title">Інструкція з тестування та калібрування</h3>
+      <span class="badge-status">Рекомендації</span>
+    </div>
+
+    <div class="gaze-step-list">
+      <div class="gaze-step-item">
+        <div class="gaze-step-number">1</div>
+        <div class="gaze-step-title">Центрування та освітлення</div>
+        <p class="gaze-step-text">
+          Сядьте прямо навпроти вебкамери на відстані 50–70 см. Переконайтеся, що обличчя рівномірно освітлене, а в кадрі немає яскравих джерел світла позаду вас.
+        </p>
+      </div>
+
+      <div class="gaze-step-item">
+        <div class="gaze-step-number">2</div>
+        <div class="gaze-step-title">Автокалібрування</div>
+        <p class="gaze-step-text">
+          Натисніть «Запустити камеру» та подивіться у центр монітора протягом 5–10 секунд. Система збере зразки яскравості очей та автоматично відкалібрує оптимальний поріг.
+        </p>
+      </div>
+
+      <div class="gaze-step-item">
+        <div class="gaze-step-number">3</div>
+        <div class="gaze-step-title">Перевірка відхилень</div>
+        <p class="gaze-step-text">
+          Подивіться вліво, вправо та вниз. Індикатор має змінити колір на «Погляд відведено». Якщо детекція нестабільна, увімкніть «Ручний поріг» та скористайтеся пресетами.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

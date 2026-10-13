@@ -20,7 +20,7 @@ Concise, project-specific guidance for AI coding agents working in this reposito
   - `main/services/gaze_service.py`: `GazeService` for tracking gaze coordinates, calibration samples, and computing off-screen percentages.
   - `main/exam_controller.py`: Interactive exam endpoints (`exam_start`, `exam_answer`, local mic `exam_voice_answer`).
   - `main/exam_extra.py`: Web client voice answer upload (`exam_voice_answer_upload`), TTS question trigger (`exam_speak_current_question`), and CSV export (`exam_export_session`).
-  - `main/handlers.py`: General web views (`main`, `about`, `contact`, `exam_page`), voice assistant chat (`record_and_respond`), file analysis (`anylize_file`), gaze stats API (`gaze_stats`), and interview submission (`submit_interview`).
+  - `main/handlers.py`: General web views (`main`, `gaze_view`, `about`, `contact`, `exam_page`), voice assistant chat (`record_and_respond`), file analysis (`anylize_file`), gaze stats and reset API (`gaze_stats`, `gaze_reset`), and interview submission (`submit_interview`).
   - `main/gaze.py`: Computer vision frame processor (`gaze_frame`) using dlib 68-landmark predictor and `GazeService`.
   - `main/cache_utils.py`: Unified cache API for exam state, gaze counters, and chat history.
   - `main/persist.py`: Session persistence (`persist_session_from_payload`) that creates `InterviewSession` and `Answer` database records.
@@ -140,6 +140,43 @@ Required:
 Optional:
 - `AGENT_ID`: Agent identification string if needed.
 
+## UI/UX Design System & Accessibility
+
+### Design Philosophy & Anti-Slop Rules
+- **Typography**: Strictly single font family `Comfortaa, sans-serif` across the entire application (`main/static/css/style.css`).
+- **Spacing & Radii**: Systematic 4px/8px grid (`--space-1` to `--space-16`). Strict radii: 6px (`--radius-sm`), 8px (`--radius-md`), 12px (`--radius-lg`). Oversized pill shapes (`border-radius: 133px`) are prohibited.
+- **Anti-Slop**: No neon glows, card gradients, floating 3D clay blobs, or decorative clutter. No emojis in UI controls — use inline SVG icons (`.ui-icon`) with `stroke="currentColor"`.
+- **Branding**: Platform name is strictly **Avatar AI** (replaces legacy "Teacher AI" / "Teach AI").
+
+### Themes & Color Tokens
+- **Dark Theme (Default)**: Deep neutral charcoal (`--bg-page: #18181B`, `--bg-card: #27272A`, `--border-color: #3F3F46`, text `#F4F4F5`, vibrant accent `--orange: #FF9820`).
+- **Light Theme (`[data-theme="light"]`)**: Warm ivory/alabaster (`--bg-page: #FAF7F2`, `--bg-card: #FFFFFF`, `--border-color: #E7DFD5`, warm charcoal text `#292524`, accent `--orange: #FF8A00`). Cool dark blues (`#0F172A`) are strictly forbidden.
+- **Logo Switching**: Responsive dual logos (`dark_theme_logo.png` & `light_theme_logo.png`) in header toggled purely via CSS `[data-theme="..."]` to prevent FOUT and JS delay.
+- **Anti-Flicker**: An early inline script in `<head>` of `main/templates/main/base.html` reads `localStorage` and sets `data-theme`, `data-font-scale`, and `data-colorblind` before first DOM paint.
+
+### Accessibility Suite (`main/static/js/a11y.js`, `a11y.css`)
+- **State Persistence**: Stored in `localStorage` as `avatarai_a11y_settings` (with legacy fallback).
+- **Content Scaling (`data-font-scale`)**: `normal` (100%), `large` (125%), `xlarge` (150%) without horizontal viewport overflow.
+- **Colorblind Adaptation (`data-colorblind`)**:
+  - `none`: Default semantic tokens.
+  - `protanopia-deuteranopia`: Royal Blue (`#2563EB`) & Amber (`#D97706`).
+  - `tritanopia`: Emerald (`#059669`) & Rose (`#E11D48`).
+  - `high-contrast`: 2px solid high-contrast borders and underlined interactive elements.
+- **Status Dual-Coding**: Never convey meaning through color alone; status badges (e.g. `#gazeStatus`) must pair color with SVG icons and descriptive text.
+- **Interaction & Contrast**: Touch targets min 44×44px. Hover and focus states must maintain high contrast (e.g. button hover text must never blend into background). Focus rings use `outline: 2px solid var(--orange); outline-offset: 2px`.
+
+### Modular CSS Architecture
+- `main/static/css/style.css`: Design tokens (`:root`, themes), typography, grid, resets, utilities.
+- `main/static/css/header.css`: Fixed header, nav links, pure CSS theme-based logo switching, a11y trigger.
+- `main/static/css/footer.css`: 3-tier footer: `.footer-container` (columns) -> `.footer-marquee` (running ticker) -> `.footer-bottom` (copyright).
+- `main/static/css/a11y.css`: Accessible popover modal, font scaling modifiers, colorblind overrides.
+- `main/static/css/exam.css`: Proctoring exam layout, camera viewport, question cards, gaze pills.
+
+### Marquee (Running Text)
+- Continuous ticker (`.footer-marquee`) animates leftward (`marqueeScrollLeft 48s linear infinite`).
+- Optically centered via `padding: var(--space-6) 0 var(--space-4)` with `line-height: 1` to compensate for Comfortaa font ascender/descender metrics.
+
+
 ## Common Commands
 ```bash
 # Run development server
@@ -173,4 +210,7 @@ pytest
 - Preserve strict JSON schemas in `GPTService` completions.
 - Update both models (`main/models.py`) and persistence logic (`main/persist.py`) when adding new metrics or session fields.
 - Keep audio sample rate aligned to `AUDIO_SAMPLE_RATE = 16000` (`main/constants.py`).
+- Maintain UI consistency with single font `Comfortaa`, 4px/8px grid, and SVG icons.
+- Ensure all UI changes support both `[data-theme="dark"]` and `[data-theme="light"]`, with status colors respecting `[data-colorblind]`.
+- Increment CSS cache version query string in templates (`?v=...`) whenever updating stylesheets.
 - Run `pytest` before finalizing changes to ensure service coverage and test integrity.

@@ -8,7 +8,7 @@
     <script>
         (function() {
             try {
-                var saved = localStorage.getItem('teachai_a11y_settings');
+                var saved = localStorage.getItem('avatarai_a11y_settings') || localStorage.getItem('teachai_a11y_settings');
                 if (saved) {
                     var s = JSON.parse(saved);
                     if (s.theme) document.documentElement.setAttribute('data-theme', s.theme);
@@ -20,9 +20,12 @@
             } catch(e) {}
         })();
     </script>
-    <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.3">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static "images/icon.ico" %}">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static "images/icon.ico" %}">
+    <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.4">
     <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.6">
-    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.4">
     <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.3">
@@ -31,7 +34,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>TeachAI – Екзаменаційна платформа</title>
+    <title>Avatar AI – Екзаменаційна платформа</title>
 </head>
 <body>
 
@@ -40,11 +43,13 @@
         <div class="container">
             <div class="header-content">
                 <a href="{% url "main" %}" class="flex-center">
-                    <img class="header-content__logo" src="{% static "images/logo.png" %}" alt="TeachAI">
+                    <img class="header-content__logo header-content__logo--dark" src="{% static "images/dark_theme_logo.png" %}" alt="Avatar AI">
+                    <img class="header-content__logo header-content__logo--light" src="{% static "images/light_theme_logo.png" %}" alt="Avatar AI">
                 </a>
 
                 <nav>
                     <a class="{% if request.resolver_match.url_name == 'main' %}checked{% endif %}" href="{% url "main" %}">Головна</a>
+                    <a class="{% if request.resolver_match.url_name == 'gaze' %}checked{% endif %}" href="{% url "gaze" %}">Моніторинг погляду</a>
                     <a class="{% if request.resolver_match.url_name == 'about' %}checked{% endif %}" href="{% url "about" %}">Про нас</a>
                     <a class="{% if request.resolver_match.url_name == 'contact' %}checked{% endif %}" href="{% url "contact" %}">Контактна інформація</a>
                 </nav>
@@ -92,18 +97,19 @@
         <!-- 1. Верхній блок футера (логотип, посилання, соцмережі) -->
         <div class="footer-container">
             <div class="footer-logo">
-                <h2>TeachAI</h2>
+                <h2>Avatar AI</h2>
                 <p>Платформа тестування та моніторингу знань</p>
             </div>
 
             <div class="footer-links">
+                <a href="{% url "gaze" %}">Моніторинг погляду</a>
                 <a href="{% url "about" %}">Про нас</a>
                 <a href="{% url "contact" %}">Контакти</a>
             </div>
 
             <div class="footer-social">
                 <a href="#" aria-label="Facebook"><img src="{% static "images/facebook.svg" %}" alt="Facebook"></a>
-                <a href="#" aria-label="Instagram"><img src="{% static "images/inst.svg" %}" alt="Instagram"></a>
+                <a href="#" aria-label="Instagram"><img src="{% static "images/instagram.svg" %}" alt="Instagram"></a>
                 <a href="#" aria-label="YouTube"><img src="{% static "images/youtube.svg" %}" alt="YouTube"></a>
             </div>
         </div>
@@ -112,7 +118,7 @@
         <div class="footer-marquee" aria-hidden="true">
             <div class="footer-marquee__track">
                 <div class="footer-marquee__group">
-                    <span>TEACHAI</span>
+                    <span>AVATAR AI</span>
                     <span class="marquee-bullet">•</span>
                     <span>СИСТЕМА КОНТРОЛЮ ЗНАНЬ</span>
                     <span class="marquee-bullet">•</span>
@@ -122,7 +128,7 @@
                     <span class="marquee-bullet">•</span>
                 </div>
                 <div class="footer-marquee__group">
-                    <span>TEACHAI</span>
+                    <span>AVATAR AI</span>
                     <span class="marquee-bullet">•</span>
                     <span>СИСТЕМА КОНТРОЛЮ ЗНАНЬ</span>
                     <span class="marquee-bullet">•</span>
@@ -136,7 +142,7 @@
 
         <!-- 3. Нижній блок футера (копірайт) -->
         <div class="footer-bottom">
-            <p>© 2025 TeachAI. Всі права захищені.</p>
+            <p>© 2025 Avatar AI. Всі права захищені.</p>
         </div>
     </footer>
 

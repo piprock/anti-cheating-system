@@ -3,7 +3,7 @@ HTTP handlers that are not part of the exam controller flow.
 
 Contains light endpoints for:
 - main/about/contact pages
-- ad-hoc teacher chat (record_and_respond) and file analysis (anylize_file)
+- ad-hoc avatar chat (record_and_respond) and file analysis (anylize_file)
 - exam_page rendering and gaze_stats reporting
 - submit_interview for bulk payload ingestion
 """
@@ -36,6 +36,11 @@ def _get_session_id(request) -> str:
 
 def main(request):
     return render(request, 'main/index.html')
+
+
+def gaze_view(request):
+    """Render gaze calibration and testing page."""
+    return render(request, 'main/gaze.html')
 
 
 def about(request):
@@ -95,6 +100,15 @@ def exam_page(request, key: str):
 def gaze_stats(request, sid: str):
     """Return gaze tracking statistics for session."""
     return JsonResponse(gaze_service.get_stats(sid))
+
+
+@csrf_exempt
+def gaze_reset(request, sid: str):
+    """Reset gaze frame counters for session."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=405)
+    gaze_service.reset_counters(sid)
+    return JsonResponse({"ok": True, "stats": gaze_service.get_stats(sid)})
 
 
 

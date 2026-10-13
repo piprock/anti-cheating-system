@@ -21,10 +21,31 @@ header {
 }
 
 .header-content__logo {
-    height: 36px;
+    height: 38px;
     width: auto;
+    max-width: 180px;
     display: block;
     object-fit: contain;
+    transition: opacity var(--transition-fast);
+}
+
+/* Перемикання логотипу за темою:
+   За замовчуванням (темна тема): показуємо логотип для темної теми */
+.header-content__logo--light {
+    display: none !important;
+}
+
+.header-content__logo--dark {
+    display: block !important;
+}
+
+/* Для світлої теми: показуємо логотип для світлої теми */
+[data-theme="light"] .header-content__logo--dark {
+    display: none !important;
+}
+
+[data-theme="light"] .header-content__logo--light {
+    display: block !important;
 }
 
 /* Навігація */

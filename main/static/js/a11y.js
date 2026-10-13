@@ -1,5 +1,5 @@
 /**
- * TeachAI Accessibility & Theme Manager
+ * Avatar AI Accessibility & Theme Manager
  * Керує:
  * - Світлою / Нічною темами
  * - Масштабуванням контенту для людей з порушенням зору (A / A+ / A++)
@@ -10,7 +10,8 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'teachai_a11y_settings';
+  const STORAGE_KEY = 'avatarai_a11y_settings';
+  const LEGACY_STORAGE_KEY = 'teachai_a11y_settings';
 
   const DEFAULT_SETTINGS = {
     theme: 'dark',
@@ -30,7 +31,7 @@
    */
   function getSettings() {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (saved) {
         return Object.assign({}, DEFAULT_SETTINGS, JSON.parse(saved));
       }
@@ -221,7 +222,7 @@
   }
 
   // Експорт у глобальну область для можливих викликів з інших скриптів
-  window.TeachAI_A11y = {
+  window.AvatarAI_A11y = window.TeachAI_A11y = {
     getSettings,
     saveSettings,
     applySettings

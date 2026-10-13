@@ -16,7 +16,8 @@
 const API_ENDPOINTS = {
   RECORD: "/record/",
   ANALYZE_FILE: "/anylizefile/",
-  GAZE_FRAME: "/gaze/frame/"
+  GAZE_FRAME: "/gaze/frame/",
+  GAZE_RESET: "/api/gaze/reset/"
 };
 
 const GAZE_CONFIG = {
@@ -31,7 +32,8 @@ let gazeState = {
   sessionId: null,
   timerId: null,
   manualMode: false,
-  manualThreshold: GAZE_CONFIG.DEFAULT_THRESHOLD
+  manualThreshold: GAZE_CONFIG.DEFAULT_THRESHOLD,
+  showPreview: true
 };
 
 // ============================================================================
@@ -203,6 +205,15 @@ async function startGaze() {
     return;
   }
 
+  // Update UI indicators
+  const indicatorDot = document.getElementById("camIndicatorDot");
+  if (indicatorDot) indicatorDot.classList.add("active");
+  updateElement("camIndicatorText", "Камера активна");
+
+  setElementDisabled("gazeStartBtn", true);
+  setElementDisabled("gazeStopBtn", false);
+  setElementDisabled("gazeResetBtn", false);
+
   // Initialize session ID
   if (!gazeState.sessionId) {
     const sidInput = document.getElementById("gazeSid");
@@ -268,9 +279,13 @@ function buildGazeQueryParams() {
   if (gazeState.manualMode) {
     params.set("manual", "1");
     params.set("thresh", String(gazeState.manualThreshold));
-    params.set("preview", "1");
   } else {
     params.set("manual", "0");
+  }
+
+  // Request eye preview images when preview element exists or manual mode
+  if (gazeState.manualMode || gazeState.showPreview || document.getElementById("leftPrev")) {
+    params.set("preview", "1");
   }
 
   return params.toString();
@@ -279,6 +294,7 @@ function buildGazeQueryParams() {
 /**
  * Update gaze tracking UI with server response
  */
+function updateGazeUI(data) {
   // Update gaze status with colorblind-friendly classes and SVG icons
   const gazeStatusEl = document.getElementById("gazeStatus");
   if (gazeStatusEl) {
@@ -298,6 +314,20 @@ function buildGazeQueryParams() {
 
   // Update cheat percentage
   updateElement("cheatPct", `Час неуваги: ${data.notLookingPct}%`);
+  updateElement("cheatPctMetric", `${data.notLookingPct}%`);
+
+  // Update proctoring gauge bar (35% penalty threshold)
+  const gaugeFill = document.getElementById("proctoringGaugeFill");
+  if (gaugeFill) {
+    const pct = Math.min(100, Math.max(0, data.notLookingPct || 0));
+    gaugeFill.style.width = `${pct}%`;
+    gaugeFill.classList.remove("warning", "danger");
+    if (pct >= 35) {
+      gaugeFill.classList.add("danger");
+    } else if (pct >= 20) {
+      gaugeFill.classList.add("warning");
+    }
+  }
 
   // Update threshold controls
   const currentThresh = data?.thresh ?? gazeState.manualThreshold;
@@ -306,16 +336,76 @@ function buildGazeQueryParams() {
   }
 
   updateElement("threshVal", String(currentThresh));
+  updateElement("threshValMetric", String(currentThresh));
 
   const threshSlider = document.getElementById("threshSlider");
   if (threshSlider && !threshSlider.matches(":active")) {
     threshSlider.value = String(currentThresh);
   }
 
-  // Update preview images in manual mode
-  if (gazeState.manualMode) {
-    updatePreviewImage("leftPrev", data.previewLeft);
-    updatePreviewImage("rightPrev", data.previewRight);
+  // Update directional metrics
+  const DIR_MAP = {
+    "center": "По центру",
+    "left": "Вліво",
+    "right": "Вправо",
+    "off": "Поза зоною",
+    "unknown": "Не визначено"
+  };
+
+  updateElement("leftEyeBadge", DIR_MAP[data.left] || (data.left ?? "—"));
+  updateElement("rightEyeBadge", DIR_MAP[data.right] || (data.right ?? "—"));
+  updateElement("centerPctVal", data.centerPct != null ? `${data.centerPct}%` : "—");
+
+  // Update face detection badge
+  const faceBadge = document.getElementById("faceDetectBadge");
+  if (faceBadge) {
+    if (data.face) {
+      faceBadge.textContent = "Виявлено";
+      faceBadge.style.color = "var(--green)";
+    } else {
+      faceBadge.textContent = "Не знайдено";
+      faceBadge.style.color = "var(--red)";
+    }
+  }
+
+  // Update calibration status
+  const calibStatus = data.manual 
+    ? "Ручний режим" 
+    : (data.calibrated ? "Відкалібровано" : "Калібрування...");
+  updateElement("calibStatusMetric", calibStatus);
+
+  // Update elapsed time
+  if (data.elapsedSec != null) {
+    updateElement("elapsedMetric", `${data.elapsedSec} с`);
+  }
+
+  // Fetch or estimate frame metrics if stats are requested
+  if (data.sid) {
+    fetchSessionStats(data.sid);
+  }
+
+  // Update preview images
+  updatePreviewImage("leftPrev", data.previewLeft);
+  updatePreviewImage("rightPrev", data.previewRight);
+}
+
+/**
+ * Periodically or optionally fetch comprehensive session stats
+ */
+let lastStatsFetchTime = 0;
+async function fetchSessionStats(sid) {
+  const now = Date.now();
+  if (now - lastStatsFetchTime < 1500) return;
+  lastStatsFetchTime = now;
+
+  try {
+    const res = await safeFetch(`/api/gaze/stats/${sid}/`);
+    if (res.success && res.data) {
+      updateElement("totalFramesMetric", String(res.data.frames ?? 0));
+      updateElement("notLookingFramesMetric", String(res.data.not_looking ?? 0));
+    }
+  } catch (e) {
+    console.debug("fetchSessionStats error:", e);
   }
 }
 
@@ -348,6 +438,44 @@ function stopGaze() {
     stream.getTracks().forEach(track => track.stop());
     video.srcObject = null;
   }
+
+  // Update UI indicators
+  const indicatorDot = document.getElementById("camIndicatorDot");
+  if (indicatorDot) indicatorDot.classList.remove("active");
+  updateElement("camIndicatorText", "Камера вимкнена");
+
+  setElementDisabled("gazeStartBtn", false);
+  setElementDisabled("gazeStopBtn", true);
+}
+
+/**
+ * Reset gaze frame counters for session
+ */
+async function resetGaze() {
+  if (!gazeState.sessionId) {
+    const sidInput = document.getElementById("gazeSid");
+    if (sidInput && sidInput.value) {
+      gazeState.sessionId = sidInput.value;
+    }
+  }
+
+  if (!gazeState.sessionId) return;
+
+  const url = `${API_ENDPOINTS.GAZE_RESET}${gazeState.sessionId}/`;
+  const result = await safeFetch(url, { method: "POST" });
+  if (result.success) {
+    updateElement("cheatPct", "Час неуваги: 0%");
+    updateElement("cheatPctMetric", "0%");
+    updateElement("totalFramesMetric", "0");
+    updateElement("notLookingFramesMetric", "0");
+    updateElement("elapsedMetric", "0 с");
+    
+    const gaugeFill = document.getElementById("proctoringGaugeFill");
+    if (gaugeFill) {
+      gaugeFill.style.width = "0%";
+      gaugeFill.classList.remove("warning", "danger");
+    }
+  }
 }
 
 /**
@@ -360,6 +488,9 @@ function enableManual() {
   setElementDisabled("manualOnBtn", true);
   setElementDisabled("manualOffBtn", false);
   
+  updateElement("calibModeBadge", "Ручний поріг");
+  updateElement("calibStatusMetric", "Ручний режим");
+
   const panel = document.getElementById("previewPanel");
   if (panel) {
     panel.classList.add("active");
@@ -376,9 +507,25 @@ function disableManual() {
   setElementDisabled("manualOnBtn", false);
   setElementDisabled("manualOffBtn", true);
   
+  updateElement("calibModeBadge", "Автоматичний");
+
   const panel = document.getElementById("previewPanel");
-  if (panel) {
+  if (panel && !gazeState.showPreview) {
     panel.classList.remove("active");
+  }
+}
+
+/**
+ * Set preset threshold value
+ */
+function setThresholdPreset(val) {
+  enableManual();
+  gazeState.manualThreshold = val;
+  updateElement("threshVal", String(val));
+  updateElement("threshValMetric", String(val));
+  const slider = document.getElementById("threshSlider");
+  if (slider) {
+    slider.value = String(val);
   }
 }
 
@@ -388,6 +535,7 @@ function disableManual() {
 function onThreshChange(event) {
   gazeState.manualThreshold = parseInt(event.target.value || String(GAZE_CONFIG.DEFAULT_THRESHOLD), 10);
   updateElement("threshVal", String(gazeState.manualThreshold));
+  updateElement("threshValMetric", String(gazeState.manualThreshold));
 }
 
 /**

@@ -16,15 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.views.generic.base import RedirectView
 from main import exam_extra
 from main.handlers import (
     main as main_view,
+    gaze_view,
     about,
     contact,
     record_and_respond,
     anylize_file,
     exam_page,
     gaze_stats,
+    gaze_reset,
     submit_interview,
 )
 from main.gaze import gaze_frame
@@ -32,7 +35,9 @@ from main.exam_controller import exam_start, exam_answer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('favicon.ico', RedirectView.as_view(url='/static/images/icon.ico', permanent=True)),
     path('', main_view, name="main"),
+    path('gaze/', gaze_view, name="gaze"),
     path('about/', about, name="about"),
     path('contact/', contact, name="contact"),
     path('record/', record_and_respond, name="record_and_respond"),
@@ -43,6 +48,7 @@ urlpatterns = [
     path('gaze/frame/', gaze_frame, name='gaze_frame'),
     path('api/submit_interview/<str:key>/', submit_interview, name='submit_interview'),
     path('api/gaze/stats/<str:sid>/', gaze_stats, name='gaze_stats'),
+    path('api/gaze/reset/<str:sid>/', gaze_reset, name='gaze_reset'),
 
     # НОВЕ: інтерактивний діалог
     path('api/exam/start/<str:key>/', exam_start, name='exam_start'),

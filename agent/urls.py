@@ -32,6 +32,14 @@ from main.handlers import (
 )
 from main.gaze import gaze_frame
 from main.exam_controller import exam_start, exam_answer
+from main.auth_views import (
+    login_view,
+    logout_view,
+    register_view,
+    dashboard_view,
+    session_detail_view,
+    profile_edit_view,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -42,6 +50,15 @@ urlpatterns = [
     path('contact/', contact, name="contact"),
     path('record/', record_and_respond, name="record_and_respond"),
     path('anylizefile/', anylize_file, name="anylize_file"),
+
+    # Авторизація, реєстрація та кабінет
+    path('login/', login_view, name="login"),
+    path('logout/', logout_view, name="logout"),
+    path('register/', register_view, name="register"),
+    path('dashboard/', dashboard_view, name="dashboard"),
+    path('profile/', dashboard_view, name="profile"),
+    path('profile/edit/', profile_edit_view, name="profile_edit"),
+    path('session/<int:session_id>/', session_detail_view, name="session_detail"),
 
     # існуюче:
     path('exam/<str:key>/', exam_page, name='exam_page'),

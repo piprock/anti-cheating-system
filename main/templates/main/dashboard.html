@@ -1,0 +1,448 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container dashboard-container">
+    <!-- Шапка панелі -->
+    <div class="dashboard-header">
+        <div class="dashboard-welcome">
+            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-1);">
+                <h1>{{ profile.full_name }}</h1>
+                <span class="badge badge-role badge-role--{{ profile.role }}">
+                    {{ profile.get_role_display }}
+                </span>
+                {% if profile.group %}
+                    <span class="badge" style="background-color: var(--bg-subtle); border-color: var(--border-color); color: var(--text-main);">
+                        Група: {{ profile.group }}
+                    </span>
+                {% endif %}
+            </div>
+            <p>
+                Логін: <strong>{{ request.user.username }}</strong>
+                {% if request.user.email %} | Email: {{ request.user.email }}{% endif %}
+                | Зареєстровано: {{ request.user.date_joined|date:"d.m.Y" }}
+            </p>
+        </div>
+
+        <div class="dashboard-actions">
+            <a href="{% url 'profile_edit' %}" class="table-btn">
+                <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <span>Редагувати профіль</span>
+            </a>
+            {% if profile.is_admin %}
+                <a href="{% url 'admin:index' %}" target="_blank" class="table-btn" style="border-color: var(--orange); color: var(--orange);">
+                    <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    <span>Django Admin</span>
+                </a>
+            {% endif %}
+            <a href="{% url 'main' %}" class="table-btn" style="background-color: var(--orange); color: #ffffff; border-color: var(--orange);">
+                <span>Пройти тестування</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Метрики та статистика -->
+    <div class="stats-grid">
+        {% if role == 'student' %}
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Пройдено тестів</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">{{ total_taken }}</span>
+                <span class="stat-card__sub">Успішно складено: {{ passed_count }}</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Середня оцінка</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">
+                    {% if stats.avg_grade %}{{ stats.avg_grade|floatformat:1 }}{% else %}—{% endif %}
+                    <small style="font-size: var(--font-size-base); color: var(--text-muted);">/ 5</small>
+                </span>
+                <span class="stat-card__sub">Шкала від 1 до 5</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Середня точність</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 14 14"></polyline>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">
+                    {% if stats.avg_accuracy %}{{ stats.avg_accuracy|floatformat:0 }}%{% else %}—{% endif %}
+                </span>
+                <span class="stat-card__sub">Оцінювання відповідей ШІ</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Контроль погляду</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">
+                    {% if stats.avg_gaze %}{{ stats.avg_gaze|floatformat:1 }}%{% else %}0.0%{% endif %}
+                </span>
+                <span class="stat-card__sub">Середній час поза екраном</span>
+            </div>
+
+        {% elif role == 'teacher' %}
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Здано робіт</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">{{ total_sessions_count }}</span>
+                <span class="stat-card__sub">Всіма студентами</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Студентів у базі</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">{{ students.count }}</span>
+                <span class="stat-card__sub">З академічними групами</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Середній бал</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">
+                    {% if avg_metrics.avg_grade %}{{ avg_metrics.avg_grade|floatformat:1 }}{% else %}—{% endif %}
+                </span>
+                <span class="stat-card__sub">Середня точність: {{ avg_metrics.avg_accuracy|floatformat:0|default:"0" }}%</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Підозри на списування</span>
+                    <span class="stat-card__icon" style="color: var(--red);">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value" style="color: var(--red);">{{ suspicious_count }}</span>
+                <span class="stat-card__sub">Gaze &gt;35% або плагіат &gt;20%</span>
+            </div>
+
+        {% else %}
+            <!-- Admin Stats -->
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Всього користувачів</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">{{ total_users_count }}</span>
+                <span class="stat-card__sub">Студентів: {{ students_count }}, Викладачів: {{ teachers_count }}</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Всього сесій</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">{{ total_sessions_count }}</span>
+                <span class="stat-card__sub">У {{ total_surveys_count }} тестах</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Середній бал системи</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">
+                    {% if avg_metrics.avg_grade %}{{ avg_metrics.avg_grade|floatformat:1 }}{% else %}—{% endif %}
+                </span>
+                <span class="stat-card__sub">Точність: {{ avg_metrics.avg_accuracy|floatformat:0|default:"0" }}%</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card__top">
+                    <span class="stat-card__label">Контроль погляду</span>
+                    <span class="stat-card__icon">
+                        <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </span>
+                </div>
+                <span class="stat-card__value">
+                    {% if avg_metrics.avg_gaze %}{{ avg_metrics.avg_gaze|floatformat:1 }}%{% else %}0.0%{% endif %}
+                </span>
+                <span class="stat-card__sub">Середній рівень погляду</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Таблиця історії пройдених тестів -->
+    <div class="dashboard-card">
+        <div class="dashboard-card__header">
+            <div>
+                <h2 class="dashboard-card__title">
+                    {% if role == 'student' %}Історія пройдених тестів{% else %}Журнал екзаменаційних сесій{% endif %}
+                </h2>
+                <p style="font-size: var(--font-size-xs); color: var(--text-muted); margin-top: 4px;">
+                    Збережені результати, аналітика погляду (античітинг), плагіат та підсумкові оцінки
+                </p>
+            </div>
+        </div>
+
+        {% if sessions %}
+            <div class="history-table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Тест / Опитування</th>
+                            {% if role != 'student' %}
+                                <th>Студент</th>
+                                <th>Група</th>
+                            {% endif %}
+                            <th>Дата здачі</th>
+                            <th>Тривалість</th>
+                            <th>Оцінка</th>
+                            <th>Точність</th>
+                            <th>Плагіат</th>
+                            <th>Погляд (відхилення)</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in sessions %}
+                            <tr>
+                                <td><strong>#{{ s.id }}</strong></td>
+                                <td>
+                                    <div>
+                                        <strong>{{ s.survey.title|default:s.survey.key }}</strong>
+                                        <div style="font-size: var(--font-size-xs); color: var(--text-muted);">{{ s.survey.key }}</div>
+                                    </div>
+                                </td>
+                                {% if role != 'student' %}
+                                    <td>
+                                        {% if s.student %}
+                                            {{ s.student }}
+                                        {% elif s.user %}
+                                            {{ s.user.profile.full_name|default:s.user.username }}
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">Анонім</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if s.student and s.student.group %}
+                                            {{ s.student.group }}
+                                        {% elif s.user and s.user.profile.group %}
+                                            {{ s.user.profile.group }}
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">—</span>
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                                <td>{{ s.started_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ s.duration_sec }} с.</td>
+                                <td>
+                                    <span class="badge-grade badge-grade--{{ s.grade_5 }}">
+                                        {{ s.grade_5 }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>{{ s.overall_accuracy }}%</strong>
+                                </td>
+                                <td>
+                                    <span style="{% if s.plagiarism_score >= 20 %}color: var(--red); font-weight: bold;{% endif %}">
+                                        {{ s.plagiarism_score }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="{% if s.gaze_not_looking_pct >= 35.0 %}color: var(--red); font-weight: bold;{% endif %}">
+                                        {{ s.gaze_not_looking_pct|floatformat:1 }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: var(--space-2);">
+                                        <a href="{% url 'session_detail' s.id %}" class="table-btn" title="Переглянути деталі">
+                                            <span>Деталі</span>
+                                        </a>
+                                        {% if role != 'student' %}
+                                            <a href="{% url 'exam_export_session' s.id %}" class="table-btn" title="Експорт в CSV">
+                                                <span>CSV</span>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state__icon">
+                    <svg class="ui-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <p class="empty-state__text">У вас ще немає збережених результатів тестувань.</p>
+                <a href="{% url 'main' %}" class="table-btn" style="background-color: var(--orange); color: #ffffff; border-color: var(--orange);">
+                    Перейти до вибору тесту
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Журнал активності / історія подій системи ("історія всього") -->
+    {% if recent_logs %}
+    <div class="dashboard-card">
+        <div class="dashboard-card__header">
+            <div>
+                <h2 class="dashboard-card__title">Журнал активності</h2>
+                <p style="font-size: var(--font-size-xs); color: var(--text-muted); margin-top: 4px;">
+                    Хронологія дій (вхід, початок тесту, завершення, оновлення профілю)
+                </p>
+            </div>
+            <button id="toggleActivityBtn" type="button" class="table-btn" onclick="toggleActivityLog()">
+                <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                <span id="toggleActivityText">Показати журнал</span>
+            </button>
+        </div>
+
+        <div id="activityLogContainer" class="activity-list" style="display: none;">
+            {% for log in recent_logs %}
+                <div class="activity-item">
+                    <div class="activity-item__details">
+                        <span class="badge" style="background-color: var(--bg-subtle); border-color: var(--border-color); color: var(--text-main);">
+                            {{ log.get_action_display }}
+                        </span>
+                        <span>{{ log.details }}</span>
+                    </div>
+                    <span class="activity-item__time">{{ log.created_at|date:"d.m.Y H:i:s" }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleActivityLog() {
+            var el = document.getElementById('activityLogContainer');
+            var btnText = document.getElementById('toggleActivityText');
+            if (!el) return;
+            if (el.style.display === 'none' || el.style.display === '') {
+                el.style.display = 'flex';
+                if (btnText) btnText.textContent = 'Приховати журнал';
+            } else {
+                el.style.display = 'none';
+                if (btnText) btnText.textContent = 'Показати журнал';
+            }
+        }
+    </script>
+    {% endif %}
+
+    <!-- Для адміністратора: Список зареєстрованих користувачів -->
+    {% if role == 'admin' and users %}
+    <div class="dashboard-card">
+        <div class="dashboard-card__header">
+            <div>
+                <h2 class="dashboard-card__title">Керування користувачами</h2>
+                <p style="font-size: var(--font-size-xs); color: var(--text-muted); margin-top: 4px;">
+                    Список усіх облікових записів системи з їхніми ролями та академічними групами
+                </p>
+            </div>
+        </div>
+
+        <div class="history-table-container">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Логін</th>
+                        <th>ПІБ</th>
+                        <th>Email</th>
+                        <th>Роль</th>
+                        <th>Група</th>
+                        <th>Дата реєстрації</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td><strong>{{ u.username }}</strong></td>
+                            <td>{{ u.profile.full_name|default:"—" }}</td>
+                            <td>{{ u.email|default:"—" }}</td>
+                            <td>
+                                <span class="badge badge-role badge-role--{{ u.profile.role }}">
+                                    {{ u.profile.get_role_display }}
+                                </span>
+                            </td>
+                            <td>{{ u.profile.group|default:"—" }}</td>
+                            <td>{{ u.date_joined|date:"d.m.Y H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</main>
+{% endblock content %}

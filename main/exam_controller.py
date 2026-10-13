@@ -111,6 +111,25 @@ def exam_start(request: HttpRequest, key: str) -> JsonResponse:
     questions = [q if isinstance(q, str) else str(q) for q in cq]
     
     state = exam_service.start_exam(key, questions)
+
+    if request.user.is_authenticated:
+        state["user_id"] = request.user.id
+        if hasattr(request.user, "profile") and request.user.profile.full_name:
+            state["student_fullname"] = request.user.profile.full_name
+        elif request.user.get_full_name():
+            state["student_fullname"] = request.user.get_full_name()
+        exam_service.save_exam_state(key, state)
+        try:
+            from .models import ActivityLog
+            ActivityLog.objects.create(
+                user=request.user,
+                action=ActivityLog.ACTION_EXAM_START,
+                details=f"Розпочато проходження тесту '{survey.title or survey.key}'",
+                metadata={"survey_key": key, "title": survey.title}
+            )
+        except Exception:
+            pass
+
     first_question = questions[0] if questions else ""
     
     if first_question:

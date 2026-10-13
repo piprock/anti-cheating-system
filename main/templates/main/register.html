@@ -1,0 +1,126 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="auth-page">
+    <div class="auth-card">
+        <div class="auth-card__header">
+            {% if step == 2 %}
+                <div class="auth-step-indicator">
+                    <span class="auth-step-pill">1. Обліковий запис</span>
+                    <span class="auth-step-arrow">→</span>
+                    <span class="auth-step-pill auth-step-pill--active">2. Персональні дані</span>
+                </div>
+                <h1 class="auth-card__title">Персональні дані</h1>
+                <p class="auth-card__subtitle">Етап 2 з 2: вкажіть ваші ПІБ та групу для екзаменаційних відомостей</p>
+            {% else %}
+                <div class="auth-step-indicator">
+                    <span class="auth-step-pill auth-step-pill--active">1. Обліковий запис</span>
+                    <span class="auth-step-arrow">→</span>
+                    <span class="auth-step-pill">2. Персональні дані</span>
+                </div>
+                <h1 class="auth-card__title">Реєстрація студента</h1>
+                <p class="auth-card__subtitle">Етап 1 з 2: створіть логін та захищений пароль</p>
+            {% endif %}
+        </div>
+
+        <form method="post" class="auth-form" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="step" value="{{ step }}">
+            {% if form.non_field_errors %}
+                <div class="alert alert--error">
+                    {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if step == 2 %}
+                <!-- ЕТАП 2: Персональні дані (строго в 1 колонку) -->
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }} *</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <span class="form-group__error">{{ form.last_name.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }} *</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <span class="form-group__error">{{ form.first_name.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.middle_name.id_for_label }}">{{ form.middle_name.label }}</label>
+                    {{ form.middle_name }}
+                    <span class="form-group__hint">Необов'язково</span>
+                    {% if form.middle_name.errors %}
+                        <span class="form-group__error">{{ form.middle_name.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.group.id_for_label }}">{{ form.group.label }}</label>
+                    {{ form.group }}
+                    <span class="form-group__hint">Наприклад, КН-41 (необов'язково)</span>
+                    {% if form.group.errors %}
+                        <span class="form-group__error">{{ form.group.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="auth-btn-submit">Завершити реєстрацію</button>
+
+                <div style="margin-top: var(--space-3); text-align: left;">
+                    <a href="{% url 'register' %}?step=1" class="table-btn" style="text-decoration: none;">
+                        ← Повернутися до етапу 1
+                    </a>
+                </div>
+
+            {% else %}
+                <!-- ЕТАП 1: Логін, пошта, пароль і підтвердження (строго в 1 колонку) -->
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">{{ form.username.label }} *</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <span class="form-group__error">{{ form.username.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    <span class="form-group__hint">Необов'язково, для сповіщень та відновлення</span>
+                    {% if form.email.errors %}
+                        <span class="form-group__error">{{ form.email.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">{{ form.password.label }} *</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <span class="form-group__error">{{ form.password.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password_confirm.id_for_label }}">{{ form.password_confirm.label }} *</label>
+                    {{ form.password_confirm }}
+                    {% if form.password_confirm.errors %}
+                        <span class="form-group__error">{{ form.password_confirm.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="auth-btn-submit">Продовжити (Етап 2) →</button>
+            {% endif %}
+        </form>
+
+        <div class="auth-card__footer">
+            <p>Вже маєте обліковий запис? <a href="{% url 'login' %}">Увійти</a></p>
+        </div>
+    </div>
+</main>
+{% endblock content %}

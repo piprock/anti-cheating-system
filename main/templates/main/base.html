@@ -30,18 +30,142 @@
     <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/a11y.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/auth.css" %}?v=1.0">
     {% block css %}{% endblock css %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title>Avatar AI – Екзаменаційна платформа</title>
+    <title>{% block title %}Головна{% endblock title %}</title>
 </head>
 <body>
-
-    <!-- HEADER -->
+    <!-- HEADER (2 Рядки) -->
     <header>
         <div class="container">
-            <div class="header-content">
+            <!-- 1-й РЯДОК: Тема, Доступність, Кнопка профілю / Авторизація -->
+            <div class="header-topbar">
+                <div class="header-topbar__left">
+                    <span style="font-size: var(--font-size-xs); color: var(--text-muted);">
+                        Avatar AI – Інтелектуальна система екзаменації
+                    </span>
+                </div>
+
+                <div class="header-topbar__right">
+                    <!-- Швидке перемикання нічного / світлого режиму -->
+                    <button id="themeQuickBtn" class="theme-quick-btn" type="button" aria-label="Перемкнути на світлу тему" title="Увімкнути світлу тему">
+                        <span id="themeQuickIcon" class="flex-center" aria-hidden="true">
+                            <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                        </span>
+                    </button>
+
+                    <!-- Кнопка відкриття меню доступності та зору -->
+                    <button id="a11yOpenBtn" class="a11y-open-btn" type="button" aria-label="Налаштування зору та доступності" title="Налаштування зору та доступності">
+                        <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span>Доступність</span>
+                    </button>
+
+                    <!-- Профіль користувача або Вхід/Реєстрація -->
+                    {% if request.user.is_authenticated %}
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <button id="profileDropdownBtn" class="profile-dropdown__btn" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="profileDropdownMenu">
+                                <span class="profile-dropdown__avatar">
+                                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                </span>
+                                <span class="profile-dropdown__shortname">
+                                    {% if request.user.first_name or request.user.last_name %}
+                                        {{ request.user.first_name }} {{ request.user.last_name }}
+                                    {% else %}
+                                        {{ request.user.username }}
+                                    {% endif %}
+                                </span>
+                                <svg class="ui-icon profile-dropdown__arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <div id="profileDropdownMenu" class="profile-dropdown__menu" role="menu" aria-labelledby="profileDropdownBtn">
+                                <div class="profile-dropdown__header">
+                                    <div class="profile-dropdown__fullname">
+                                        {% if request.user.profile.full_name %}
+                                            {{ request.user.profile.full_name }}
+                                        {% else %}
+                                            {{ request.user.username }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="profile-dropdown__badges">
+                                        <span class="badge badge-role badge-role--{{ request.user.profile.role }}">
+                                            {{ request.user.profile.get_role_display }}
+                                        </span>
+                                        {% if request.user.profile.group %}
+                                            <span class="badge" style="background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                                                Група: {{ request.user.profile.group }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    {% if request.user.email %}
+                                        <div class="profile-dropdown__email">{{ request.user.email }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="profile-dropdown__divider"></div>
+                                <a role="menuitem" class="profile-dropdown__item" href="{% url 'dashboard' %}">
+                                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                    </svg>
+                                    <span>Особистий кабінет / Історія</span>
+                                </a>
+                                <a role="menuitem" class="profile-dropdown__item" href="{% url 'profile_edit' %}">
+                                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                    <span>Редагувати профіль</span>
+                                </a>
+                                {% if request.user.profile.is_admin %}
+                                    <a role="menuitem" class="profile-dropdown__item" href="{% url 'admin:index' %}" target="_blank">
+                                        <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                        </svg>
+                                        <span>Панель керування Django</span>
+                                    </a>
+                                {% endif %}
+                                <div class="profile-dropdown__divider"></div>
+                                <a role="menuitem" class="profile-dropdown__item profile-dropdown__item--logout" href="{% url 'logout' %}">
+                                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                        <polyline points="16 17 21 12 16 7"></polyline>
+                                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                                    </svg>
+                                    <span>Вийти з системи</span>
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div style="display: flex; gap: var(--space-2); align-items: center;">
+                            <a href="{% url 'login' %}" class="table-btn">Увійти</a>
+                            <a href="{% url 'register' %}" class="table-btn" style="background-color: var(--orange); color: #ffffff; border-color: var(--orange);">Реєстрація</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 2-й РЯДОК: Логотип, Основна навігація, Бургер -->
+            <div class="header-mainbar">
                 <a href="{% url "main" %}" class="flex-center">
                     <img class="header-content__logo header-content__logo--dark" src="{% static "images/dark_theme_logo.png" %}" alt="Avatar AI">
                     <img class="header-content__logo header-content__logo--light" src="{% static "images/light_theme_logo.png" %}" alt="Avatar AI">
@@ -69,49 +193,42 @@
                     </div>
                 </nav>
 
-                <div class="header-actions">
-                    <!-- Швидке перемикання нічного / світлого режиму (за замовчуванням темна тема) -->
-                    <button id="themeQuickBtn" class="theme-quick-btn" type="button" aria-label="Перемкнути на світлу тему" title="Увімкнути світлу тему">
-                        <span id="themeQuickIcon" class="flex-center" aria-hidden="true">
-                            <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="5"></circle>
-                                <line x1="12" y1="1" x2="12" y2="3"></line>
-                                <line x1="12" y1="21" x2="12" y2="23"></line>
-                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                                <line x1="1" y1="12" x2="3" y2="12"></line>
-                                <line x1="21" y1="12" x2="23" y2="12"></line>
-                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                            </svg>
-                        </span>
-                    </button>
-
-                    <!-- Кнопка відкриття меню доступності та зору -->
-                    <button id="a11yOpenBtn" class="a11y-open-btn" type="button" aria-label="Налаштування зору та доступності" title="Налаштування зору та доступності">
-                        <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                        <span>Доступність</span>
-                    </button>
-
-                    <div class="header-content__last">
-                        <a href="#">Увійти</a>
-                    </div>
-
-                    <!-- Бургер-кнопка для адаптивного меню навігації -->
-                    <button id="burgerBtn" class="burger-btn" type="button" aria-label="Відкрити меню навігації" aria-expanded="false" aria-controls="headerNav">
-                        <span class="burger-box" aria-hidden="true">
-                            <span class="burger-line"></span>
-                            <span class="burger-line"></span>
-                            <span class="burger-line"></span>
-                        </span>
-                    </button>
-                </div>
+                <!-- Бургер-кнопка для адаптивного меню навігації на мобільних -->
+                <button id="burgerBtn" class="burger-btn" type="button" aria-label="Відкрити меню навігації" aria-expanded="false" aria-controls="headerNav">
+                    <span class="burger-box" aria-hidden="true">
+                        <span class="burger-line"></span>
+                        <span class="burger-line"></span>
+                        <span class="burger-line"></span>
+                    </span>
+                </button>
             </div>
         </div>
     </header>
+
+    <!-- TOASTER CONTAINER (Вспливаючі сповіщення) -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast toast--{{ message.tags|default:'info' }}" role="alert">
+                    <div class="toast__icon">
+                        {% if message.tags == 'success' %}
+                            <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        {% elif message.tags == 'error' %}
+                            <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                        {% else %}
+                            <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        {% endif %}
+                    </div>
+                    <div class="toast__body">
+                        {{ message }}
+                    </div>
+                    <button type="button" class="toast__close" aria-label="Закрити" onclick="this.closest('.toast').remove()">
+                        <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
 
     {% block content %}
     {% endblock content %}

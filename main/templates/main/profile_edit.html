@@ -1,0 +1,71 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="auth-page">
+    <div class="auth-card">
+        <div class="auth-card__header">
+            <h1 class="auth-card__title">Редагування профілю</h1>
+            <p class="auth-card__subtitle">Оновіть ваші персональні дані або академічну групу</p>
+        </div>
+
+        <form method="post" class="auth-form" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert--error">
+                    {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                    <span class="form-group__error">{{ form.last_name.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                    <span class="form-group__error">{{ form.first_name.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.middle_name.id_for_label }}">{{ form.middle_name.label }}</label>
+                {{ form.middle_name }}
+                {% if form.middle_name.errors %}
+                    <span class="form-group__error">{{ form.middle_name.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.group.id_for_label }}">{{ form.group.label }}</label>
+                {{ form.group }}
+                <span class="form-group__hint">Наприклад, КН-41</span>
+                {% if form.group.errors %}
+                    <span class="form-group__error">{{ form.group.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <span class="form-group__error">{{ form.email.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="auth-btn-submit">Зберегти зміни</button>
+        </form>
+
+        <div class="auth-card__footer">
+            <p><a href="{% url 'dashboard' %}">← Повернутися до кабінету</a></p>
+        </div>
+    </div>
+</main>
+{% endblock content %}

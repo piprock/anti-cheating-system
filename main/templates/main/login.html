@@ -1,0 +1,50 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="auth-page">
+    <div class="auth-card">
+        <div class="auth-card__header">
+            <h1 class="auth-card__title">Вхід у систему</h1>
+            <p class="auth-card__subtitle">Авторизуйтесь для доступу до екзаменів та історії тестувань</p>
+        </div>
+
+        <form method="post" class="auth-form" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert--error">
+                    {% for error in form.non_field_errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <span class="form-group__error">{{ form.username.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <span class="form-group__error">{{ form.password.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+            {% endif %}
+
+            <button type="submit" class="auth-btn-submit">Увійти</button>
+        </form>
+
+        <div class="auth-card__footer">
+            <p>Ще не маєте облікового запису? <a href="{% url 'register' %}">Зареєструватися</a></p>
+        </div>
+    </div>
+</main>
+{% endblock content %}

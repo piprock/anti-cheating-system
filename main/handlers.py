@@ -134,6 +134,8 @@ def submit_interview(request, key: str):
     if not form.is_valid():
         return JsonResponse({"error": form.errors}, status=400)
     payload = raw  # keep original structure for persistence service
+    if request.user.is_authenticated and "user_id" not in payload:
+        payload["user_id"] = request.user.id
 
     # Delegate persistence and metrics to common helper
     saved = persist_session_from_payload(key, payload)

@@ -675,6 +675,131 @@ function initNavDropdown() {
   });
 }
 
+/**
+ * Initialize Profile Dropdown Menu in top navigation
+ */
+function initProfileDropdown() {
+  const dropdown = document.getElementById("profileDropdown");
+  if (!dropdown) return;
+
+  const btn = document.getElementById("profileDropdownBtn");
+  const menu = document.getElementById("profileDropdownMenu");
+  if (!btn || !menu) return;
+
+  function setProfileDropdownState(open) {
+    dropdown.classList.toggle("is-open", open);
+    btn.setAttribute("aria-expanded", String(open));
+  }
+
+  function toggleProfileDropdown() {
+    const isCurrentlyOpen = dropdown.classList.contains("is-open");
+    setProfileDropdownState(!isCurrentlyOpen);
+  }
+
+  btn.addEventListener("click", function(e) {
+    e.stopPropagation();
+    toggleProfileDropdown();
+  });
+
+  // Keyboard navigation on button
+  btn.addEventListener("keydown", function(e) {
+    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setProfileDropdownState(true);
+      const firstLink = menu.querySelector("a");
+      if (firstLink) firstLink.focus();
+    } else if (e.key === "Escape") {
+      setProfileDropdownState(false);
+      btn.focus();
+    }
+  });
+
+  // Keyboard navigation inside dropdown menu
+  menu.addEventListener("keydown", function(e) {
+    const links = Array.from(menu.querySelectorAll("a"));
+    const currentIndex = links.indexOf(document.activeElement);
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setProfileDropdownState(false);
+      btn.focus();
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % links.length;
+      links[nextIndex].focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + links.length) % links.length;
+      links[prevIndex].focus();
+    }
+  });
+
+  // Close when clicking outside
+  document.addEventListener("click", function(e) {
+    if (dropdown.classList.contains("is-open") && !dropdown.contains(e.target)) {
+      setProfileDropdownState(false);
+    }
+  });
+
+  // Close on Escape key globally if open
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && dropdown.classList.contains("is-open")) {
+      setProfileDropdownState(false);
+      btn.focus();
+    }
+  });
+}
+
+/**
+ * Initialize Toasters (floating notifications)
+ */
+function initToasts() {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+
+  const toasts = container.querySelectorAll(".toast");
+  toasts.forEach(function(toast) {
+    setupToastDismiss(toast);
+  });
+}
+
+function setupToastDismiss(toast, delay = 4500) {
+  if (!toast) return;
+
+  let timer = setTimeout(function() {
+    dismissToast(toast);
+  }, delay);
+
+  // Pause auto-dismiss when hovering over toast
+  toast.addEventListener("mouseenter", function() {
+    clearTimeout(timer);
+  });
+
+  // Resume auto-dismiss on mouse leave
+  toast.addEventListener("mouseleave", function() {
+    timer = setTimeout(function() {
+      dismissToast(toast);
+    }, 2000);
+  });
+
+  const closeBtn = toast.querySelector(".toast__close");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function(e) {
+      e.preventDefault();
+      clearTimeout(timer);
+      dismissToast(toast);
+    });
+  }
+}
+
+function dismissToast(toast) {
+  if (!toast || toast.classList.contains("toast--hiding")) return;
+  toast.classList.add("toast--hiding");
+  setTimeout(function() {
+    toast.remove();
+  }, 320);
+}
+
 // ============================================================================
 // Initialization
 // ============================================================================
@@ -685,9 +810,13 @@ if (document.readyState === "loading") {
     initFileUploadHandlers();
     initBurgerMenu();
     initNavDropdown();
+    initProfileDropdown();
+    initToasts();
   });
 } else {
   initFileUploadHandlers();
   initBurgerMenu();
   initNavDropdown();
+  initProfileDropdown();
+  initToasts();
 }

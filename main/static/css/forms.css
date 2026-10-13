@@ -52,12 +52,15 @@ label {
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     color: var(--text-main);
+    text-align: left;
+    display: block;
 }
 
 /* Контейнери полів */
 .form-group {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    text-align: left;
     gap: var(--space-3); /* 12px */
     margin-bottom: var(--space-4); /* 16px */
     flex-wrap: wrap;

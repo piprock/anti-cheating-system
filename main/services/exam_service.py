@@ -164,10 +164,11 @@ class ExamService:
             }
             for i, row in enumerate(state["qa_log"]) if i != 0
         ]
-        return {
+        payload = {
             "student": {
                 "first_name": first or "Unknown",
-                "last_name": last or "Student"
+                "last_name": last or "Student",
+                "middle_name": middle or "",
             },
             "answers": graded_answers,
             "summary": {
@@ -176,6 +177,9 @@ class ExamService:
                 "plagiarism_score": plagiarism_score,
             },
         }
+        if state.get("user_id"):
+            payload["user_id"] = state.get("user_id")
+        return payload
 
     def compute_grade(self, accuracy: int, plagiarism: int, gaze_pct: float) -> int:
         """

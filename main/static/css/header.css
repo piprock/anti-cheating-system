@@ -6,18 +6,42 @@
 header {
     background-color: var(--bg-card);
     border-bottom: 1px solid var(--border-color);
-    padding: var(--space-3) 0; /* 12px 0 */
+    padding: var(--space-2) 0 var(--space-3);
     position: sticky;
     top: 0;
     z-index: 100;
     transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.header-content {
+/* 1-й РЯДОК: Тема, доступність, профіль */
+.header-topbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--space-2);
+}
+
+.header-topbar__right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-left: auto;
+}
+
+/* 2-й РЯДОК: Логотип та навігація */
+.header-mainbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: var(--space-4);
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
 }
 
 .header-content__logo {
@@ -234,6 +258,135 @@ nav a.checked {
     display: flex;
     align-items: center;
     gap: var(--space-2);
+}
+
+/* Профіль - спадне меню */
+.profile-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.profile-dropdown__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-md);
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.profile-dropdown__btn:hover,
+.profile-dropdown.is-open .profile-dropdown__btn {
+    border-color: var(--orange);
+    color: var(--orange);
+}
+
+.profile-dropdown__avatar {
+    color: var(--orange);
+    display: flex;
+    align-items: center;
+}
+
+.profile-dropdown__shortname {
+    font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-dropdown__arrow {
+    transition: transform var(--transition-fast);
+}
+
+.profile-dropdown.is-open .profile-dropdown__arrow {
+    transform: rotate(180deg);
+}
+
+.profile-dropdown__menu {
+    position: absolute;
+    top: calc(100% + var(--space-2));
+    right: 0;
+    min-width: 260px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    padding: var(--space-3);
+    display: none;
+    flex-direction: column;
+    gap: var(--space-1);
+    z-index: 1000;
+}
+
+.profile-dropdown.is-open .profile-dropdown__menu {
+    display: flex;
+}
+
+.profile-dropdown__header {
+    padding: var(--space-2) var(--space-2) var(--space-3);
+    text-align: left;
+}
+
+.profile-dropdown__fullname {
+    font-weight: var(--font-weight-bold);
+    color: var(--text-main);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-1);
+}
+
+.profile-dropdown__badges {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.profile-dropdown__email {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.profile-dropdown__divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: var(--space-1) 0;
+}
+
+.profile-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    text-align: left;
+}
+
+.profile-dropdown__item:hover {
+    background-color: var(--orange-subtle);
+    color: var(--orange);
+}
+
+.profile-dropdown__item--logout {
+    color: var(--red);
+}
+
+.profile-dropdown__item--logout:hover {
+    background-color: var(--red-subtle);
+    color: var(--red);
 }
 
 /* Кнопка швидкого перемикання теми (Сонце / Місяць) */

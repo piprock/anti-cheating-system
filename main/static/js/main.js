@@ -549,12 +549,64 @@ function setElementDisabled(id, disabled) {
 }
 
 // ============================================================================
+// Responsive Burger Menu
+// ============================================================================
+
+/**
+ * Initialize responsive burger menu navigation
+ */
+function initBurgerMenu() {
+  const burgerBtn = document.getElementById("burgerBtn");
+  const nav = document.getElementById("headerNav");
+  if (!burgerBtn || !nav) return;
+
+  burgerBtn.addEventListener("click", function(e) {
+    e.stopPropagation();
+    const isOpen = nav.classList.toggle("open");
+    burgerBtn.classList.toggle("active", isOpen);
+    burgerBtn.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener("click", function(e) {
+    if (nav.classList.contains("open") && !nav.contains(e.target) && !burgerBtn.contains(e.target)) {
+      nav.classList.remove("open");
+      burgerBtn.classList.remove("active");
+      burgerBtn.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  // Close menu on Escape key
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && nav.classList.contains("open")) {
+      nav.classList.remove("open");
+      burgerBtn.classList.remove("active");
+      burgerBtn.setAttribute("aria-expanded", "false");
+      burgerBtn.focus();
+    }
+  });
+
+  // Close menu when clicking on any navigation link
+  nav.querySelectorAll("a").forEach(function(link) {
+    link.addEventListener("click", function() {
+      nav.classList.remove("open");
+      burgerBtn.classList.remove("active");
+      burgerBtn.setAttribute("aria-expanded", "false");
+    });
+  });
+}
+
+// ============================================================================
 // Initialization
 // ============================================================================
 
-// Initialize file upload handlers when DOM is ready
+// Initialize handlers when DOM is ready
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initFileUploadHandlers);
+  document.addEventListener("DOMContentLoaded", function() {
+    initFileUploadHandlers();
+    initBurgerMenu();
+  });
 } else {
   initFileUploadHandlers();
+  initBurgerMenu();
 }

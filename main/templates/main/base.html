@@ -25,7 +25,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="{% static "images/icon.ico" %}">
     <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.4">
     <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.6">
-    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.4">
+    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.5">
     <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.3">
@@ -47,7 +47,7 @@
                     <img class="header-content__logo header-content__logo--light" src="{% static "images/light_theme_logo.png" %}" alt="Avatar AI">
                 </a>
 
-                <nav>
+                <nav id="headerNav" class="header-nav">
                     <a class="{% if request.resolver_match.url_name == 'main' %}checked{% endif %}" href="{% url "main" %}">Головна</a>
                     <a class="{% if request.resolver_match.url_name == 'gaze' %}checked{% endif %}" href="{% url "gaze" %}">Моніторинг погляду</a>
                     <a class="{% if request.resolver_match.url_name == 'about' %}checked{% endif %}" href="{% url "about" %}">Про нас</a>
@@ -84,6 +84,15 @@
                     <div class="header-content__last">
                         <a href="#">Увійти</a>
                     </div>
+
+                    <!-- Бургер-кнопка для адаптивного меню навігації -->
+                    <button id="burgerBtn" class="burger-btn" type="button" aria-label="Відкрити меню навігації" aria-expanded="false" aria-controls="headerNav">
+                        <span class="burger-box" aria-hidden="true">
+                            <span class="burger-line"></span>
+                            <span class="burger-line"></span>
+                            <span class="burger-line"></span>
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -142,7 +151,7 @@
 
         <!-- 3. Нижній блок футера (копірайт) -->
         <div class="footer-bottom">
-            <p>© 2025 Avatar AI. Всі права захищені.</p>
+            <p>© 2026 Avatar AI. Всі права захищені.</p>
         </div>
     </footer>
 

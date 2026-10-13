@@ -6,18 +6,16 @@
 {% endblock css %}
 
 {% block content %}
-<section class="intro-section">
+<section class="intro-section intro-section--large">
+  <video class="intro-bg-video" autoplay muted loop playsinline preload="auto">
+    <source src="{% static "videos/videoplayback.webm" %}" type="video/webm">
+  </video>
   <div class="overlay"></div>
   <div class="intro-content">
     <h1 class="inner_cont">Асистент тестування та екзаменів</h1>
     <p class="inner_cont">
       Інтерактивний модуль для усного опитування, аналізу навчальних матеріалів та автоматизованого моніторингу академічної доброчесності.
     </p>
-    <div class="button-try-about">
-      <a class="try" href="#main_title">Голосовий асистент</a>
-      <a class="add_inf" href="{% url "gaze" %}">Моніторинг погляду</a>
-      <a class="add_inf" href="{% url "about" %}">Про систему</a>
-    </div>
   </div>
 </section>
 
@@ -26,93 +24,44 @@
     <h1 id="main_title">Голосовий асистент та інструменти</h1>
   </div>
 
-  <div class="grid grid-equal gap-lg">
-    <!-- Ліва колонка: Діалог та аналіз матеріалів -->
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">Діалогова панель</h3>
-        <span id="status">Готовий до роботи</span>
+  <!-- Діалогова панель на всю ширину -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Діалогова панель</h3>
+      <span id="status">Готовий до роботи</span>
+    </div>
+
+    <div class="question-answer">
+      <div class="inner">
+        <span class="text-small text-muted mb-xs">Запитання / Запит:</span>
+        <p id="question" class="default-back-panel">Очікування запиту або запису голосу...</p>
       </div>
-
-      <div class="question-answer">
-        <div class="inner">
-          <span class="text-small text-muted mb-xs">Запитання / Запит:</span>
-          <p id="question" class="default-back-panel">Очікування запиту або запису голосу...</p>
-        </div>
-        <div class="inner">
-          <span class="text-small text-muted mb-xs">Відповідь асистента:</span>
-          <p id="answer" class="default-back-panel">Тут з'явиться відповідь асистента після обробки.</p>
-        </div>
-      </div>
-
-      <div class="chat-buttons">
-        <div class="chat-buttons_buttons">
-          <button onclick="sendRequest()" class="btn btn-primary">
-            <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-              <line x1="12" y1="19" x2="12" y2="23"></line>
-              <line x1="8" y1="23" x2="16" y2="23"></line>
-            </svg>
-            <span>Записати голос</span>
-          </button>
-
-          <form id="fileForm" enctype="multipart/form-data">
-            <label for="fileInput" class="custom-file-upload">
-              Вибрати документ
-            </label>
-            <span id="fileName">Файл не вибрано</span>
-            <input type="file" name="file" id="fileInput" accept=".txt,.docx,.pdf">
-            <button type="submit" class="btn btn-secondary btn-small">Аналізувати</button>
-          </form>
-        </div>
+      <div class="inner">
+        <span class="text-small text-muted mb-xs">Відповідь асистента:</span>
+        <p id="answer" class="default-back-panel">Тут з'явиться відповідь асистента після обробки.</p>
       </div>
     </div>
 
-    <!-- Права колонка: Картка швидкого переходу до Моніторингу погляду -->
-    <div class="card flex-column justify-between">
-      <div>
-        <div class="card-header">
-          <h3 class="card-title">Моніторинг погляду</h3>
-          <span class="badge-status badge-status--info">Окрема лабораторія</span>
-        </div>
-
-        <p class="text-muted mb-md" style="font-size: var(--font-size-sm); line-height: var(--line-height-relaxed);">
-          Модуль контролю погляду винесено на спеціалізовану сторінку для детальної діагностики, калібрування чутливості та перевірки розпізнавання уваги перед екзаменом.
-        </p>
-
-        <div class="flex-column gap-sm mb-lg">
-          <div class="flex gap-sm align-start">
-            <span class="icon-bullet" style="color: var(--orange);">
-              <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            </span>
-            <span class="text-small"><b>Калібрування камери:</b> автопідбір та ручне налаштування порогу бінаризації очей.</span>
-          </div>
-
-          <div class="flex gap-sm align-start">
-            <span class="icon-bullet" style="color: var(--orange);">
-              <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            </span>
-            <span class="text-small"><b>Діагностика очей:</b> візуалізація масок склери та напрямку зіниць (ліве/праве око).</span>
-          </div>
-
-          <div class="flex gap-sm align-start">
-            <span class="icon-bullet" style="color: var(--orange);">
-              <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            </span>
-            <span class="text-small"><b>Тестування уваги:</b> обчислення відсотка відволікання від екрана в реальному часі.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-md">
-        <a href="{% url "gaze" %}" class="btn btn-primary" style="width: 100%;">
-          <span>Перейти до налаштування та тестування</span>
-          <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
+    <div class="chat-buttons">
+      <div class="chat-buttons_buttons">
+        <button onclick="sendRequest()" class="btn btn-primary">
+          <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
           </svg>
-        </a>
+          <span>Записати голос</span>
+        </button>
+
+        <form id="fileForm" enctype="multipart/form-data">
+          <label for="fileInput" class="custom-file-upload">
+            Вибрати документ
+          </label>
+          <span id="fileName">Файл не вибрано</span>
+          <input type="file" name="file" id="fileInput" accept=".txt,.docx,.pdf">
+          <button type="submit" class="btn btn-secondary btn-small">Аналізувати</button>
+        </form>
       </div>
     </div>
   </div>

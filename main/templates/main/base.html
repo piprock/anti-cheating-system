@@ -1,74 +1,298 @@
 {% load static %}
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk" data-theme="dark" data-font-scale="normal" data-colorblind="none">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static "css/style.css" %}">
-    <link rel="stylesheet" href="{% static "css/footer.css" %}">
-    <link rel="stylesheet" href="{% static "css/header.css" %}">
-    <link rel="stylesheet" href="{% static "css/buttons.css" %}">
-    <link rel="stylesheet" href="{% static "css/layout.css" %}">
-    <link rel="stylesheet" href="{% static "css/forms.css" %}">
+    <!-- Антифлікер скрипт: миттєве застосування теми та шрифту до першого рендерингу -->
+    <script>
+        (function() {
+            try {
+                var saved = localStorage.getItem('avatarai_a11y_settings') || localStorage.getItem('teachai_a11y_settings');
+                if (saved) {
+                    var s = JSON.parse(saved);
+                    if (s.theme) document.documentElement.setAttribute('data-theme', s.theme);
+                    if (s.fontScale) document.documentElement.setAttribute('data-font-scale', s.fontScale);
+                    if (s.colorblind) document.documentElement.setAttribute('data-colorblind', s.colorblind);
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch(e) {}
+        })();
+    </script>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static "images/icon.ico" %}">
+    <link rel="shortcut icon" type="image/x-icon" href="{% static "images/icon.ico" %}">
+    <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.4">
+    <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.6">
+    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.5">
+    <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.3">
+    <link rel="stylesheet" href="{% static "css/a11y.css" %}?v=2.3">
     {% block css %}{% endblock css %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
-    <title>Teacher AI</title>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Avatar AI – Екзаменаційна платформа</title>
 </head>
 <body>
 
-<!--HEADER-->
+    <!-- HEADER -->
     <header>
         <div class="container">
             <div class="header-content">
+                <a href="{% url "main" %}" class="flex-center">
+                    <img class="header-content__logo header-content__logo--dark" src="{% static "images/dark_theme_logo.png" %}" alt="Avatar AI">
+                    <img class="header-content__logo header-content__logo--light" src="{% static "images/light_theme_logo.png" %}" alt="Avatar AI">
+                </a>
 
-                <img class="header-content__logo" src="{% static "images/logo.png" %}" alt="">
-
-                <nav>
-                    <a class="checked" href="{% url "main" %}">Головна</a>
-                    <a href="{% url "about" %}">Про нас</a>
-                    <a href="{% url "contact" %}">Контактна інформація</a>
+                <nav id="headerNav" class="header-nav">
+                    <a class="{% if request.resolver_match.url_name == 'main' %}checked{% endif %}" href="{% url "main" %}">Головна</a>
+                    <a class="{% if request.resolver_match.url_name == 'gaze' %}checked{% endif %}" href="{% url "gaze" %}">Моніторинг погляду</a>
+                    <a class="{% if request.resolver_match.url_name == 'about' %}checked{% endif %}" href="{% url "about" %}">Про нас</a>
+                    <a class="{% if request.resolver_match.url_name == 'contact' %}checked{% endif %}" href="{% url "contact" %}">Контактна інформація</a>
                 </nav>
 
-                <div class="header-content__last">
-                    <a href="#">Увійти</a>
-                </div>
+                <div class="header-actions">
+                    <!-- Швидке перемикання нічного / світлого режиму (за замовчуванням темна тема) -->
+                    <button id="themeQuickBtn" class="theme-quick-btn" type="button" aria-label="Перемкнути на світлу тему" title="Увімкнути світлу тему">
+                        <span id="themeQuickIcon" class="flex-center" aria-hidden="true">
+                            <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                        </span>
+                    </button>
 
+                    <!-- Кнопка відкриття меню доступності та зору -->
+                    <button id="a11yOpenBtn" class="a11y-open-btn" type="button" aria-label="Налаштування зору та доступності" title="Налаштування зору та доступності">
+                        <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <span>Доступність</span>
+                    </button>
+
+                    <div class="header-content__last">
+                        <a href="#">Увійти</a>
+                    </div>
+
+                    <!-- Бургер-кнопка для адаптивного меню навігації -->
+                    <button id="burgerBtn" class="burger-btn" type="button" aria-label="Відкрити меню навігації" aria-expanded="false" aria-controls="headerNav">
+                        <span class="burger-box" aria-hidden="true">
+                            <span class="burger-line"></span>
+                            <span class="burger-line"></span>
+                            <span class="burger-line"></span>
+                        </span>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
-{% block content %}
-{% endblock content %}
-  
-  <footer class="footer">
-    <div class="footer-container">
-      <div class="footer-logo">
-        <h2>TeachAI</h2>
-        <p>Голосовий аватар</p>
-      </div>
-      
-      <div class="footer-links">
-        <a href="#about">Про нас</a>
-        <a href="#contact">Контакти</a>
-      </div>
-  
-      <div class="footer-social">
-        <a href="#"><img src="{% static "images/facebook.svg" %}" alt="Facebook"></a>
-        <a href="#"><img src="{% static "images/inst.svg" %}" alt="Instagram"></a>
-        <a href="#"><img src="{% static "images/youtube.svg" %}" alt="YouTube"></a>
-      </div>
+
+    {% block content %}
+    {% endblock content %}
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <!-- 1. Верхній блок футера (логотип, посилання, соцмережі) -->
+        <div class="footer-container">
+            <div class="footer-logo">
+                <h2>Avatar AI</h2>
+                <p>Платформа тестування та моніторингу знань</p>
+            </div>
+
+            <div class="footer-links">
+                <a href="{% url "gaze" %}">Моніторинг погляду</a>
+                <a href="{% url "about" %}">Про нас</a>
+                <a href="{% url "contact" %}">Контакти</a>
+            </div>
+
+            <div class="footer-social">
+                <a href="#" aria-label="Facebook"><img src="{% static "images/facebook.svg" %}" alt="Facebook"></a>
+                <a href="#" aria-label="Instagram"><img src="{% static "images/instagram.svg" %}" alt="Instagram"></a>
+                <a href="#" aria-label="YouTube"><img src="{% static "images/youtube.svg" %}" alt="YouTube"></a>
+            </div>
+        </div>
+
+        <!-- 2. Циклічний рядок з великим жирним текстом (між елементами футера) -->
+        <div class="footer-marquee" aria-hidden="true">
+            <div class="footer-marquee__track">
+                <div class="footer-marquee__group">
+                    <span>AVATAR AI</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>СИСТЕМА КОНТРОЛЮ ЗНАНЬ</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>AI PROCTORING</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>ЧЕСНІ ЕКЗАМЕНИ</span>
+                    <span class="marquee-bullet">•</span>
+                </div>
+                <div class="footer-marquee__group">
+                    <span>AVATAR AI</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>СИСТЕМА КОНТРОЛЮ ЗНАНЬ</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>AI PROCTORING</span>
+                    <span class="marquee-bullet">•</span>
+                    <span>ЧЕСНІ ЕКЗАМЕНИ</span>
+                    <span class="marquee-bullet">•</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Нижній блок футера (копірайт) -->
+        <div class="footer-bottom">
+            <p>© 2026 Avatar AI. Всі права захищені.</p>
+        </div>
+    </footer>
+
+    <!-- МОДАЛЬНЕ ВІКНО ДОСТУПНОСТІ ТА НАЛАШТУВАНЬ ЗОРУ -->
+    <div id="a11yBackdrop" class="a11y-backdrop" role="dialog" aria-modal="true" aria-labelledby="a11yModalTitle" hidden>
+        <div class="a11y-modal">
+            <div class="a11y-modal__header">
+                <h2 id="a11yModalTitle" class="a11y-modal__title">
+                    <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Налаштування доступності</span>
+                </h2>
+                <button id="a11yCloseBtn" class="a11y-close-btn" type="button" aria-label="Закрити вікно">
+                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 1. Тема оформлення -->
+            <div class="a11y-section">
+                <div class="a11y-section__title">Тема оформлення</div>
+                <div class="a11y-section__desc">Виберіть нічну контрастну або світлу (теплу) тему</div>
+                <div class="a11y-btn-group">
+                    <button class="a11y-option-btn active" type="button" data-theme-choice="dark">
+                        <span class="a11y-option-icon">
+                            <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                        </span>
+                        <span>Нічна (темна)</span>
+                    </button>
+                    <button class="a11y-option-btn" type="button" data-theme-choice="light">
+                        <span class="a11y-option-icon">
+                            <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                            </svg>
+                        </span>
+                        <span>Світла (тепла)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Розмір контенту для слабозорих -->
+            <div class="a11y-section">
+                <div class="a11y-section__title">Розмір тексту та контенту</div>
+                <div class="a11y-section__desc">Збільшення розміру шрифтів та елементів інтерфейсу для комфортного читання</div>
+                <div class="a11y-btn-group">
+                    <button class="a11y-option-btn active" type="button" data-scale-choice="normal">
+                        <span style="font-size: 16px; font-weight: bold;">A</span>
+                        <span>Стандартний (100%)</span>
+                    </button>
+                    <button class="a11y-option-btn" type="button" data-scale-choice="large">
+                        <span style="font-size: 20px; font-weight: bold;">A+</span>
+                        <span>Збільшений (125%)</span>
+                    </button>
+                    <button class="a11y-option-btn" type="button" data-scale-choice="xlarge">
+                        <span style="font-size: 24px; font-weight: bold;">A++</span>
+                        <span>Великий (150%)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. Режими для людей з дальтонізмом -->
+            <div class="a11y-section">
+                <div class="a11y-section__title">Режим кольорокорекції для дальтоніків</div>
+                <div class="a11y-section__desc">Адаптація колірної палітри статусів та відповідей під різні типи зору</div>
+                <div class="a11y-radio-list">
+                    <label class="a11y-radio-card active" data-colorblind-choice="none">
+                        <input type="radio" name="colorblindRadio" value="none" checked>
+                        <div class="a11y-radio-label">
+                            <span class="a11y-radio-title">Стандартна палітра</span>
+                            <span class="a11y-radio-desc">Зелений для успіху / Червоний для помилок та завершення</span>
+                            <div class="a11y-swatch-preview">
+                                <span class="a11y-swatch" style="background:#2E8540;"></span>
+                                <span class="a11y-swatch" style="background:#DC2626;"></span>
+                                <span class="a11y-swatch" style="background:#FF8A00;"></span>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="a11y-radio-card" data-colorblind-choice="protanopia-deuteranopia">
+                        <input type="radio" name="colorblindRadio" value="protanopia-deuteranopia">
+                        <div class="a11y-radio-label">
+                            <span class="a11y-radio-title">Протанопія / Дейтеранопія (Червоно-зелена)</span>
+                            <span class="a11y-radio-desc">Синій (успіх/увага) та Бурштиновий (увага/помилка) з піктограмами</span>
+                            <div class="a11y-swatch-preview">
+                                <span class="a11y-swatch" style="background:#2563EB;"></span>
+                                <span class="a11y-swatch" style="background:#D97706;"></span>
+                                <span class="a11y-swatch" style="background:#FF8A00;"></span>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="a11y-radio-card" data-colorblind-choice="tritanopia">
+                        <input type="radio" name="colorblindRadio" value="tritanopia">
+                        <div class="a11y-radio-label">
+                            <span class="a11y-radio-title">Тританопія (Синьо-жовта)</span>
+                            <span class="a11y-radio-desc">Смарагдовий (успіх) та Пурпурово-рожевий (помилка)</span>
+                            <div class="a11y-swatch-preview">
+                                <span class="a11y-swatch" style="background:#059669;"></span>
+                                <span class="a11y-swatch" style="background:#E11D48;"></span>
+                                <span class="a11y-swatch" style="background:#FF8A00;"></span>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="a11y-radio-card" data-colorblind-choice="high-contrast">
+                        <input type="radio" name="colorblindRadio" value="high-contrast">
+                        <div class="a11y-radio-label">
+                            <span class="a11y-radio-title">Високий контраст (High Contrast)</span>
+                            <span class="a11y-radio-desc">Потовщені межі, максимальна контрастність тексту та підкреслення</span>
+                            <div class="a11y-swatch-preview">
+                                <span class="a11y-swatch" style="background:#000000; border:1px solid #999;"></span>
+                                <span class="a11y-swatch" style="background:#FFFFFF; border:1px solid #000;"></span>
+                                <span class="a11y-swatch" style="background:#D96B00;"></span>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="a11y-modal__footer">
+                <button id="a11yResetBtn" class="a11y-reset-btn" type="button">Скинути за замовчуванням</button>
+                <button id="a11yDoneBtn" class="a11y-done-btn" type="button">Зберегти та закрити</button>
+            </div>
+        </div>
     </div>
-  
-    <div class="footer-bottom">
-      <p>© 2025 TeachAI. Всі права захищені.</p>
-    </div>
-  </footer>
 
-
-  <script src="{% static "js/main.js" %}"></script>
-
+    <script src="{% static "js/a11y.js" %}?v=2.2"></script>
+    <script src="{% static "js/main.js" %}"></script>
 </body>
 </html>

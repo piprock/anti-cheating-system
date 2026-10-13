@@ -1,0 +1,379 @@
+/* ============================================
+   GAZE - Стилі сторінки моніторингу та калібрування погляду
+   Тестування вебкамери, калібрування порогу бінаризації
+   Повна підтримка світлої / темної тем та режимів доступності
+   ============================================ */
+
+/* Робоча сітка сторінки налаштування погляду */
+.gaze-workspace {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    align-items: start;
+    margin-bottom: var(--space-8);
+}
+
+@media (min-width: 992px) {
+    .gaze-workspace {
+        grid-template-columns: 1.15fr 0.85fr;
+    }
+}
+
+/* Контейнер відеопотоку */
+.gaze-camera-card {
+    position: relative;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.gaze-video-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 380px;
+    background: var(--bg-video);
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border-color);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gaze-video-wrapper video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Оверлей стану камери */
+.gaze-video-overlay {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-sm);
+    background: rgba(24, 24, 27, 0.75);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+}
+
+.cam-indicator-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #71717A;
+    transition: background-color var(--transition-fast);
+}
+
+.cam-indicator-dot.active {
+    background-color: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulseDot 2s infinite ease-in-out;
+}
+
+@keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+/* Статусні бейджі детекції в реальному часі */
+.gaze-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    transition: all var(--transition-fast);
+}
+
+/* Сітка індикаторів очей та обличчя */
+.gaze-detection-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+
+@media (min-width: 576px) {
+    .gaze-detection-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.gaze-detection-item {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.gaze-detection-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.gaze-detection-val {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-main);
+}
+
+/* Картка калібрування */
+.gaze-calib-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Пресети порогу */
+.thresh-presets {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-top: var(--space-2);
+}
+
+.thresh-preset-btn {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-main);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-subtle);
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.thresh-preset-btn:hover:not(:disabled) {
+    border-color: var(--orange);
+    color: var(--orange);
+    background-color: var(--orange-subtle);
+}
+
+/* Панель візуалізації очей */
+.eye-preview-section {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.eye-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.eye-preview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+    justify-items: center;
+}
+
+.eye-preview-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+}
+
+.eye-preview-box span {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-muted);
+}
+
+.eye-preview-img {
+    width: 100%;
+    max-width: 150px;
+    aspect-ratio: 16 / 10;
+    background-color: #000000;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+    display: block;
+}
+
+.eye-preview-caption {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: var(--line-height-relaxed);
+    margin: 0;
+}
+
+/* Секція діагностичних метрик */
+.gaze-metrics-section {
+    margin-bottom: var(--space-8);
+}
+
+.gaze-metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+}
+
+@media (min-width: 576px) {
+    .gaze-metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    .gaze-metrics-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.gaze-metric-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-2);
+    transition: all var(--transition-fast);
+}
+
+.gaze-metric-card:hover {
+    border-color: var(--border-color-hover);
+}
+
+.gaze-metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+}
+
+.gaze-metric-val {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-main);
+    line-height: var(--line-height-tight);
+}
+
+.gaze-metric-desc {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: var(--line-height-normal);
+}
+
+/* Індикатор штрафного порогу (35%) */
+.proctoring-gauge {
+    width: 100%;
+    height: 6px;
+    background-color: var(--bg-subtle);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+    margin-top: var(--space-2);
+}
+
+.proctoring-gauge__fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--green);
+    transition: width var(--transition-normal), background-color var(--transition-fast);
+}
+
+.proctoring-gauge__fill.warning {
+    background-color: var(--orange);
+}
+
+.proctoring-gauge__fill.danger {
+    background-color: var(--red);
+}
+
+/* Інструкція тестування (Checklist) */
+.gaze-instructions-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+}
+
+.gaze-step-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+@media (min-width: 768px) {
+    .gaze-step-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.gaze-step-item {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.gaze-step-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--orange-subtle);
+    color: var(--orange);
+    border: 1px solid var(--orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+}
+
+.gaze-step-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-main);
+}
+
+.gaze-step-text {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: var(--line-height-relaxed);
+    margin: 0;
+}

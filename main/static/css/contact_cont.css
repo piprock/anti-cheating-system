@@ -1,12 +1,21 @@
+/* ============================================
+   CONTACT PAGE - Стилі сторінки контактів
+   ============================================ */
+
 .page-wrapper {
-    min-height: 100vh;
+    min-height: 65vh;
     display: flex;
     flex-direction: column;
-  }
-  
-  /* Основний контент займає всю доступну висоту */
+    padding: var(--space-8) var(--space-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 .content {
     flex: 1;
-    padding: 20px;
-  }
-  
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8);
+    color: var(--text-main);
+}

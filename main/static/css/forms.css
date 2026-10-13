@@ -1,18 +1,22 @@
 /* ============================================
-   FORMS - Стилі для форм та інпутів
+   FORMS - Стилі для форм, інпутів та індикаторів
+   Тепла палітра без синього, адаптація під темну тему
    ============================================ */
 
-/* Інпути */
+/* Текстові поля */
 input[type="text"],
 input[type="email"],
 input[type="password"],
 textarea {
-    padding: 10px 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-family: "Comfortaa", sans-serif;
-    font-size: 16px;
-    transition: border-color .3s ease;
+    padding: var(--space-3) var(--space-4); /* 12px 16px */
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    color: var(--text-main);
+    background-color: var(--bg-card);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+    line-height: var(--line-height-normal);
 }
 
 input[type="text"]:focus,
@@ -21,66 +25,176 @@ input[type="password"]:focus,
 textarea:focus {
     outline: none;
     border-color: var(--orange);
+    box-shadow: 0 0 0 3px var(--orange-subtle);
 }
 
-/* Повноширокі інпути */
+input:disabled,
+textarea:disabled {
+    background-color: var(--bg-subtle);
+    border-color: var(--border-color);
+    color: var(--text-light);
+    cursor: not-allowed;
+}
+
+/* Ширина полів */
 .input-full {
     width: 100%;
 }
 
 .input-medium {
-    width: 60%;
+    flex: 1;
+    min-width: 260px;
 }
 
 /* Лейбли */
 label {
-    font-family: "Comfortaa", sans-serif;
-    font-size: 16px;
-    color: var(--black);
-    margin-right: 8px;
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-main);
 }
 
-/* Контейнер форми */
+/* Контейнери полів */
 .form-group {
-    margin-bottom: 20px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--space-3); /* 12px */
+    margin-bottom: var(--space-4); /* 16px */
     flex-wrap: wrap;
 }
 
 .form-group-column {
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--space-2);
 }
 
-/* Лог та текстові блоки */
+/* Спеціальний бар введення ПІБ студента */
+.student-auth-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-6);
+    flex-wrap: wrap;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* Статус файлу в формі завантаження */
+#fileName {
+    font-size: var(--font-size-xs);
+    font-family: var(--font-main);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-subtle);
+    color: var(--text-main);
+    display: inline-block;
+    max-width: 240px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+/* Індикатори уваги та погляду (Gaze badges) - світлі та адаптивні */
+#gazeStatus,
+#cheatPct {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3); /* 8px 12px */
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    letter-spacing: 0.2px;
+    transition: all var(--transition-fast);
+}
+
+/* Стани погляду зі статусною кольоровою схемою (з підтримкою дальтонізму) */
+.gaze-status--looking {
+    background-color: var(--green-subtle) !important;
+    border-color: var(--green) !important;
+    color: var(--green) !important;
+}
+
+.gaze-status--not-looking {
+    background-color: var(--red-subtle) !important;
+    border-color: var(--red) !important;
+    color: var(--red) !important;
+}
+
+/* Слайдер налаштування порогу */
+input[type="range"] {
+    accent-color: var(--orange);
+    cursor: pointer;
+}
+
+input[type="range"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#threshVal {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+}
+
+/* Лог відповідей (Transcript Log) */
 .log-container {
-    margin: 0 30px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6); /* 24px */
+    margin: var(--space-6) 0; /* 24px */
 }
 
 .log-entry {
-    margin: 6px 0;
-    font-size: 14px;
+    padding: var(--space-3) var(--space-4); /* 12px 16px */
+    margin-bottom: var(--space-3); /* 12px */
+    background-color: var(--bg-subtle);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--orange);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--text-main);
 }
 
-.text-small {
-    font-size: 12px;
+.log-entry:last-child {
+    margin-bottom: 0;
 }
 
-.text-muted {
-    opacity: 0.7;
+.log-entry b {
+    color: var(--text-main);
 }
 
-/* Результати екзамену */
+/* Підсумковий звіт екзамену (Exam Summary Card) */
 .exam-summary {
-    margin-top: 10px;
-    padding: 20px;
-    background-color: #e3e3e3;
-    border-radius: 8px;
+    margin-top: var(--space-4);
+    padding: var(--space-6); /* 24px */
+    background-color: var(--green-subtle);
+    border: 1.5px solid var(--green);
+    border-radius: var(--radius-md);
+    line-height: var(--line-height-relaxed);
+    font-size: var(--font-size-sm);
+    color: var(--text-main);
 }
 
 .exam-summary-title {
-    font-weight: bold;
-    margin-bottom: 8px;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--green);
+    margin-bottom: var(--space-3);
 }

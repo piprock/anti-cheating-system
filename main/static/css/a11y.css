@@ -1,0 +1,272 @@
+/* ============================================
+   A11Y - СТИЛІ ПАНЕЛІ ДОСТУПНОСТІ ТА НАЛАШТУВАНЬ ЗОРУ
+   ============================================ */
+
+/* Бекдроп модального вікна */
+.a11y-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.2s ease;
+}
+
+.a11y-backdrop.active {
+    display: flex;
+}
+
+/* Модальне вікно доступності */
+.a11y-modal {
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: var(--space-6);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    animation: slideDown 0.25s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Шапка модалки */
+.a11y-modal__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.a11y-modal__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.a11y-close-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.a11y-close-btn:hover {
+    color: #ffffff;
+    border-color: var(--orange-hover);
+    background-color: var(--orange);
+}
+
+.a11y-close-btn:hover svg {
+    stroke: #ffffff;
+}
+
+/* Секції налаштувань */
+.a11y-section {
+    margin-bottom: var(--space-5);
+}
+
+.a11y-section:last-of-type {
+    margin-bottom: var(--space-6);
+}
+
+.a11y-section__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    margin: 0 0 var(--space-1) 0;
+    color: var(--text-main);
+}
+
+.a11y-section__desc {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin: 0 0 var(--space-3) 0;
+    line-height: var(--line-height-normal);
+}
+
+/* Сітка кнопок перемикання */
+.a11y-btn-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: var(--space-2);
+}
+
+.a11y-option-btn {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: var(--space-3) var(--space-3);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+    transition: all var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+}
+
+.a11y-option-btn:hover {
+    border-color: var(--orange);
+    background-color: var(--orange-subtle);
+}
+
+.a11y-option-btn.active {
+    background-color: var(--orange);
+    border-color: var(--orange);
+    color: #ffffff;
+    font-weight: var(--font-weight-bold);
+}
+
+.a11y-option-btn .a11y-option-icon {
+    font-size: 18px;
+}
+
+/* Список режимів дальтоніка */
+.a11y-radio-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.a11y-radio-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.a11y-radio-card:hover {
+    border-color: var(--orange);
+}
+
+.a11y-radio-card.active {
+    border-color: var(--orange);
+    border-width: 1.5px;
+    background-color: var(--orange-subtle);
+}
+
+.a11y-radio-card input[type="radio"] {
+    accent-color: var(--orange);
+    margin-top: 3px;
+    cursor: pointer;
+}
+
+.a11y-radio-label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.a11y-radio-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-main);
+}
+
+.a11y-radio-desc {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* Кольорові зразки для дальтоніка */
+.a11y-swatch-preview {
+    display: inline-flex;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.a11y-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    display: inline-block;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Футер модалки */
+.a11y-modal__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--space-4);
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.a11y-reset-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.a11y-reset-btn:hover {
+    color: var(--red);
+    border-color: var(--red);
+}
+
+.a11y-done-btn {
+    background-color: var(--orange);
+    border: 1px solid var(--orange);
+    color: #ffffff;
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.a11y-done-btn:hover {
+    background-color: var(--orange-hover);
+}

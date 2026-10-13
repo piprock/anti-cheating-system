@@ -39,3 +39,15 @@ def test_stats_structure(gaze_service):
     gaze_service.increment_frame('sid4', not_looking=True)
     stats = gaze_service.get_stats('sid4')
     assert set(stats.keys()) >= {"frames", "not_looking", "not_looking_pct", "calibrated"}
+
+@pytest.mark.django_db
+def test_reset_counters(gaze_service):
+    gaze_service.init_session('sid5')
+    gaze_service.increment_frame('sid5', not_looking=True)
+    gaze_service.increment_frame('sid5', not_looking=False)
+    assert gaze_service.get_session('sid5')['frames'] == 2
+    gaze_service.reset_counters('sid5')
+    sess = gaze_service.get_session('sid5')
+    assert sess['frames'] == 0
+    assert sess['not_looking'] == 0
+

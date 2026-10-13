@@ -2,80 +2,92 @@
 {% load static %}
 
 {% block css %}
-<link rel="stylesheet" href="{% static "css/content.css" %}">
+<link rel="stylesheet" href="{% static "css/content.css" %}?v=2.3">
 {% endblock css %}
 
 {% block content %}
 <section class="intro-section">
-  <img src="{% static 'images/background.jpg' %}" alt="bg" class="background-image" />
   <div class="overlay"></div>
   <div class="intro-content">
-    <h1 class="inner_cont">Голосовий екзамен</h1>
+    <h1 id="main_title" class="inner_cont">Екзамен: {{ survey.title|default:"Без назви" }}</h1>
     <p class="inner_cont">
-      Система озвучує запитання, фіксує ваш погляд через камеру та аналізує голосові відповіді за допомогою нейромереж.
-      Після завершення ви отримаєте підсумкову оцінку й Excel‑звіт.
+      Система озвучує запитання, фіксує погляд через веб-камеру та проводить оцінювання ваших усних відповідей.
     </p>
   </div>
 </section>
 
 <div class="container-main">
-  <div class="h-title">
-    <h1 id="main_title">Екзамен: {{ survey.title|default:"Без назви" }}</h1>
-  </div>
-
-  <!-- ПІБ з клавіатури -->
-  <div class="form-group mb-md">
+  <!-- ПІБ студента для авторизації сесії -->
+  <div class="student-auth-bar">
     <label for="studentName">ПІБ студента:</label>
-    <input id="studentName" type="text" class="input-medium" placeholder="Прізвище Ім'я По батькові">
-    <button id="startExamBtn">Почати екзамен</button>
+    <input id="studentName" type="text" class="input-medium" placeholder="Прізвище Ім'я По батькові" autocomplete="name">
+    <button id="startExamBtn" class="btn btn-green">Почати екзамен</button>
   </div>
 
-  <!-- Поточне запитання та статус -->
-  <div class="question-answer">
-    <div class="inner">
-      <p id="question">Після старту тут з’являться запитання.</p>
-    </div>
-    <div class="inner">
-      <p id="status">Екзамен ще не розпочато.</p>
-      <p id="feedback"></p>
-      <p id="progress" class="text-small text-muted"></p>
-      <button id="stopAnswerBtn" disabled>Завершити відповідь</button>
-    </div>
-  </div>
-
-  <!-- Лог Q/A -->
-  <div class="log-container">
-    <div id="log" class="text-small"></div>
-  </div>
-
-  <!-- Блок перевірки погляду -->
-  <div class="video-frame">
-    <input type="hidden" id="gazeSid" value="">
-
-    <div class="video-controls">
-      <button id="manualOnBtn" onclick="enableManual()" disabled>Ручний режим порогу</button>
-      <button id="manualOffBtn" onclick="disableManual()" disabled>Вимкнути ручний режим</button>
-      <div id="gazeStatus">Погляд: —</div>
-      <div id="cheatPct">Час неуваги: 0%</div>
-    </div>
-
-    <div class="video-preview">
-      <video id="cam" muted playsinline></video>
-
-      <div id="previewPanel" class="preview-panel">
-        <div class="preview-controls">
-          <label>Поріг:</label>
-          <input id="threshSlider" type="range" min="1" max="255" value="170" oninput="onThreshChange(event)" disabled />
-          <span id="threshVal">170</span>
+  <!-- Робочий простір екзамену: Питання зліва, Моніторинг справа -->
+  <div class="exam-workspace">
+    <!-- Ліва колонка: Поточне запитання та хід опитування -->
+    <div class="flex-column gap-md">
+      <div class="card">
+        <div class="card-header">
+          <span id="progress" class="text-small text-muted">Очікування початку</span>
+          <span id="status">Екзамен ще не розпочато.</span>
         </div>
-        <div class="preview-images">
-          <div class="preview-image-container">
-            <div class="preview-image-label">Ліве око</div>
-            <img id="leftPrev" alt="Left preview" class="preview-image" />
+
+        <div class="mb-md">
+          <p id="question">Введіть своє ПІБ та натисніть «Почати екзамен» для отримання першого запитання.</p>
+        </div>
+
+        <div class="flex-between flex-wrap gap-sm">
+          <button id="stopAnswerBtn" class="btn btn-danger" disabled>Завершити відповідь</button>
+          <div id="feedback" class="text-small text-muted"></div>
+        </div>
+      </div>
+
+      <!-- Журнал відповідей (Лог Q/A) -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Журнал відповідей</h3>
+        </div>
+        <div id="log" class="text-small"></div>
+      </div>
+    </div>
+
+    <!-- Права колонка: Моніторинг погляду та камера -->
+    <div class="video-frame">
+      <input type="hidden" id="gazeSid" value="">
+
+      <div class="card-header">
+        <h3 class="card-title">Моніторинг погляду</h3>
+        <div class="flex gap-xs flex-wrap">
+          <div id="gazeStatus">Погляд: —</div>
+          <div id="cheatPct">Час неуваги: 0%</div>
+        </div>
+      </div>
+
+      <div class="video-preview">
+        <video id="cam" muted playsinline></video>
+
+        <div class="video-controls flex-between flex-wrap mt-xs">
+          <button id="manualOnBtn" onclick="enableManual()" class="btn btn-secondary btn-small" disabled>Ручний поріг</button>
+          <button id="manualOffBtn" onclick="disableManual()" class="btn btn-secondary btn-small" disabled>Авторежим</button>
+        </div>
+
+        <div id="previewPanel" class="preview-panel">
+          <div class="preview-controls">
+            <label for="threshSlider">Поріг:</label>
+            <input id="threshSlider" type="range" min="1" max="255" value="170" oninput="onThreshChange(event)" disabled />
+            <span id="threshVal">170</span>
           </div>
-          <div class="preview-image-container">
-            <div class="preview-image-label">Праве око</div>
-            <img id="rightPrev" alt="Right preview" class="preview-image" />
+          <div class="preview-images">
+            <div class="preview-image-container">
+              <div class="preview-image-label">Ліве око</div>
+              <img id="leftPrev" alt="Left preview" class="preview-image" />
+            </div>
+            <div class="preview-image-container">
+              <div class="preview-image-label">Праве око</div>
+              <img id="rightPrev" alt="Right preview" class="preview-image" />
+            </div>
           </div>
         </div>
       </div>
@@ -187,13 +199,15 @@
 
       if (dd.summary && dd.saved) {
             logEl.innerHTML += `<div class="exam-summary">
-              <div class="exam-summary-title">Підсумок:</div>
-              ${dd.summary.dialogue_result}<br>
-              <b>Середня точність відповіді:</b> ${dd.summary.overall_accuracy}%<br>
-              <b>Показник запозичень (плагіат):</b> ${dd.summary.plagiarism_score}<br>
-              <b>Оцінка (1-5):</b> ${dd.saved.grade_5}<br>
-              <b>% часу не дивився на екран:</b> ${dd.saved.gaze_not_looking_pct}%<br>
-              <b>Тривалість сесії:</b> ${dd.saved.duration_sec} c
+              <div class="exam-summary-title">Підсумок екзамену</div>
+              <p class="mb-sm">${dd.summary.dialogue_result}</p>
+              <div class="grid grid-equal gap-xs mt-sm text-small">
+                <div><b>Середня точність:</b> ${dd.summary.overall_accuracy}%</div>
+                <div><b>Плагіат:</b> ${dd.summary.plagiarism_score}</div>
+                <div><b>Підсумкова оцінка:</b> <span style="font-weight:700; color:var(--green);">${dd.saved.grade_5} / 5</span></div>
+                <div><b>Час неуваги (погляд):</b> ${dd.saved.gaze_not_looking_pct}%</div>
+                <div><b>Тривалість:</b> ${dd.saved.duration_sec} c</div>
+              </div>
             </div>`;
 
             // Автоматичне завантаження Excel (CSV)

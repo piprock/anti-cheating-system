@@ -23,10 +23,10 @@ class DummyClient:
                 # Return JSON of score or summary depending on prompt
                 messages = kwargs.get('messages', [])
                 last = messages[-1]['content'] if messages else ''
-                if 'Оціни' in last or 'score' in last or 'Поверни' in last:
-                    return DummyResp(json.dumps({"score": 88, "feedback": "Добре."}))
-                elif 'Проаналізуй' in last:
+                if 'Проаналізуй' in last or 'plagiarism' in last:
                     return DummyResp(json.dumps({"summary": "Короткий підсумок.", "plagiarism_score": 12}))
+                elif 'Оціни' in last or 'score' in last:
+                    return DummyResp(json.dumps({"score": 88, "feedback": "Добре."}))
                 else:
                     return DummyResp('Звичайна відповідь')
 

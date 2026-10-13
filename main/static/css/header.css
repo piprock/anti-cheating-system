@@ -1,59 +1,307 @@
 /* ============================================
    HEADER - Шапка сайту
+   Підтримка теми, кнопки доступності та швидкого перемикання теми
    ============================================ */
 
 header {
-    margin: 20px 0;
+    background-color: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--space-3) 0; /* 12px 0 */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.header-content__last {
-    align-items: center;
-    display: flex;
-}
-
-.header-content__last a:last-of-type {
-    background-color: var(--green);
-    text-decoration: none;
-    color: #fff;
-    padding: 15px 34px;
-    border-radius: 133px;
-    transition: background-color .4s ease;
-}
-
-.header-content__last a:last-of-type:hover {
-    background-color: var(--orange);
+    gap: var(--space-4);
 }
 
 .header-content__logo {
-    width: 150px;
+    height: 38px;
+    width: auto;
+    max-width: 180px;
+    display: block;
+    object-fit: contain;
+    transition: opacity var(--transition-fast);
+}
+
+/* Перемикання логотипу за темою:
+   За замовчуванням (темна тема): показуємо логотип для темної теми */
+.header-content__logo--light {
+    display: none !important;
+}
+
+.header-content__logo--dark {
+    display: block !important;
+}
+
+/* Для світлої теми: показуємо логотип для світлої теми */
+[data-theme="light"] .header-content__logo--dark {
+    display: none !important;
+}
+
+[data-theme="light"] .header-content__logo--light {
+    display: block !important;
 }
 
 /* Навігація */
+nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2); /* 8px */
+}
+
 nav a {
     text-decoration: none;
-    margin-right: 45px;
-    color: var(--black);
-    display: inline-block;
-    transition: all .4s ease;
+    color: var(--text-muted);
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    padding: var(--space-2) var(--space-3); /* 8px 12px */
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+    line-height: var(--line-height-normal);
 }
 
 nav a:hover {
-    color: var(--green);
-    transform: scale(1.05);
-}
-
-nav a:last-of-type {
-    margin-right: 0;
+    color: var(--orange);
+    background-color: var(--orange-subtle);
 }
 
 nav a.checked {
     color: var(--orange);
+    font-weight: var(--font-weight-semibold);
+    background-color: var(--orange-subtle);
 }
 
+/* Блок дій у шапці (Доступність, Тема, Вхід) */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
 
+/* Кнопка швидкого перемикання теми (Сонце / Місяць) */
+.theme-quick-btn {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.theme-quick-btn:hover {
+    border-color: var(--orange-hover);
+    background-color: var(--orange);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.theme-quick-btn:hover svg {
+    stroke: #ffffff;
+}
+
+/* Кнопка відкриття панелі доступності */
+.a11y-open-btn {
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: var(--space-2) var(--space-3); /* 8px 12px */
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-main);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-fast);
+}
+
+.a11y-open-btn:hover {
+    border-color: var(--orange-hover);
+    background-color: var(--orange);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.a11y-open-btn:hover svg {
+    stroke: #ffffff;
+}
+
+.header-content__last {
+    display: flex;
+    align-items: center;
+}
+
+.header-content__last a {
+    text-decoration: none;
+    color: var(--text-main);
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--space-2) var(--space-4); /* 8px 16px */
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-content__last a:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+    background-color: var(--orange-subtle);
+}
+
+/* ============================================
+   БУРГЕР-МЕНЮ ТА АДАПТИВНІСТЬ ШАПКИ
+   ============================================ */
+
+/* Кнопка бургер-меню (за замовчуванням прихована на десктопі) */
+.burger-btn {
+    display: none;
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.burger-btn:hover {
+    border-color: var(--orange-hover);
+    background-color: var(--orange);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.burger-box {
+    width: 18px;
+    height: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.burger-line {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: currentColor;
+    border-radius: 2px;
+    transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.burger-btn.active .burger-line:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.burger-btn.active .burger-line:nth-child(2) {
+    opacity: 0;
+}
+
+.burger-btn.active .burger-line:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Адаптивність: Навігація ховається в бургер-меню для екранів < 992px */
+@media (max-width: 991px) {
+    .burger-btn {
+        display: inline-flex;
+    }
+
+    nav,
+    .header-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: var(--bg-card);
+        border-bottom: 1.5px solid var(--border-color);
+        padding: var(--space-4) var(--space-6);
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-2);
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+        z-index: 105;
+        animation: slideDownNav 0.2s ease forwards;
+    }
+
+    nav.open,
+    .header-nav.open {
+        display: flex;
+    }
+
+    nav a,
+    .header-nav a {
+        padding: var(--space-3) var(--space-4);
+        font-size: var(--font-size-base);
+        border-radius: var(--radius-md);
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    nav a:hover,
+    nav a.checked,
+    .header-nav a:hover,
+    .header-nav a.checked {
+        background-color: var(--orange-subtle);
+        color: var(--orange);
+    }
+}
+
+@keyframes slideDownNav {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Мобільні оптимізації для невеликих екранів (< 576px) */
+@media (max-width: 575px) {
+    .header-content {
+        gap: var(--space-2);
+    }
+
+    .a11y-open-btn span {
+        display: none;
+    }
+
+    .a11y-open-btn {
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .header-content__last a {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--font-size-xs);
+    }
+}

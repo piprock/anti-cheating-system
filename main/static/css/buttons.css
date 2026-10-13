@@ -1,47 +1,117 @@
 /* ============================================
-   BUTTONS - Загальні стилі для кнопок
+   BUTTONS - Загальні стилі для кнопок та карток вибору
+   Підтримка темної теми та режимів доступності
    ============================================ */
 
 button,
 .btn {
     text-decoration: none;
-    color: #fff;
-    font-family: "Comfortaa", sans-serif;
-    font-size: 20px;
-    padding: 15px 34px;
-    border-radius: 133px;
-    border: none;
+    color: #ffffff;
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--space-3) var(--space-5); /* 12px 20px */
+    border-radius: var(--radius-md); /* 8px clean border-radius */
+    border: 1px solid transparent;
     background-color: var(--orange);
-    transition: background-color .4s ease;
+    transition: background-color var(--transition-fast), 
+                border-color var(--transition-fast), 
+                transform var(--transition-fast),
+                box-shadow var(--transition-fast);
     cursor: pointer;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    line-height: var(--line-height-normal);
+    user-select: none;
 }
 
-button:hover,
-.btn:hover {
-    background-color: var(--green);
+button:hover:not(:disabled),
+.btn:hover:not(:disabled) {
+    background-color: var(--orange-hover);
+    border-color: var(--orange-hover);
+    transform: translateY(-1px);
 }
 
+button:active:not(:disabled),
+.btn:active:not(:disabled) {
+    background-color: var(--orange-active);
+    border-color: var(--orange-active);
+    transform: translateY(0);
+}
+
+button:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 2px;
+}
+
+/* Виправлення контрасту для вимкнених кнопок */
 button:disabled,
-.btn:disabled {
-    background-color: #ccc;
+.btn:disabled,
+.btn[disabled] {
+    background-color: var(--bg-subtle);
+    border-color: var(--border-color);
+    color: var(--text-light);
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 1;
+    transform: none;
+    box-shadow: none;
 }
 
-/* Кнопка з зеленим фоном */
-.btn-green {
+/* Зелена кнопка (успішна дія / старт) - автоматично адаптується під дальтонізм */
+.btn-green,
+.btn-success {
     background-color: var(--green);
+    border-color: var(--green);
+    color: #ffffff;
 }
 
-.btn-green:hover {
-    background-color: var(--orange);
+.btn-green:hover:not(:disabled),
+.btn-success:hover:not(:disabled) {
+    background-color: var(--green-hover);
+    border-color: var(--green-hover);
+}
+
+.btn-green:active:not(:disabled),
+.btn-success:active:not(:disabled) {
+    background-color: var(--green-hover);
+    border-color: var(--green-hover);
+}
+
+/* Кнопка зупинки / небезпечної дії (завершити запис, стоп) - адаптується під дальтонізм */
+.btn-danger {
+    background-color: var(--red);
+    border-color: var(--red);
+    color: #ffffff;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background-color: var(--red-hover);
+    border-color: var(--red-hover);
+}
+
+/* Вторинна кнопка (outline) */
+.btn-secondary,
+.btn-outline {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover:not(:disabled),
+.btn-outline:hover:not(:disabled) {
+    background-color: var(--bg-subtle);
+    border-color: var(--border-color-hover);
+    color: var(--text-main);
 }
 
 /* Маленькі кнопки */
 .btn-small {
-    padding: 10px 20px;
-    font-size: 16px;
+    padding: var(--space-2) var(--space-3); /* 8px 12px */
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
 }
 
 /* Кнопки для CTA секцій */
@@ -49,61 +119,80 @@ button:disabled,
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    margin-top: 30px;
+    gap: var(--space-4); /* 16px */
+    margin-top: var(--space-4); /* 16px */
     flex-wrap: wrap;
 }
 
 .button-try-about a {
     text-decoration: none;
-    color: #fff;
-    padding: 15px 34px;
-    border-radius: 133px;
-    font-family: "Comfortaa", sans-serif;
-    font-size: 20px;
-    transition: background-color .4s ease;
+    color: #ffffff;
+    padding: var(--space-3) var(--space-6); /* 12px 24px */
+    border-radius: var(--radius-md);
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
 }
 
 .button-try-about .try {
     background-color: var(--orange);
+    border-color: var(--orange);
+    color: #ffffff;
 }
 
 .button-try-about .try:hover {
-    background-color: var(--green);
+    background-color: var(--orange-hover);
+    border-color: var(--orange-hover);
+    transform: translateY(-1px);
 }
 
 .button-try-about .add_inf {
-    background-color: var(--green);
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-main);
 }
 
 .button-try-about .add_inf:hover {
-    background-color: var(--orange);
+    background-color: var(--bg-subtle);
+    border-color: var(--orange);
+    color: var(--orange);
+    transform: translateY(-1px);
 }
 
-/* Кнопки для форм */
+/* Кнопка завантаження файлу */
 .custom-file-upload {
-    display: inline-block;
-    padding: 15px 25px;
-    border-radius: 133px;
-    border: none;
-    background-color: var(--orange);
-    transition: background-color .4s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3) var(--space-4); /* 12px 16px */
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
     cursor: pointer;
-    color: #fff;
-    font-family: "Comfortaa", sans-serif;
-    font-size: 20px;
+    line-height: var(--line-height-normal);
 }
 
 .custom-file-upload:hover {
-    background-color: var(--green);
+    background-color: var(--bg-subtle);
+    border-color: var(--border-color-hover);
 }
 
-/* Контейнер для кнопок з вирівнюванням */
+/* Контейнери для кнопок */
 .button-container {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 30px;
+    gap: var(--space-4);
     flex-wrap: wrap;
 }
 
@@ -113,4 +202,109 @@ button:disabled,
 
 .button-container-left {
     justify-content: flex-start;
+}
+
+/* ============================================
+   КАРТКИ ВАРІАНТІВ ВІДПОВІДЕЙ (CHOICE / OPTIONS)
+   Стани: default, hover, active, selected
+   ============================================ */
+
+.choice-list,
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3); /* 12px */
+    margin: var(--space-4) 0; /* 16px */
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .options-grid-2col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.choice-card,
+.option-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3); /* 12px */
+    padding: var(--space-4); /* 16px */
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+    text-align: left;
+    width: 100%;
+    color: var(--text-main);
+    font-family: var(--font-main);
+    font-size: var(--font-size-base);
+    position: relative;
+    box-shadow: none;
+}
+
+/* Hover стан */
+.choice-card:hover,
+.option-card:hover {
+    border-color: var(--border-color-hover);
+    background-color: var(--bg-subtle);
+    transform: translateY(-1px);
+}
+
+/* Active стан (натискання) */
+.choice-card:active,
+.option-card:active {
+    transform: translateY(0);
+    background-color: var(--bg-subtle);
+}
+
+/* Selected стан (обраний варіант) */
+.choice-card.selected,
+.option-card.selected,
+.choice-card[aria-selected="true"],
+.option-card[aria-selected="true"] {
+    border: 1.5px solid var(--orange);
+    background-color: var(--orange-subtle);
+    color: var(--text-main);
+    font-weight: var(--font-weight-medium);
+}
+
+/* Бейдж літери (A, B, C, D) */
+.choice-badge,
+.option-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border-color);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+}
+
+.choice-card:hover .choice-badge,
+.option-card:hover .option-badge {
+    border-color: var(--border-color-hover);
+    color: var(--text-main);
+}
+
+.choice-card.selected .choice-badge,
+.option-card.selected .option-badge {
+    background-color: var(--orange);
+    border-color: var(--orange);
+    color: #ffffff;
+}
+
+.choice-text,
+.option-text {
+    flex: 1;
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
 }

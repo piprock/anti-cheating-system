@@ -78,6 +78,157 @@ nav a.checked {
     background-color: var(--orange-subtle);
 }
 
+/* ============================================
+   ВИПАДАЮЧЕ МЕНЮ (DROPDOWN) "ПРО НАС"
+   ============================================ */
+
+.nav-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.nav-dropdown__btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    padding: var(--space-2) var(--space-3); /* 8px 12px */
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+    line-height: var(--line-height-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    user-select: none;
+}
+
+.nav-dropdown__btn:hover,
+.nav-dropdown.is-open .nav-dropdown__btn {
+    color: var(--orange);
+    background-color: var(--orange-subtle);
+}
+
+.nav-dropdown__btn.checked {
+    color: var(--orange);
+    font-weight: var(--font-weight-semibold);
+    background-color: var(--orange-subtle);
+}
+
+.nav-dropdown__btn:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 2px;
+}
+
+.nav-dropdown__arrow {
+    transition: transform var(--transition-fast);
+    stroke-width: 2.5;
+}
+
+.nav-dropdown.is-open .nav-dropdown__arrow {
+    transform: rotate(180deg);
+}
+
+/* Меню випадаючого списку */
+.nav-dropdown__menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    min-width: 220px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-1);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.25);
+    z-index: 120;
+    flex-direction: column;
+    gap: 2px;
+}
+
+[data-theme="light"] .nav-dropdown__menu {
+    box-shadow: 0 10px 25px -5px rgba(41, 37, 36, 0.12), 0 8px 10px -6px rgba(41, 37, 36, 0.08);
+}
+
+/* Пункт випадаючого списку */
+.nav-dropdown__item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    color: var(--text-main);
+    text-decoration: none;
+    font-family: var(--font-main);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+    white-space: nowrap;
+    line-height: var(--line-height-normal);
+}
+
+.nav-dropdown__item:hover {
+    color: var(--orange);
+    background-color: var(--orange-subtle);
+}
+
+.nav-dropdown__item.checked {
+    color: var(--orange);
+    font-weight: var(--font-weight-semibold);
+    background-color: var(--orange-subtle);
+}
+
+.nav-dropdown__item:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: -2px;
+}
+
+/* Десктоп: відкриття при наведенні або активному стані */
+@media (min-width: 992px) {
+    .nav-dropdown:hover .nav-dropdown__arrow {
+        transform: rotate(180deg);
+    }
+
+    .nav-dropdown:hover .nav-dropdown__menu,
+    .nav-dropdown.is-open .nav-dropdown__menu {
+        display: flex;
+        animation: dropdownFadeIn 0.15s ease forwards;
+    }
+
+    /* Невидимий місток між кнопкою та меню для безперервного hover */
+    .nav-dropdown::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        height: var(--space-1);
+        display: block;
+    }
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Підтримка високого контрасту */
+[data-colorblind="high-contrast"] .nav-dropdown__menu {
+    border: 2px solid var(--border-color);
+}
+
+[data-colorblind="high-contrast"] .nav-dropdown__item {
+    text-decoration: underline;
+}
+
 /* Блок дій у шапці (Доступність, Тема, Вхід) */
 .header-actions {
     display: flex;
@@ -269,6 +420,59 @@ nav a.checked {
     .header-nav a.checked {
         background-color: var(--orange-subtle);
         color: var(--orange);
+    }
+
+    /* Адаптивність випадаючого меню в мобільному списку */
+    .nav-dropdown {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .nav-dropdown__btn {
+        width: 100%;
+        justify-content: space-between;
+        padding: var(--space-3) var(--space-4);
+        font-size: var(--font-size-base);
+        border-radius: var(--radius-md);
+        min-height: 44px;
+    }
+
+    .nav-dropdown:hover .nav-dropdown__arrow {
+        transform: none; /* На мобільних поворот тільки при відкритті */
+    }
+
+    .nav-dropdown.is-open .nav-dropdown__arrow {
+        transform: rotate(180deg);
+    }
+
+    .nav-dropdown__menu {
+        position: static;
+        width: 100%;
+        min-width: unset;
+        box-shadow: none;
+        border: none;
+        border-left: 2px solid var(--border-color);
+        border-radius: 0;
+        padding: var(--space-1) 0 var(--space-1) var(--space-3);
+        margin-left: var(--space-4);
+        margin-top: var(--space-1);
+        margin-bottom: var(--space-1);
+        background: transparent;
+        display: none;
+        flex-direction: column;
+        gap: var(--space-1);
+    }
+
+    .nav-dropdown.is-open .nav-dropdown__menu {
+        display: flex;
+    }
+
+    .nav-dropdown__item {
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--font-size-sm);
+        min-height: 40px;
+        border-radius: var(--radius-sm);
     }
 }
 

@@ -25,7 +25,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="{% static "images/icon.ico" %}">
     <link rel="stylesheet" href="{% static "css/style.css" %}?v=2.4">
     <link rel="stylesheet" href="{% static "css/footer.css" %}?v=2.6">
-    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.5">
+    <link rel="stylesheet" href="{% static "css/header.css" %}?v=2.6">
     <link rel="stylesheet" href="{% static "css/buttons.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/layout.css" %}?v=2.3">
     <link rel="stylesheet" href="{% static "css/forms.css" %}?v=2.3">
@@ -47,11 +47,26 @@
                     <img class="header-content__logo header-content__logo--light" src="{% static "images/light_theme_logo.png" %}" alt="Avatar AI">
                 </a>
 
-                <nav id="headerNav" class="header-nav">
+                <nav id="headerNav" class="header-nav" aria-label="Основна навігація">
                     <a class="{% if request.resolver_match.url_name == 'main' %}checked{% endif %}" href="{% url "main" %}">Головна</a>
                     <a class="{% if request.resolver_match.url_name == 'gaze' %}checked{% endif %}" href="{% url "gaze" %}">Моніторинг погляду</a>
-                    <a class="{% if request.resolver_match.url_name == 'about' %}checked{% endif %}" href="{% url "about" %}">Про нас</a>
-                    <a class="{% if request.resolver_match.url_name == 'contact' %}checked{% endif %}" href="{% url "contact" %}">Контактна інформація</a>
+                    <div class="nav-dropdown">
+                        <button id="aboutDropdownBtn" 
+                                class="nav-dropdown__btn {% if request.resolver_match.url_name == 'about' or request.resolver_match.url_name == 'contact' %}checked{% endif %}" 
+                                type="button" 
+                                aria-expanded="false" 
+                                aria-haspopup="true" 
+                                aria-controls="aboutDropdownMenu">
+                            <span>Про нас</span>
+                            <svg class="ui-icon nav-dropdown__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                        <div id="aboutDropdownMenu" class="nav-dropdown__menu" role="menu" aria-labelledby="aboutDropdownBtn">
+                            <a role="menuitem" class="nav-dropdown__item {% if request.resolver_match.url_name == 'about' %}checked{% endif %}" href="{% url "about" %}">Про платформу</a>
+                            <a role="menuitem" class="nav-dropdown__item {% if request.resolver_match.url_name == 'contact' %}checked{% endif %}" href="{% url "contact" %}">Контакти</a>
+                        </div>
+                    </div>
                 </nav>
 
                 <div class="header-actions">
@@ -293,6 +308,6 @@
     </div>
 
     <script src="{% static "js/a11y.js" %}?v=2.2"></script>
-    <script src="{% static "js/main.js" %}"></script>
+    <script src="{% static "js/main.js" %}?v=2.4"></script>
 </body>
 </html>

@@ -597,6 +597,85 @@ function initBurgerMenu() {
 }
 
 // ============================================================================
+// Navigation Dropdown
+// ============================================================================
+
+/**
+ * Initialize navigation dropdown menu (e.g. "Про нас")
+ */
+function initNavDropdown() {
+  const dropdown = document.querySelector(".nav-dropdown");
+  if (!dropdown) return;
+
+  const btn = dropdown.querySelector(".nav-dropdown__btn");
+  const menu = dropdown.querySelector(".nav-dropdown__menu");
+  if (!btn || !menu) return;
+
+  function setDropdownState(open) {
+    dropdown.classList.toggle("is-open", open);
+    btn.setAttribute("aria-expanded", String(open));
+  }
+
+  function toggleDropdown() {
+    const isCurrentlyOpen = dropdown.classList.contains("is-open");
+    setDropdownState(!isCurrentlyOpen);
+  }
+
+  btn.addEventListener("click", function(e) {
+    e.stopPropagation();
+    toggleDropdown();
+  });
+
+  // Keyboard navigation on button
+  btn.addEventListener("keydown", function(e) {
+    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setDropdownState(true);
+      const firstLink = menu.querySelector("a");
+      if (firstLink) firstLink.focus();
+    } else if (e.key === "Escape") {
+      setDropdownState(false);
+      btn.focus();
+    }
+  });
+
+  // Keyboard navigation inside dropdown menu
+  menu.addEventListener("keydown", function(e) {
+    const links = Array.from(menu.querySelectorAll("a"));
+    const currentIndex = links.indexOf(document.activeElement);
+
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setDropdownState(false);
+      btn.focus();
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const nextIndex = (currentIndex + 1) % links.length;
+      links[nextIndex].focus();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const prevIndex = (currentIndex - 1 + links.length) % links.length;
+      links[prevIndex].focus();
+    }
+  });
+
+  // Close when clicking outside
+  document.addEventListener("click", function(e) {
+    if (dropdown.classList.contains("is-open") && !dropdown.contains(e.target)) {
+      setDropdownState(false);
+    }
+  });
+
+  // Close on Escape key globally if open
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && dropdown.classList.contains("is-open")) {
+      setDropdownState(false);
+      btn.focus();
+    }
+  });
+}
+
+// ============================================================================
 // Initialization
 // ============================================================================
 
@@ -605,8 +684,10 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", function() {
     initFileUploadHandlers();
     initBurgerMenu();
+    initNavDropdown();
   });
 } else {
   initFileUploadHandlers();
   initBurgerMenu();
+  initNavDropdown();
 }

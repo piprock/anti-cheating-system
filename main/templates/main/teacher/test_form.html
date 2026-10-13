@@ -1,0 +1,271 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container dashboard-container" style="max-width: 820px;">
+    <!-- Шапка форми створення/редагування тесту -->
+    <div class="dashboard-header">
+        <div class="dashboard-welcome">
+            <h1 style="margin-bottom: var(--space-1);">
+                {% if is_create %}Створення нового тесту{% else %}Редагування тесту{% endif %}
+            </h1>
+            <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin: 0;">
+                {% if is_create %}
+                    Вкажіть назву, унікальний код та додайте перелік запитань із власним лімітом часу для кожного.
+                {% else %}
+                    Оновлення налаштувань, списку запитань та індивідуального часу для тесту «{{ survey.title|default:survey.key }}».
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="dashboard-actions">
+            <a href="{% url 'teacher_tests_list' %}" class="table-btn">
+                <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Назад до списку тестів</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="dashboard-card">
+        <form id="testForm" method="post" novalidate style="display: flex; flex-direction: column; gap: var(--space-5);">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert--error" role="alert">
+                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <div>
+                        {% for err in form.non_field_errors %}
+                            <div>{{ err }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Назва тесту -->
+            <div class="form-group-column">
+                <label for="{{ form.title.id_for_label }}">
+                    {{ form.title.label }} <span style="color: var(--red);">*</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <span style="color: var(--red); font-size: var(--font-size-xs);">{{ form.title.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Унікальний код / ключ -->
+            <div class="form-group-column">
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                    <label for="{{ form.key.id_for_label }}">{{ form.key.label }} <span style="color: var(--red);">*</span></label>
+                    <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Унікальний ідентифікатор для посилання на тест, наприклад: /exam/python_exam/">
+                        <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </span>
+                </div>
+                {{ form.key }}
+                {% if form.key.errors %}
+                    <span style="color: var(--red); font-size: var(--font-size-xs);">{{ form.key.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Опис тесту -->
+            <div class="form-group-column">
+                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <span style="color: var(--red); font-size: var(--font-size-xs);">{{ form.description.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Прапорці активності та відкритості (без загального часу) -->
+            <div style="display: flex; gap: var(--space-6); flex-wrap: wrap; padding: var(--space-2) 0;">
+                <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+                    {{ form.active }}
+                    <span style="font-weight: 500;">{{ form.active.label }}</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+                    {{ form.is_public }}
+                    <span style="font-weight: 500;">{{ form.is_public.label }}</span>
+                </label>
+            </div>
+
+            <div style="height: 1px; background-color: var(--border-color); margin: var(--space-2) 0;"></div>
+
+            <!-- Секція: Індивідуальні екзаменаційні запитання -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); flex-wrap: wrap; gap: var(--space-2);">
+                    <div style="display: flex; align-items: center; gap: var(--space-2);">
+                        <h2 style="font-size: var(--font-size-base); font-weight: 700; margin: 0;">
+                            Контрольні екзаменаційні запитання
+                        </h2>
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Кожне запитання має окреме поле формулювання та власний ліміт часу на відповідь">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </div>
+                    <span style="color: var(--text-muted); font-size: var(--font-size-xs);" id="questionsCountLabel">
+                        Запитань: {{ questions_data|length }}
+                    </span>
+                </div>
+                <p style="color: var(--text-muted); font-size: var(--font-size-xs); margin: 0 0 var(--space-4) 0;">
+                    Задайте формулювання для кожного питання та точну кількість секунд на відповідь студента.
+                </p>
+
+                <!-- Контейнер карток запитань -->
+                <div id="questionsContainer" style="display: flex; flex-direction: column; gap: var(--space-3);">
+                    {% for q in questions_data %}
+                    <div class="question-card" style="background-color: var(--bg-card); border: 1px solid var(--border-color); padding: var(--space-4); border-radius: var(--radius-md); box-sizing: border-box; transition: border-color 0.15s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+                            <span class="question-number-badge badge" style="background-color: var(--orange-subtle); color: var(--orange); border-color: var(--orange); font-weight: bold; font-size: var(--font-size-xs);">
+                                Запитання #{{ forloop.counter }}
+                            </span>
+                            <button type="button" class="table-btn delete-question-btn" onclick="removeQuestionCard(this)" title="Видалити запитання" aria-label="Видалити запитання" style="padding: 4px 8px; color: var(--red); border-color: transparent; min-height: unset;">
+                                <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="form-group-column" style="margin-bottom: var(--space-3);">
+                            <label style="font-size: var(--font-size-xs); font-weight: 600; margin-bottom: 4px;">
+                                Текст запитання <span style="color: var(--red);">*</span>
+                            </label>
+                            <textarea name="question_text" class="input-medium" rows="2" placeholder="Введіть запитання для студента..." required style="width: 100%; box-sizing: border-box; resize: vertical;">{{ q.text }}</textarea>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;">
+                            <label style="font-size: var(--font-size-xs); color: var(--text-muted); display: inline-flex; align-items: center; gap: var(--space-2);">
+                                <span>Час на відповідь:</span>
+                                <input type="number" name="question_time" class="input-medium" min="5" max="300" value="{{ q.time|default:15 }}" style="width: 90px; padding: 4px 8px; box-sizing: border-box;" required>
+                                <span>секунд</span>
+                            </label>
+                            <span style="font-size: 11px; color: var(--text-muted); opacity: 0.8;">
+                                (від 5 до 300 сек.)
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Кнопка додавання нового запитання -->
+                <button type="button" id="addQuestionBtn" onclick="addQuestionCard()" class="table-btn" style="width: 100%; justify-content: center; min-height: 44px; border: 2px dashed var(--orange); color: var(--orange); background: transparent; font-weight: bold; border-radius: var(--radius-md); margin-top: var(--space-3); display: inline-flex; align-items: center; gap: var(--space-2);">
+                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Додати запитання</span>
+                </button>
+            </div>
+
+            <!-- Кнопки збереження -->
+            <div style="display: flex; gap: var(--space-3); justify-content: flex-end; margin-top: var(--space-4); border-top: 1px solid var(--border-color); padding-top: var(--space-4);">
+                <a href="{% url 'teacher_tests_list' %}" class="table-btn">
+                    <span>Скасувати</span>
+                </a>
+                <button type="submit" class="table-btn" style="background-color: var(--orange); color: #ffffff; border-color: var(--orange); font-weight: bold; min-width: 140px; justify-content: center;">
+                    {% if is_create %}Створити тест{% else %}Зберегти зміни{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script>
+    function renumberQuestions() {
+        const container = document.getElementById('questionsContainer');
+        const cards = container.querySelectorAll('.question-card');
+        const label = document.getElementById('questionsCountLabel');
+        if (label) {
+            label.textContent = 'Запитань: ' + cards.length;
+        }
+
+        cards.forEach((card, index) => {
+            const badge = card.querySelector('.question-number-badge');
+            if (badge) {
+                badge.textContent = 'Запитання #' + (index + 1);
+            }
+            const deleteBtn = card.querySelector('.delete-question-btn');
+            if (deleteBtn) {
+                deleteBtn.style.visibility = (cards.length > 1) ? 'visible' : 'hidden';
+            }
+        });
+    }
+
+    function addQuestionCard(text = '', time = 15) {
+        const container = document.getElementById('questionsContainer');
+        const nextIndex = container.querySelectorAll('.question-card').length + 1;
+
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.style.cssText = 'background-color: var(--bg-card); border: 1px solid var(--border-color); padding: var(--space-4); border-radius: var(--radius-md); box-sizing: border-box; transition: border-color 0.15s ease;';
+
+        card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+                <span class="question-number-badge badge" style="background-color: var(--orange-subtle); color: var(--orange); border-color: var(--orange); font-weight: bold; font-size: var(--font-size-xs);">
+                    Запитання #${nextIndex}
+                </span>
+                <button type="button" class="table-btn delete-question-btn" onclick="removeQuestionCard(this)" title="Видалити запитання" aria-label="Видалити запитання" style="padding: 4px 8px; color: var(--red); border-color: transparent; min-height: unset;">
+                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="form-group-column" style="margin-bottom: var(--space-3);">
+                <label style="font-size: var(--font-size-xs); font-weight: 600; margin-bottom: 4px;">
+                    Текст запитання <span style="color: var(--red);">*</span>
+                </label>
+                <textarea name="question_text" class="input-medium" rows="2" placeholder="Введіть запитання для студента..." required style="width: 100%; box-sizing: border-box; resize: vertical;">${text}</textarea>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;">
+                <label style="font-size: var(--font-size-xs); color: var(--text-muted); display: inline-flex; align-items: center; gap: var(--space-2);">
+                    <span>Час на відповідь:</span>
+                    <input type="number" name="question_time" class="input-medium" min="5" max="300" value="${time}" style="width: 90px; padding: 4px 8px; box-sizing: border-box;" required>
+                    <span>секунд</span>
+                </label>
+                <span style="font-size: 11px; color: var(--text-muted); opacity: 0.8;">
+                    (від 5 до 300 сек.)
+                </span>
+            </div>
+        `;
+
+        container.appendChild(card);
+        renumberQuestions();
+        const textarea = card.querySelector('textarea');
+        if (textarea) textarea.focus();
+    }
+
+    function removeQuestionCard(btn) {
+        const container = document.getElementById('questionsContainer');
+        const cards = container.querySelectorAll('.question-card');
+        if (cards.length <= 1) {
+            alert('Тест повинен містити хоча б одне запитання.');
+            return;
+        }
+        const card = btn.closest('.question-card');
+        if (card) {
+            card.remove();
+            renumberQuestions();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        renumberQuestions();
+    });
+</script>
+{% endblock content %}

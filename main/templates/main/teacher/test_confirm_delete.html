@@ -1,0 +1,97 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container dashboard-container">
+    <!-- Шапка підтвердження видалення тесту -->
+    <div class="dashboard-header">
+        <div class="dashboard-welcome">
+            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-1); flex-wrap: wrap;">
+                <h1 style="color: var(--red);">Видалення тесту</h1>
+                <span class="badge" style="background-color: var(--orange-subtle); color: var(--orange); border-color: var(--orange);">
+                    Код: {{ survey.key }}
+                </span>
+            </div>
+            <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin: 0;">
+                Підтвердіть видалення або деактивацію тесту «{{ survey.title|default:survey.key }}».
+            </p>
+        </div>
+
+        <div class="dashboard-actions">
+            <a href="{% url 'teacher_tests_list' %}" class="table-btn">
+                <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Назад до списку тестів</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Картка підтвердження -->
+    <div class="dashboard-card" style="max-width: 680px; margin: 0 auto; border-color: rgba(239, 68, 68, 0.4);">
+        <div style="display: flex; align-items: flex-start; gap: var(--space-4); margin-bottom: var(--space-5);">
+            <div style="padding: var(--space-3); background-color: var(--red-subtle); color: var(--red); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                <svg class="ui-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <div>
+                <h2 style="margin: 0 0 var(--space-2) 0; font-size: var(--font-size-lg);">
+                    Ви впевнені, що хочете видалити тест?
+                </h2>
+                <p style="color: var(--text-muted); margin: 0; font-size: var(--font-size-sm); line-height: 1.5;">
+                    Тест: <strong>«{{ survey.title|default:survey.key }}»</strong> (код: <code>{{ survey.key }}</code>)
+                </p>
+            </div>
+        </div>
+
+        {% if sessions_count > 0 %}
+            <div class="alert alert--warning" style="margin-bottom: var(--space-5); display: flex; gap: var(--space-3); align-items: flex-start;">
+                <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <div>
+                    <strong>Увага! Студенти вже проходили цей тест (сесій: {{ sessions_count }}).</strong>
+                    <div style="font-size: var(--font-size-xs); margin-top: var(--space-1); line-height: 1.4;">
+                        Повне видалення тесту призведе до видалення всіх {{ sessions_count }} збережених результатів студентів та їхніх оцінок!
+                        Рекомендується <strong>деактивувати</strong> тест замість повного видалення.
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div style="display: flex; gap: var(--space-3); justify-content: flex-end; flex-wrap: wrap; margin-top: var(--space-6); pt-4; border-top: 1px solid var(--border-color); padding-top: var(--space-4);">
+            <a href="{% url 'teacher_tests_list' %}" class="table-btn" style="min-height: 40px; padding: var(--space-2) var(--space-4);">
+                Скасувати
+            </a>
+
+            {% if sessions_count > 0 %}
+                <form method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="deactivate">
+                    <button type="submit" class="table-btn" style="background-color: var(--orange-subtle); color: var(--orange); border-color: var(--orange); min-height: 40px; padding: var(--space-2) var(--space-4); font-weight: 600;">
+                        Деактивувати (рекомендовано)
+                    </button>
+                </form>
+            {% endif %}
+
+            <form method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <button type="submit" class="table-btn" style="background-color: var(--red); color: #ffffff; border-color: var(--red); min-height: 40px; padding: var(--space-2) var(--space-4); font-weight: 600;">
+                    <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    <span>Остаточно видалити</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock content %}

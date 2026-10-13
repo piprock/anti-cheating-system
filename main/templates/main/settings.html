@@ -125,7 +125,6 @@
                         <div class="form-group">
                             <label for="{{ profile_form.middle_name.id_for_label }}">{{ profile_form.middle_name.label }}</label>
                             {{ profile_form.middle_name }}
-                            <span class="form-group__hint">По батькові студента або викладача (за наявності)</span>
                             {% if profile_form.middle_name.errors %}
                                 <span class="form-group__error">{{ profile_form.middle_name.errors.0 }}</span>
                             {% endif %}
@@ -134,7 +133,6 @@
                         <div class="form-group">
                             <label for="{{ profile_form.group.id_for_label }}">{{ profile_form.group.label }}</label>
                             {{ profile_form.group }}
-                            <span class="form-group__hint">Наприклад, КН-41 або номер навчального потоку</span>
                             {% if profile_form.group.errors %}
                                 <span class="form-group__error">{{ profile_form.group.errors.0 }}</span>
                             {% endif %}
@@ -143,7 +141,6 @@
                         <div class="form-group">
                             <label for="{{ profile_form.email.id_for_label }}">{{ profile_form.email.label }}</label>
                             {{ profile_form.email }}
-                            <span class="form-group__hint">Електронна пошта для системних повідомлень</span>
                             {% if profile_form.email.errors %}
                                 <span class="form-group__error">{{ profile_form.email.errors.0 }}</span>
                             {% endif %}
@@ -293,12 +290,9 @@
 
                         <!-- Блок переваг статусу викладача -->
                         <div class="teacher-promo-box">
-                            <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); margin-bottom: var(--space-2); color: var(--text-main);">
+                            <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); margin-bottom: var(--space-3); color: var(--text-main);">
                                 Можливості викладача в Avatar AI
                             </h3>
-                            <p style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: var(--space-4);">
-                                Отримавши підтверджений статус викладача, ви зможете проводити автоматизовані іспити та тестування з контролем академічної доброчесності.
-                            </p>
                             <div class="teacher-benefits">
                                 <div class="teacher-benefit-item">
                                     <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -344,7 +338,6 @@
                             <div class="form-group">
                                 <label for="{{ teacher_form.department.id_for_label }}">{{ teacher_form.department.label }}</label>
                                 {{ teacher_form.department }}
-                                <span class="form-group__hint">Вкажіть ваш навчальний заклад, факультет або кафедру</span>
                                 {% if teacher_form.department.errors %}
                                     <span class="form-group__error">{{ teacher_form.department.errors.0 }}</span>
                                 {% endif %}
@@ -353,7 +346,6 @@
                             <div class="form-group">
                                 <label for="{{ teacher_form.position.id_for_label }}">{{ teacher_form.position.label }}</label>
                                 {{ teacher_form.position }}
-                                <span class="form-group__hint">Наприклад: Доцент, Асистент, Старший викладач, Вчитель</span>
                                 {% if teacher_form.position.errors %}
                                     <span class="form-group__error">{{ teacher_form.position.errors.0 }}</span>
                                 {% endif %}
@@ -362,7 +354,6 @@
                             <div class="form-group">
                                 <label for="{{ teacher_form.phone.id_for_label }}">{{ teacher_form.phone.label }}</label>
                                 {{ teacher_form.phone }}
-                                <span class="form-group__hint">Контактний номер для верифікації (необов'язково)</span>
                                 {% if teacher_form.phone.errors %}
                                     <span class="form-group__error">{{ teacher_form.phone.errors.0 }}</span>
                                 {% endif %}
@@ -371,7 +362,6 @@
                             <div class="form-group">
                                 <label for="{{ teacher_form.reason.id_for_label }}">{{ teacher_form.reason.label }}</label>
                                 {{ teacher_form.reason }}
-                                <span class="form-group__hint">Опишіть дисципліни або навчальні групи, для яких планується тестування</span>
                                 {% if teacher_form.reason.errors %}
                                     <span class="form-group__error">{{ teacher_form.reason.errors.0 }}</span>
                                 {% endif %}

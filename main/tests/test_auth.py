@@ -179,7 +179,12 @@ def test_profile_edit_view(client):
 
     url = reverse("profile_edit")
     get_res = client.get(url)
-    assert get_res.status_code == 200
+    assert get_res.status_code == 302
+    assert get_res.url == f"{reverse('settings')}?tab=profile"
+
+    get_follow = client.get(url, follow=True)
+    assert get_follow.status_code == 200
+    assert "Редагування профілю" in get_follow.content.decode("utf-8")
 
     post_res = client.post(url, {
         "first_name": "НовеІмя",
@@ -545,6 +550,58 @@ def test_settings_change_password(client):
 
     user.refresh_from_db()
     assert user.check_password("newSecurePassword456!") is True
+
+
+@pytest.mark.django_db
+def test_dashboard_activity_log_pagination(client):
+    user = User.objects.create_user(username="log_user", password="password123")
+    client.force_login(user)
+
+    for i in range(25):
+        ActivityLog.objects.create(
+            user=user,
+            action=ActivityLog.ACTION_LOGIN,
+            details=f"Вхід у систему #{i+1}"
+        )
+
+    dash_page1 = client.get(reverse("dashboard"))
+    assert dash_page1.status_code == 200
+    text1 = dash_page1.content.decode("utf-8")
+    assert "Журнал активності" in text1
+    assert "Сторінка 1 з 3" in text1
+    assert "Вхід у систему #25" in text1
+
+    dash_page2 = client.get(f"{reverse('dashboard')}?log_page=2")
+    assert dash_page2.status_code == 200
+    text2 = dash_page2.content.decode("utf-8")
+    assert "Сторінка 2 з 3" in text2
+    assert "display: flex;" in text2
+
+    # Verify session log subtitle was removed
+    assert "Збережені результати, аналітика погляду (античітинг), плагіат та підсумкові оцінки" not in text1
+
+
+@pytest.mark.django_db
+def test_settings_cleaned_text_and_placeholders(client):
+    user = User.objects.create_user(username="student_clean", password="password123")
+    client.force_login(user)
+
+    res = client.get(f"{reverse('settings')}?tab=profile")
+    assert res.status_code == 200
+    text = res.content.decode("utf-8")
+    # Profile edit form has placeholders and no hints
+    assert 'placeholder="Шевченко"' in text
+    assert 'placeholder="Тарас"' in text
+    assert "По батькові студента або викладача (за наявності)" not in text
+    assert "Наприклад, КН-41 або номер навчального потоку" not in text
+
+    # Teacher tab has no promo paragraph and no hints under inputs
+    res_t = client.get(f"{reverse('settings')}?tab=teacher")
+    assert res_t.status_code == 200
+    text_t = res_t.content.decode("utf-8")
+    assert "Отримавши підтверджений статус викладача, ви зможете проводити автоматизовані іспити" not in text_t
+    assert "Вкажіть ваш навчальний заклад, факультет або кафедру" not in text_t
+
 
 
 

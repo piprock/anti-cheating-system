@@ -20,7 +20,8 @@
   <!-- ПІБ студента для авторизації сесії -->
   <div class="student-auth-bar">
     <label for="studentName">ПІБ студента:</label>
-    <input id="studentName" type="text" class="input-medium" placeholder="Прізвище Ім'я По батькові" autocomplete="name">
+    <input id="studentName" type="text" class="input-medium" placeholder="Прізвище Ім'я По батькові" autocomplete="name"
+           value="{% if request.user.is_authenticated %}{{ request.user.profile.full_name|default:request.user.get_full_name|default:request.user.username }}{% endif %}">
     <button id="startExamBtn" class="btn btn-green">Почати екзамен</button>
   </div>
 
@@ -35,7 +36,7 @@
         </div>
 
         <div class="mb-md">
-          <p id="question">Введіть своє ПІБ та натисніть «Почати екзамен» для отримання першого запитання.</p>
+          <p id="question">{% if request.user.is_authenticated %}Ваше ПІБ заповнено автоматично з акаунту. Натисніть «Почати екзамен» для старту.{% else %}Введіть своє ПІБ та натисніть «Почати екзамен» для отримання першого запитання.{% endif %}</p>
         </div>
 
         <div class="flex-between flex-wrap gap-sm">
@@ -231,6 +232,10 @@
         progressEl.textContent = `Питання ${idx} з ${totalExam}`;
         statusEl.textContent = 'Слухаю наступну відповідь...';
 
+        if (dd.answer_time_sec) {
+          answerTimeSec = dd.answer_time_sec;
+        }
+
         // Озвучити поточне запитання
         await fetch(`/api/exam/speak/${key}/`, { method: 'POST' });
 
@@ -282,10 +287,13 @@
       alert("Введіть ПІБ студента.");
       return;
     }
-    const parts = fullname.split(/\s+/).filter(Boolean);
-    if (parts.length < 2 || fullname.length < 5) {
-      alert("ПІБ має складатися щонайменше з двох слів і бути довшим за 5 символів.");
-      return;
+    const isAuthenticated = {% if request.user.is_authenticated %}true{% else %}false{% endif %};
+    if (!isAuthenticated) {
+      const parts = fullname.split(/\s+/).filter(Boolean);
+      if (parts.length < 2 || fullname.length < 5) {
+        alert("ПІБ має складатися щонайменше з двох слів і бути довшим за 5 символів.");
+        return;
+      }
     }
 
     try {
@@ -314,6 +322,9 @@
 
       totalRaw = nameData.total;
       totalExam = Math.max(0, totalRaw - 1);
+      if (nameData.answer_time_sec) {
+        answerTimeSec = nameData.answer_time_sec;
+      }
 
       // Поточне запитання – перше екзаменаційне
       questionEl.textContent = nameData.next_question;

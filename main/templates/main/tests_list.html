@@ -1,0 +1,287 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container dashboard-container">
+    <!-- Шапка каталогу тестів -->
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-6);">
+        <div class="dashboard-welcome">
+            <h1 style="margin: 0 0 var(--space-1) 0;">Каталог тестів та опитувань</h1>
+            <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin: 0;">
+                Оберіть доступний тест для перевірки знань з аудіо-відповідями та моніторингом погляду.
+            </p>
+        </div>
+
+        <!-- Пошук тестів -->
+        <div style="flex-grow: 1; max-width: 420px; min-width: 260px; margin-left: auto;">
+            <form method="get" action="{% url 'tests_list' %}" style="display: flex; gap: var(--space-2); width: 100%;">
+                <div style="position: relative; flex-grow: 1;">
+                    <input type="text"
+                           name="q"
+                           value="{{ q }}"
+                           placeholder="Пошук за назвою або кодом..."
+                           class="input-medium"
+                           style="width: 100%; padding-left: 36px; box-sizing: border-box;"
+                           aria-label="Пошук тестів">
+                    <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </div>
+                <button type="submit" class="table-btn" style="min-height: 40px; padding: 0 var(--space-4);">
+                    Шукати
+                </button>
+                {% if q %}
+                    <a href="{% url 'tests_list' %}" class="table-btn" title="Очистити фільтр" style="min-height: 40px; padding: 0 var(--space-3); color: var(--text-muted);">
+                        ✕
+                    </a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <!-- Секція: Призначені тести (якщо користувач авторизований і має призначення) -->
+    {% if assigned_tests %}
+    <div style="margin-bottom: var(--space-8);">
+        <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4);">
+            <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--orange);">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <h2 style="font-size: var(--font-size-lg); margin: 0;">
+                Призначені вам завдання
+            </h2>
+            <span class="badge" style="background-color: var(--orange-subtle); color: var(--orange); border-color: var(--orange);">
+                {{ assigned_tests|length }}
+            </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-4);">
+            {% for item in assigned_tests %}
+            <div class="dashboard-card" style="display: flex; flex-direction: column; justify-content: space-between; border-left: 4px solid var(--orange); height: 100%; box-sizing: border-box;">
+                <div>
+                    <!-- Заголовок та статус проходження -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-2); margin-bottom: var(--space-1);">
+                        <h3 style="margin: 0; font-size: var(--font-size-base); font-weight: 700; line-height: 1.3;">
+                            {{ item.survey.title|default:item.survey.key }}
+                        </h3>
+                        {% if item.is_completed %}
+                            <span class="badge" style="background-color: var(--green-subtle); color: var(--green); border-color: var(--green); flex-shrink: 0;">
+                                Складено
+                            </span>
+                        {% else %}
+                            <span class="badge" style="background-color: var(--orange-subtle); color: var(--orange); border-color: var(--orange); flex-shrink: 0;">
+                                Очікує здачі
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Код тесту (звичайний приглушений текст як у дизайні) -->
+                    <div style="color: var(--text-muted); font-size: var(--font-size-xs); margin-bottom: var(--space-2);">
+                        Код: {{ item.survey.key }}
+                    </div>
+
+                    <!-- Опис або повідомлення про відсутність опису -->
+                    {% if item.survey.description %}
+                        <p style="color: var(--text-muted); font-size: var(--font-size-xs); line-height: 1.4; margin: 0 0 var(--space-3) 0;">
+                            {{ item.survey.description|truncatewords:25 }}
+                        </p>
+                    {% else %}
+                        <p style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic; margin: 0 0 var(--space-3) 0;">
+                            Опис тесту відсутній.
+                        </p>
+                    {% endif %}
+
+                    {% if item.assignment.instructions %}
+                        <div style="background-color: var(--bg-page); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); border: 1px dashed var(--border-color); font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--space-3);">
+                            <strong>Вказівка:</strong> {{ item.assignment.instructions }}
+                        </div>
+                    {% endif %}
+
+                    <!-- Світло-сірі лейбли деталей -->
+                    <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4);">
+                        {% if item.assignment.due_date %}
+                            <span class="badge" style="background-color: var(--bg-subtle); border-color: var(--border-color); font-size: var(--font-size-xs); color: {% if item.assignment.is_overdue %}var(--red){% else %}var(--text-main){% endif %};">
+                                Дедлайн: {{ item.assignment.due_date|date:"d.m.Y H:i" }}
+                            </span>
+                        {% endif %}
+                        {% if item.assignment.assigned_by %}
+                            <span class="badge" style="background-color: var(--bg-subtle); border-color: var(--border-color); color: var(--text-main); font-size: var(--font-size-xs);">
+                                Викладач: {{ item.assignment.assigned_by.profile.full_name|default:item.assignment.assigned_by.username }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Дії картки призначеного тесту -->
+                <div style="display: flex; gap: var(--space-2); align-items: stretch; margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--border-color); flex-wrap: wrap;">
+                    <a href="{% url 'exam_page' item.survey.key %}"
+                       class="table-btn test-card-action-btn"
+                       style="flex: 1 1 auto; background-color: var(--orange); color: #ffffff; border-color: var(--orange); min-height: 40px; padding: var(--space-2) var(--space-4); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); font-size: var(--font-size-sm); font-weight: 600; box-sizing: border-box; text-decoration: none; border-radius: var(--radius-md);">
+                        <svg class="ui-icon" style="width: 1.15em; height: 1.15em; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        <span>{% if item.is_completed %}Пройти повторно{% else %}Пройти тестування{% endif %}</span>
+                    </a>
+
+                    {% if can_manage %}
+                        <a href="{% url 'teacher_test_assign' item.survey.id %}"
+                           class="table-btn test-card-action-btn"
+                           title="Призначити студентам"
+                           aria-label="Призначити студентам"
+                           style="flex: 0 0 auto; min-height: 40px; padding: var(--space-2) var(--space-3); display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none; border-radius: var(--radius-md);">
+                            <svg class="ui-icon" style="width: 1.25em; height: 1.25em; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </a>
+
+                        <a href="{% url 'teacher_test_edit' item.survey.id %}"
+                           class="table-btn test-card-action-btn"
+                           title="Редагувати тест"
+                           aria-label="Редагувати тест"
+                           style="flex: 0 0 auto; min-height: 40px; padding: var(--space-2) var(--space-3); display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none; border-radius: var(--radius-md);">
+                            <svg class="ui-icon" style="width: 1.25em; height: 1.25em; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Секція: Загальний каталог тестів -->
+    <div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-2);">
+            <h2 style="font-size: var(--font-size-lg); margin: 0;">
+                {% if assigned_tests %}Інші доступні тести{% else %}Усі доступні тести{% endif %}
+            </h2>
+            <span style="color: var(--text-muted); font-size: var(--font-size-xs);">
+                Знайдено: {{ surveys|length }}
+            </span>
+        </div>
+
+        {% if surveys %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-5);">
+                {% for s in surveys %}
+                <div class="dashboard-card" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%; box-sizing: border-box; transition: transform 0.15s ease, border-color 0.15s ease;">
+                    <div>
+                        <!-- Заголовок та бейдж статусу -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-2); margin-bottom: var(--space-1);">
+                            <h3 style="margin: 0; font-size: var(--font-size-base); font-weight: 700; line-height: 1.3;">
+                                {{ s.title|default:s.key }}
+                            </h3>
+                            {% if not s.active %}
+                                <span class="badge" style="background-color: var(--red-subtle); color: var(--red); border-color: var(--red); flex-shrink: 0;">
+                                    Неактивний
+                                </span>
+                            {% elif s.is_public %}
+                                <span class="badge" style="background-color: var(--green-subtle); color: var(--green); border-color: var(--green); flex-shrink: 0;">
+                                    Відкритий
+                                </span>
+                            {% else %}
+                                <span class="badge" style="background-color: var(--orange-subtle); color: var(--orange); border-color: var(--orange); flex-shrink: 0;">
+                                    Приватний
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Код тесту (звичайний приглушений текст під назвою) -->
+                        <div style="color: var(--text-muted); font-size: var(--font-size-xs); margin-bottom: var(--space-2);">
+                            Код: {{ s.key }}
+                        </div>
+
+                        <!-- Опис тесту або повідомлення про відсутність опису -->
+                        {% if s.description %}
+                            <p style="color: var(--text-muted); font-size: var(--font-size-xs); line-height: 1.4; margin: 0 0 var(--space-3) 0;">
+                                {{ s.description|truncatewords:28 }}
+                            </p>
+                        {% else %}
+                            <p style="color: var(--text-muted); font-size: var(--font-size-xs); font-style: italic; margin: 0 0 var(--space-3) 0;">
+                                Опис тесту відсутній.
+                            </p>
+                        {% endif %}
+
+                        <!-- Світло-сірі лейбли деталей (без 'Час' та 'Пройдено') -->
+                        <div style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4);">
+                            {% if s.question_count %}
+                                <span class="badge" style="background-color: var(--bg-subtle); border-color: var(--border-color); color: var(--text-main); font-size: var(--font-size-xs);">
+                                    Питань: {{ s.question_count }}
+                                </span>
+                            {% endif %}
+                            {% if s.author %}
+                                <span class="badge" style="background-color: var(--bg-subtle); border-color: var(--border-color); color: var(--text-main); font-size: var(--font-size-xs);">
+                                    Автор: {{ s.author.profile.full_name|default:s.author.username }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Кнопки дій картки: однаковий розмір та пропорційне масштабування шрифту -->
+                    <div style="display: flex; gap: var(--space-2); align-items: stretch; margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--border-color); flex-wrap: wrap;">
+                        <a href="{% url 'exam_page' s.key %}"
+                           class="table-btn test-card-action-btn"
+                           style="flex: 1 1 auto; background-color: var(--orange); color: #ffffff; border-color: var(--orange); min-height: 40px; padding: var(--space-2) var(--space-4); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); font-size: var(--font-size-sm); font-weight: 600; box-sizing: border-box; text-decoration: none; border-radius: var(--radius-md);">
+                            <svg class="ui-icon" style="width: 1.15em; height: 1.15em; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            <span>Пройти тестування</span>
+                        </a>
+
+                        {% if can_manage %}
+                            <a href="{% url 'teacher_test_assign' s.id %}"
+                               class="table-btn test-card-action-btn"
+                               title="Призначити студентам"
+                               aria-label="Призначити студентам"
+                               style="flex: 0 0 auto; min-height: 40px; padding: var(--space-2) var(--space-3); display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none; border-radius: var(--radius-md);">
+                                <svg class="ui-icon" style="width: 1.25em; height: 1.25em; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                            </a>
+
+                            <a href="{% url 'teacher_test_edit' s.id %}"
+                               class="table-btn test-card-action-btn"
+                               title="Редагувати тест"
+                               aria-label="Редагувати тест"
+                               style="flex: 0 0 auto; min-height: 40px; padding: var(--space-2) var(--space-3); display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none; border-radius: var(--radius-md);">
+                                <svg class="ui-icon" style="width: 1.25em; height: 1.25em; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="dashboard-card" style="text-align: center; padding: var(--space-8); color: var(--text-muted);">
+                <svg class="ui-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: var(--space-3); opacity: 0.6;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <h3 style="margin: 0 0 var(--space-2) 0; color: var(--text-main);">
+                    {% if q %}За запитом «{{ q }}» нічого не знайдено{% else %}Наразі немає доступних тестів{% endif %}
+                </h3>
+                <p style="margin: 0 0 var(--space-4) 0; font-size: var(--font-size-sm);">
+                    {% if q %}Спробуйте змінити пошуковий запит або переглянути всі тести.{% else %}Викладачі незабаром додадуть нові завдання.{% endif %}
+                </p>
+                {% if q %}
+                    <a href="{% url 'tests_list' %}" class="table-btn">
+                        Скинути пошук
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock content %}

@@ -58,6 +58,9 @@ class UserProfile(models.Model):
         return self.role == self.ROLE_STUDENT
 
 
+Profile = UserProfile
+
+
 class Student(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="student_records")
     first_name = models.CharField(max_length=100)
@@ -74,15 +77,90 @@ class Student(models.Model):
 
 
 class Survey(models.Model):
-    key = models.CharField(max_length=64, unique=True)
-    title = models.CharField(max_length=200, blank=True)
-    control_questions = models.JSONField(default=list, blank=True)
-    answer_time_sec = models.IntegerField(default=10)
-    active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    key = models.CharField(max_length=64, unique=True, verbose_name="Унікальний ключ (код)")
+    title = models.CharField(max_length=200, blank=True, verbose_name="Назва тесту")
+    description = models.TextField(blank=True, default="", verbose_name="Опис тесту")
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="created_surveys", verbose_name="Автор / Викладач")
+    is_public = models.BooleanField(default=True, verbose_name="Відкритий доступ (для всіх)")
+    control_questions = models.JSONField(default=list, blank=True, verbose_name="Контрольні запитання")
+    answer_time_sec = models.IntegerField(default=10, verbose_name="Час на відповідь (сек.)")
+    active = models.BooleanField(default=True, verbose_name="Активний")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Створено")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Оновлено")
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Тест / Опитування"
+        verbose_name_plural = "Тести / Опитування"
 
     def __str__(self):
         return self.title or self.key
+
+    @property
+    def question_count(self) -> int:
+        if not self.control_questions:
+            return 0
+        cq = self.control_questions
+        first_q = cq[0]
+        first_q_text = first_q.get("text", "") if isinstance(first_q, dict) else str(first_q)
+        if cq and any(kw in first_q_text.lower() for kw in ["піб", "прізвище", "ім'я", "fullname", "name"]):
+            return max(0, len(cq) - 1)
+        return len(cq)
+
+    @property
+    def exam_questions(self) -> list[dict]:
+        """Normalized exam questions (excluding intro question) with individual text and time."""
+        cq = self.control_questions or []
+        if not cq:
+            return []
+        first_q = cq[0]
+        first_q_text = first_q.get("text", "") if isinstance(first_q, dict) else str(first_q)
+        items = cq[1:] if any(kw in first_q_text.lower() for kw in ["піб", "прізвище", "ім'я", "fullname", "name"]) else cq
+        res = []
+        for q in items:
+            if isinstance(q, dict):
+                res.append({
+                    "text": q.get("text", ""),
+                    "time": q.get("time", self.answer_time_sec or 15)
+                })
+            else:
+                res.append({
+                    "text": str(q),
+                    "time": self.answer_time_sec or 15
+                })
+        return res
+
+
+class TestAssignment(models.Model):
+    __test__ = False
+
+    survey = models.ForeignKey(Survey, on_delete=models.CASCADE, related_name="assignments", verbose_name="Тест")
+    student = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="test_assignments", verbose_name="Студент")
+    group = models.CharField(max_length=50, blank=True, default="", verbose_name="Академічна група")
+    due_date = models.DateField(null=True, blank=True, verbose_name="Термін здачі (дедлайн)")
+    notes = models.TextField(blank=True, default="", verbose_name="Коментар / Інструкції")
+    assigned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="given_assignments", verbose_name="Призначив викладач")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата призначення")
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Призначення тесту"
+        verbose_name_plural = "Призначення тестів"
+
+    def __str__(self):
+        target = self.student.username if self.student else (f"Група {self.group}" if self.group else "Всі")
+        return f"{self.survey.key} -> {target}"
+
+    @property
+    def is_overdue(self) -> bool:
+        if not self.due_date:
+            return False
+        from django.utils import timezone
+        return timezone.localdate() > self.due_date
+
+    @property
+    def instructions(self) -> str:
+        return self.notes
 
 
 class InterviewSession(models.Model):
@@ -129,7 +207,7 @@ class Answer(models.Model):
 
 class ActivityLog(models.Model):
     """
-    Audit log tracking all critical system events (logins, logouts, exams, updates).
+    Audit log tracking all critical system events (logins, logouts, exams, updates, tests).
     """
     ACTION_LOGIN = "login"
     ACTION_LOGOUT = "logout"
@@ -137,6 +215,10 @@ class ActivityLog(models.Model):
     ACTION_EXAM_SUBMIT = "exam_submit"
     ACTION_PROFILE_UPDATE = "profile_update"
     ACTION_TEACHER_REQUEST = "teacher_request"
+    ACTION_SURVEY_CREATE = "survey_create"
+    ACTION_SURVEY_UPDATE = "survey_update"
+    ACTION_SURVEY_DELETE = "survey_delete"
+    ACTION_SURVEY_ASSIGN = "survey_assign"
 
     ACTION_CHOICES = [
         (ACTION_LOGIN, "Вхід у систему"),
@@ -145,6 +227,10 @@ class ActivityLog(models.Model):
         (ACTION_EXAM_SUBMIT, "Завершення тесту"),
         (ACTION_PROFILE_UPDATE, "Оновлення профілю"),
         (ACTION_TEACHER_REQUEST, "Запит на статус викладача"),
+        (ACTION_SURVEY_CREATE, "Створення тесту"),
+        (ACTION_SURVEY_UPDATE, "Оновлення тесту"),
+        (ACTION_SURVEY_DELETE, "Видалення тесту"),
+        (ACTION_SURVEY_ASSIGN, "Призначення тесту"),
     ]
 
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="activity_logs")

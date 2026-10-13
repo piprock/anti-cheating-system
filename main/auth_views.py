@@ -5,6 +5,7 @@ from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.db.models import Avg, Count, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.contrib.auth.models import User
@@ -13,6 +14,7 @@ from .models import (
     UserProfile,
     InterviewSession,
     Survey,
+    TestAssignment,
     Student,
     ActivityLog,
     TeacherApplication,
@@ -166,11 +168,14 @@ def dashboard_view(request):
     """
     profile, _ = UserProfile.objects.get_or_create(user=request.user)
 
+    log_page = request.GET.get("log_page", 1)
+
     if profile.is_admin:
         # Admin Dashboard: comprehensive stats, user management, all sessions
         users = User.objects.select_related("profile").order_by("-date_joined")
         sessions = InterviewSession.objects.select_related("survey", "student", "user").order_by("-started_at")[:50]
-        recent_logs = ActivityLog.objects.select_related("user").order_by("-created_at")[:30]
+        logs_qs = ActivityLog.objects.select_related("user").order_by("-created_at")
+        recent_logs = Paginator(logs_qs, 10).get_page(log_page)
 
         total_users_count = User.objects.count()
         students_count = UserProfile.objects.filter(role=UserProfile.ROLE_STUDENT).count()
@@ -210,10 +215,16 @@ def dashboard_view(request):
         return render(request, "main/dashboard.html", context)
 
     elif profile.is_teacher:
-        # Teacher Dashboard: student performance, anti-cheating alerts, sessions
+        # Teacher Dashboard: student performance, anti-cheating alerts, sessions, tests
         sessions = InterviewSession.objects.select_related("survey", "student", "user").order_by("-started_at")[:100]
         students = Student.objects.select_related("user").order_by("last_name", "first_name")
         surveys = Survey.objects.filter(active=True)
+        teacher_surveys = Survey.objects.annotate(
+            sessions_total=Count("sessions"),
+            assignments_total=Count("assignments"),
+        ).order_by("-created_at")[:10]
+        logs_qs = ActivityLog.objects.filter(user=request.user).order_by("-created_at")
+        recent_logs = Paginator(logs_qs, 10).get_page(log_page)
 
         avg_metrics = InterviewSession.objects.aggregate(
             avg_accuracy=Avg("overall_accuracy"),
@@ -232,15 +243,16 @@ def dashboard_view(request):
             "sessions": sessions,
             "students": students,
             "surveys": surveys,
+            "teacher_surveys": teacher_surveys,
             "avg_metrics": avg_metrics,
+            "recent_logs": recent_logs,
             "total_sessions_count": InterviewSession.objects.count(),
             "suspicious_count": suspicious_count,
         }
         return render(request, "main/dashboard.html", context)
 
     else:
-        # Student Dashboard: personal history, passed exams, detailed stats
-        # Search for sessions tied directly to this user OR by student match
+        # Student Dashboard: personal history, passed exams, detailed stats, assignments
         user_sessions = InterviewSession.objects.filter(
             Q(user=request.user) |
             Q(student__user=request.user)
@@ -257,8 +269,17 @@ def dashboard_view(request):
             avg_plag=Avg("plagiarism_score"),
         )
 
-        recent_logs = ActivityLog.objects.filter(user=request.user).order_by("-created_at")[:15]
+        logs_qs = ActivityLog.objects.filter(user=request.user).order_by("-created_at")
+        recent_logs = Paginator(logs_qs, 10).get_page(log_page)
         available_surveys = Survey.objects.filter(active=True)[:5]
+
+        assign_q = Q(student=request.user)
+        if profile.group:
+            assign_q |= Q(group__iexact=profile.group)
+        student_assigned_tests = TestAssignment.objects.filter(
+            assign_q,
+            survey__active=True
+        ).select_related("survey", "assigned_by").order_by("-created_at")[:5]
 
         context = {
             "profile": profile,
@@ -269,6 +290,7 @@ def dashboard_view(request):
             "stats": stats,
             "recent_logs": recent_logs,
             "available_surveys": available_surveys,
+            "student_assigned_tests": student_assigned_tests,
         }
         return render(request, "main/dashboard.html", context)
 
@@ -305,10 +327,12 @@ def session_detail_view(request, session_id: int):
 
 @login_required
 def profile_edit_view(request):
-    """Update user personal profile details (ПІБ, group)."""
-    profile, _ = UserProfile.objects.get_or_create(user=request.user)
-
+    """
+    Redirects to settings profile tab (/settings/?tab=profile).
+    Maintains backward compatibility for POST or direct URL access.
+    """
     if request.method == "POST":
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
         form = UserProfileEditForm(data=request.POST)
         if form.is_valid():
             cd = form.cleaned_data
@@ -334,21 +358,11 @@ def profile_edit_view(request):
             ActivityLog.objects.create(
                 user=user,
                 action=ActivityLog.ACTION_PROFILE_UPDATE,
-                details="Оновлено контактні дані та академічну групу в профілі."
+                details="Оновлено контактні дані та академічну групу в налаштуваннях."
             )
 
             messages.success(request, "Дані профілю успішно оновлено!")
-            return redirect("dashboard")
-    else:
-        form = UserProfileEditForm(initial={
-            "first_name": request.user.first_name,
-            "last_name": request.user.last_name,
-            "middle_name": profile.middle_name,
-            "group": profile.group,
-            "email": request.user.email,
-        })
-
-    return render(request, "main/profile_edit.html", {"form": form, "profile": profile})
+    return redirect(f"{reverse('settings')}?tab=profile")
 
 
 @login_required

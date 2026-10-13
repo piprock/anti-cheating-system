@@ -1,0 +1,264 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container dashboard-container">
+    <!-- Шапка призначення тесту -->
+    <div class="dashboard-header">
+        <div class="dashboard-welcome">
+            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-1); flex-wrap: wrap;">
+                <h1>Призначення тесту: {{ survey.title|default:survey.key }}</h1>
+                <span class="badge" style="background-color: var(--orange-subtle); color: var(--orange); border-color: var(--orange);">
+                    Код: {{ survey.key }}
+                </span>
+            </div>
+            <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin: 0;">
+                Призначте цей тест окремим студентам або цілій академічній групі, встановіть дедлайн та інструкції.
+            </p>
+        </div>
+
+        <div class="dashboard-actions">
+            <a href="{% url 'teacher_tests_list' %}" class="table-btn">
+                <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Назад до списку тестів</span>
+            </a>
+            <a href="{% url 'exam_page' survey.key %}" class="table-btn" target="_blank">
+                <span>Переглянути тест</span>
+            </a>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--space-6); align-items: start;">
+        <!-- ФОРМА ПРИЗНАЧЕННЯ -->
+        <div class="dashboard-card">
+            <h2 class="dashboard-card__title" style="margin-top: 0; margin-bottom: var(--space-4);">
+                Нове призначення
+            </h2>
+
+            <form method="post" novalidate style="display: flex; flex-direction: column; gap: var(--space-4);">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert--error" role="alert">
+                        <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <div>
+                            {% for err in form.non_field_errors %}
+                                <div>{{ err }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Тип призначення: студенти чи група -->
+                <div class="form-group-column">
+                    <label>{{ form.assign_type.label }} <span style="color: var(--red);">*</span></label>
+                    <div style="display: flex; gap: var(--space-4); margin-top: var(--space-1);">
+                        {% for radio in form.assign_type %}
+                            <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer; font-size: var(--font-size-sm);">
+                                {{ radio.tag }}
+                                <span>{{ radio.choice_label }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Вибір студентів -->
+                <div id="studentsFieldWrapper" class="form-group-column">
+                    <label for="{{ form.students.id_for_label }}">
+                        {{ form.students.label }}
+                        <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Утримуйте Ctrl (або Cmd), щоб обрати кількох студентів одночасно">
+                            <svg class="ui-icon ui-tooltip__icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </span>
+                    </label>
+                    <select name="{{ form.students.name }}" id="{{ form.students.id_for_label }}" multiple size="7" style="width: 100%; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-card); color: var(--text-main); font-family: var(--font-main); padding: var(--space-2);">
+                        {% for st in form.students.field.queryset %}
+                            <option value="{{ st.id }}">
+                                {{ st.profile.full_name|default:st.username }} (@{{ st.username }}){% if st.profile.group %} [{{ st.profile.group }}]{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.students.errors %}
+                        <span style="color: var(--red); font-size: var(--font-size-xs);">{{ form.students.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Академічна група -->
+                <div id="groupFieldWrapper" class="form-group-column">
+                    <label for="{{ form.group.id_for_label }}">{{ form.group.label }}</label>
+                    {{ form.group }}
+                    {% if existing_groups %}
+                        <div style="display: flex; gap: var(--space-1); flex-wrap: wrap; margin-top: var(--space-2); align-items: center;">
+                            <span style="font-size: var(--font-size-xs); color: var(--text-muted);">Існуючі групи:</span>
+                            {% for g in existing_groups %}
+                                <button type="button" class="badge" onclick="setGroup('{{ g }}')" style="cursor: pointer; background-color: var(--bg-subtle); border-color: var(--border-color); color: var(--text-main);">
+                                    {{ g }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if form.group.errors %}
+                        <span style="color: var(--red); font-size: var(--font-size-xs);">{{ form.group.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Дедлайн -->
+                <div class="form-group-column">
+                    <label for="{{ form.due_date.id_for_label }}">{{ form.due_date.label }}</label>
+                    {{ form.due_date }}
+                    {% if form.due_date.errors %}
+                        <span style="color: var(--red); font-size: var(--font-size-xs);">{{ form.due_date.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Коментар / примітки -->
+                <div class="form-group-column">
+                    <label for="{{ form.notes.id_for_label }}">{{ form.notes.label }}</label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                        <span style="color: var(--red); font-size: var(--font-size-xs);">{{ form.notes.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Сабміт -->
+                <button type="submit" class="table-btn" style="background-color: var(--orange); color: #ffffff; border-color: var(--orange); font-weight: bold; justify-content: center; margin-top: var(--space-2);">
+                    Призначити тест
+                </button>
+            </form>
+        </div>
+
+        <!-- ТАБЛИЦЯ ПОТОЧНИХ ПРИЗНАЧЕНЬ -->
+        <div class="dashboard-card">
+            <div class="dashboard-card__header">
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                    <h2 class="dashboard-card__title" style="margin: 0;">Активні призначення</h2>
+                    <span class="badge" style="background-color: var(--bg-subtle); border-color: var(--border-color);">
+                        {{ assignments|length }}
+                    </span>
+                </div>
+            </div>
+
+            {% if assignments %}
+                <div class="history-table-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Ціль призначення</th>
+                                <th>Дедлайн</th>
+                                <th>Дата</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in assignments %}
+                                <tr>
+                                    <td>
+                                        {% if a.student %}
+                                            <div>
+                                                <strong>{{ a.student.profile.full_name|default:a.student.username }}</strong>
+                                                <div style="font-size: var(--font-size-xs); color: var(--text-muted);">
+                                                    Студент: @{{ a.student.username }}
+                                                    {% if a.student.profile.group %} | Група: {{ a.student.profile.group }}{% endif %}
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <div>
+                                                <span class="badge" style="background-color: rgba(245, 158, 11, 0.15); border-color: #F59E0B; color: #F59E0B; font-weight: bold;">
+                                                    Група: {{ a.group }}
+                                                </span>
+                                            </div>
+                                        {% endif %}
+                                        {% if a.notes %}
+                                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                                                Примітка: {{ a.notes }}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if a.due_date %}
+                                            <span style="font-size: var(--font-size-xs); color: #F59E0B;">
+                                                {{ a.due_date|date:"d.m.Y" }}
+                                            </span>
+                                        {% else %}
+                                            <span style="color: var(--text-muted); font-size: var(--font-size-xs);">Безстроково</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="font-size: var(--font-size-xs); white-space: nowrap;">
+                                        {{ a.created_at|date:"d.m.Y" }}
+                                    </td>
+                                    <td>
+                                        <form method="post" action="{% url 'teacher_assignment_delete' a.id %}" onsubmit="return confirm('Скасувати це призначення?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="table-btn" style="color: var(--red); border-color: var(--red); padding: 4px 8px;" title="Скасувати призначення">
+                                                <svg class="ui-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                                <span>Скасувати</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p class="empty-state__text">Цей тест ще не призначено жодному студенту чи групі.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+<script>
+    function setGroup(name) {
+        var groupInput = document.getElementById('{{ form.group.id_for_label }}');
+        if (groupInput) {
+            groupInput.value = name;
+        }
+        // Switch radio to group if not selected
+        var groupRadio = document.querySelector('input[name="assign_type"][value="group"]');
+        if (groupRadio) {
+            groupRadio.checked = true;
+            toggleFields();
+        }
+    }
+
+    function toggleFields() {
+        var assignTypeRadios = document.querySelectorAll('input[name="assign_type"]');
+        var selected = 'student';
+        assignTypeRadios.forEach(function(r) {
+            if (r.checked) selected = r.value;
+        });
+
+        var stWrap = document.getElementById('studentsFieldWrapper');
+        var grWrap = document.getElementById('groupFieldWrapper');
+
+        if (selected === 'group') {
+            if (stWrap) stWrap.style.opacity = '0.4';
+            if (grWrap) grWrap.style.opacity = '1.0';
+        } else {
+            if (stWrap) stWrap.style.opacity = '1.0';
+            if (grWrap) grWrap.style.opacity = '0.4';
+        }
+    }
+
+    document.querySelectorAll('input[name="assign_type"]').forEach(function(r) {
+        r.addEventListener('change', toggleFields);
+    });
+
+    document.addEventListener('DOMContentLoaded', toggleFields);
+</script>
+{% endblock content %}

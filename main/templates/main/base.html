@@ -136,13 +136,25 @@
                                     </svg>
                                     <span>Налаштування</span>
                                 </a>
-                                <a role="menuitem" class="profile-dropdown__item" href="{% url 'profile_edit' %}">
+                                <a role="menuitem" class="profile-dropdown__item" href="{% url 'settings' %}?tab=profile">
                                     <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                     </svg>
                                     <span>Редагувати профіль</span>
                                 </a>
+                                {% if request.user.profile.is_teacher or request.user.profile.is_admin %}
+                                    <a role="menuitem" class="profile-dropdown__item" href="{% url 'teacher_tests_list' %}">
+                                        <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                        <span>Мої тести</span>
+                                    </a>
+                                {% endif %}
                                 {% if request.user.profile.is_admin %}
                                     <a role="menuitem" class="profile-dropdown__item" href="{% url 'admin:index' %}" target="_blank">
                                         <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -176,6 +188,10 @@
             <div class="header-mainbar">
                 <nav id="headerNav" class="header-nav" aria-label="Основна навігація">
                     <a class="{% if request.resolver_match.url_name == 'main' %}checked{% endif %}" href="{% url "main" %}">Головна</a>
+                    <a class="{% if request.resolver_match.url_name == 'tests_list' %}checked{% endif %}" href="{% url "tests_list" %}">Тести</a>
+                    {% if request.user.is_authenticated and request.user.profile.is_teacher or request.user.profile.is_admin %}
+                        <a class="{% if request.resolver_match.url_name == 'teacher_tests_list' or request.resolver_match.url_name == 'teacher_test_create' or request.resolver_match.url_name == 'teacher_test_edit' or request.resolver_match.url_name == 'teacher_test_assign' or request.resolver_match.url_name == 'teacher_test_delete' %}checked{% endif %}" href="{% url "teacher_tests_list" %}">Мої тести</a>
+                    {% endif %}
                     <a class="{% if request.resolver_match.url_name == 'gaze' %}checked{% endif %}" href="{% url "gaze" %}">Моніторинг погляду</a>
                     <div class="nav-dropdown">
                         <button id="aboutDropdownBtn" 

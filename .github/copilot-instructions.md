@@ -7,16 +7,19 @@ Concise, project-specific guidance for AI coding agents working in this reposito
 - `main/`: Primary application package containing models, views, services, templates, and static assets.
 - **Models (`main/models.py`)**:
   - `UserProfile`: Role-based profile extending Django `User` (`role`: `student`, `teacher`, `admin`; `middle_name`, `group`, `full_name`).
-  - `ActivityLog`: User action audit trail (`action`: login, logout, profile update, exam start, exam submit).
+  - `ActivityLog`: User action audit trail (`action`: login, logout, profile update, exam start, exam submit, role change).
+  - `TeacherApplication`: Request for role elevation to teacher (`department`, `position`, `phone`, `reason`, `status`: pending/approved/rejected/cancelled, `admin_notes`, `reviewed_by`).
   - `Student`: Full name (`first_name`, `last_name`, `middle_name`) and creation timestamp.
-  - `Survey`: Exam definition (`key`, `title`, `control_questions` JSON list, `answer_time_sec`, `active`).
+  - `Survey`: Exam definition (`key`, `title`, `description`, `author`, `is_public`, `control_questions` JSON list of `{"text": ..., "time": ...}` dicts or legacy strings, `answer_time_sec` fallback, `active`).
+  - `TestAssignment`: Assignment of tests to individual students or academic groups (`survey`, `student`, `group`, `assigned_by`, `due_date`, `notes`).
   - `InterviewSession`: Completed exam session with aggregated metrics (`overall_accuracy`, `plagiarism_score`, `gaze_not_looking_pct`, `grade_5`, `dialogue_result`, `raw_payload`, `status`).
   - `Answer`: Individual question response (`question`, `answer`, `accuracy_score`, `feedback`, `question_order`).
 - **Service Layer Architecture (`main/services/`)**: All business logic encapsulated into isolated, unit-tested service classes.
 - **Runtime State (`main/cache_utils.py`)**: All transient state (exam progress, gaze metrics, chat history) is stored in the Django cache rather than global variables.
 - **Central Modules**:
   - `const/`: Centralized modular constants package (`const/errors/messages.py`, `const/validation/bounds.py`, `const/exam/metrics.py`). Validation limits must strictly use `bounds` (never `extremes`). Re-exported in `main/constants.py`.
-  - `main/auth_views.py`: Authentication views (login, logout), 2-step registration wizard, role-based dashboard, profile editor, session inspector.
+  - `main/auth_views.py`: Authentication (login, logout), 2-step registration wizard, role-based dashboard with paginated activity log, user settings (`/settings/` with tabs `profile`, `teacher`, `security`), teacher application review, session inspector.
+  - `main/survey_views.py`: Public test catalog (`/tests/`), teacher CRUD panel (`/teacher/tests/`, create/edit with dynamic per-question cards and individual time limits, delete/deactivate), and test assignment (`/teacher/tests/<id>/assign/`).
   - `main/management/commands/seed_admin.py`: Idempotent superuser seeding from root `.env` (`ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_EMAIL`).
   - `main/services/audio_service.py`: `AudioService` for microphone recording, Whisper speech recognition, and ElevenLabs TTS.
   - `main/services/gpt_service.py`: `GPTService` for chat, answer scoring, and exam summarization with OpenAI (`gpt-4o-mini`).
@@ -30,7 +33,7 @@ Concise, project-specific guidance for AI coding agents working in this reposito
   - `main/cache_utils.py`: Unified cache API for exam state, gaze counters, and chat history.
   - `main/persist.py`: Session persistence (`persist_session_from_payload`) that creates `InterviewSession` and `Answer` database records.
   - `main/constants.py`: Re-exports modular constants from root `const/` package for backward compatibility.
-  - `main/forms.py`: Django forms for validation (`RegistrationStep1Form`, `RegistrationStep2Form`, `UserProfileForm`, `VoiceAnswerUploadForm`, `FileAnalyzeForm`, `SubmitInterviewForm`).
+  - `main/forms.py`: Django forms (`RegistrationStep1Form`, `RegistrationStep2Form`, `UserProfileEditForm`, `TeacherApplicationForm`, `SurveyForm`, `TestAssignmentForm`, `VoiceAnswerUploadForm`, `FileAnalyzeForm`, `SubmitInterviewForm`).
 - **Legacy Files (Deprecated)**:
   - `main/audio.py`, `main/file_extract.py`, `main/gaze_utils.py`, `main/gpt_utils.py`, `main/views.py`. These files are deprecated remnants from pre-service refactoring. Do not add new logic to or import from these legacy files.
 
@@ -111,14 +114,15 @@ All runtime state is isolated and managed through [`main/cache_utils.py`](file:/
 1. **Start (`/api/exam/start/<key>/`)**:
    - Fetches active `Survey` by `key`.
    - Initializes exam state via `ExamService.start_exam()` and resets gaze counters.
-   - Speaks first question (student ПІБ prompt) via `AudioService.play_tts()`.
+   - First question is always student ПІБ prompt (`DEFAULT_INTRO_QUESTION`, auto-filled if logged in).
+   - Speaks first question via `AudioService.play_tts()`. Returns question time `answer_time_sec`.
 2. **Answering**:
    - **Text Answer (`/api/exam/answer/<key>/`)**: JSON POST `{"answer": "..."}` handled by `exam_controller.exam_answer`.
    - **Web Voice Answer (`/api/exam/voice_answer/<key>/`)**: Multipart POST with audio file handled by `exam_extra.exam_voice_answer_upload`. Transcribed with Whisper (`AudioService.recognize`).
    - **First Question Handling**: Index 0 is always student ПІБ. Stored in `student_fullname`, assigned score 100, excluded from academic scoring.
-   - **Subsequent Questions**: Evaluated by `GPTService.score_answer()`. State updated via `ExamService.record_answer()`.
+   - **Subsequent Questions**: Evaluated by `GPTService.score_answer()`. State updated via `ExamService.record_answer()`. Countdown timer dynamically adapts to each question's individual `answer_time_sec`.
 3. **Question Progression**:
-   - Intermediate responses return: `{"done": False, "idx": N, "total": M, "feedback": "...", "accuracy_score": S, "answer": "...", "next_question": "..."}`.
+   - Intermediate responses return: `{"done": False, "idx": N, "total": M, "feedback": "...", "accuracy_score": S, "answer": "...", "next_question": "...", "answer_time_sec": T}`.
 4. **Finalization**:
    - When all questions are answered, `GPTService.summarize_exam(graded_answers)` produces summary text and plagiarism score.
    - `ExamService.build_session_payload()` structures the session data.
@@ -157,7 +161,9 @@ Optional:
   - Stage 1: `username`, `email` (optional), `password`, `password_confirm` (cached in `request.session['reg_step1']`).
   - Stage 2: `last_name`, `first_name`, `middle_name` (optional), `group` (optional) -> creates `User` + `UserProfile` and auto-logs in.
 - **Admin Seeding**: Automated on migrate or manually via `python manage.py seed_admin` (idempotent, reads credentials from root `.env`).
-- **Audit Trail (`ActivityLog`)**: Logs user events (login, logout, profile update, exam start/submit). On the dashboard, activity history is collapsed by default and toggled via `#toggleActivityBtn`.
+- **Audit Trail (`ActivityLog`)**: Logs user events (login, logout, profile update, exam start/submit, role change). On the dashboard, activity history is paginated (`10/page`, `?log_page=N`), collapsed by default, and auto-expands when navigating pages.
+- **User Settings (`/settings/`)**: Multi-tab interface (`tab=profile`, `teacher`, `security`). Direct requests to legacy `/profile/edit/` redirect to `?tab=profile`. Form input examples are strictly placed in `placeholder` attributes (never as hint text beneath fields).
+- **Teacher Applications**: Students apply for teacher role from Settings (`tab=teacher`). Administrators approve or reject requests directly in Dashboard or Django admin, promoting the user to `ROLE_TEACHER` with an audit record (`ACTION_ROLE_CHANGE`).
 
 ## UI/UX Design System & Accessibility
 
@@ -201,7 +207,7 @@ Optional:
 - **Profile Dropdown**: Displays short name "Ім'я Прізвище", opening into user card (full name, role badge, group, email, dashboard link, profile editor, Django admin link for superusers, and logout at bottom).
 - **Toaster Notifications (`#toastContainer`)**: Floating stack at top-right for flash messages (success, error, info), auto-dismissing after 4.5s (pauses on hover), with inline close button.
 - **Micro-Tooltips (`.ui-tooltip`)**: Accessible SVG hover/focus tooltips for secondary descriptions and metrics (e.g. grading scales, activity log purpose, pupil detection hints) to prevent visual clutter.
-- **Form Layout**: Strict 1-column layout, left-aligned labels, headings, and input fields.
+- **Form Layout**: Strict 1-column layout, left-aligned labels, headings, and input fields. Examples must be HTML `placeholder` attributes rather than sub-field hint clutter.
 
 ### Marquee (Running Text)
 - Continuous ticker (`.footer-marquee`) animates leftward (`marqueeScrollLeft 48s linear infinite`).
@@ -209,21 +215,20 @@ Optional:
 
 
 ## Common Commands
+> **Important**: Always run commands using the project virtual environment (`.venv`), never global Python!
+
 ```bash
-# Run development server
+# Windows (PowerShell / CMD using .venv directly):
+.venv\Scripts\python manage.py runserver
+.venv\Scripts\python manage.py makemigrations main
+.venv\Scripts\python manage.py migrate
+.venv\Scripts\python manage.py seed_admin
+.venv\Scripts\python manage.py shell
+.venv\Scripts\pytest
+
+# Linux / macOS (or when .venv is activated):
+source .venv/bin/activate
 python manage.py runserver
-
-# Database migrations
-python manage.py makemigrations main
-python manage.py migrate
-
-# Seed or ensure superuser from .env
-python manage.py seed_admin
-
-# Django interactive shell
-python manage.py shell
-
-# Run test suite with pytest & coverage
 pytest
 ```
 
@@ -237,6 +242,7 @@ pytest
   - `test_gaze_service.py`: Frame counting, calibration, and off-screen percentage computation.
   - `test_gpt_service.py`: Chat history accumulation, answer scoring, and summarization.
   - `test_persist.py`: Session and answer database record creation from payloads.
+  - `test_survey_crud.py`: Test creation, editing, deletion, public catalog, and student/group assignment.
 - When creating or modifying tests, mock external AI APIs (OpenAI, ElevenLabs, Whisper) to avoid network calls and rate limits.
 
 ## Safe Changes Checklist
@@ -250,4 +256,6 @@ pytest
 - Render secondary explanatory descriptions inside `.ui-tooltip` icons rather than plain paragraph clutter.
 - Ensure all UI changes support both `[data-theme="dark"]` and `[data-theme="light"]`, with status colors respecting `[data-colorblind]`.
 - Increment CSS cache version query string in templates (`?v=...`) whenever updating stylesheets.
+- Tests/Surveys: `control_questions` stores `{"text": ..., "time": ...}`; keep `Survey.exam_questions` normalized, question 0 as fixed ПІБ intro, and dynamic frontend timer per question.
+- Always run tests and manage commands using `.venv`, never global Python.
 - Run `pytest` before finalizing changes to ensure service coverage and test integrity.

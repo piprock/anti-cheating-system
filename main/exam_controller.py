@@ -88,6 +88,8 @@ def _handle_exam_answer_common(key: str, user_answer: str, speak_next: bool = Fa
                 pass
         
         idx, total = exam_service.get_progress(state)
+        q_times = state.get("question_times") or []
+        next_time = q_times[idx] if idx < len(q_times) else 15
         return {
             "done": False,
             "idx": idx,
@@ -96,6 +98,7 @@ def _handle_exam_answer_common(key: str, user_answer: str, speak_next: bool = Fa
             "accuracy_score": score,
             "answer": state["qa_log"][-1]["answer"],
             "next_question": next_q,
+            "answer_time_sec": next_time,
         }
     
     # Exam complete - finalize
@@ -108,9 +111,18 @@ def exam_start(request: HttpRequest, key: str) -> JsonResponse:
     
     survey = get_object_or_404(Survey, key=key, active=True)
     cq = survey.control_questions or []
-    questions = [q if isinstance(q, str) else str(q) for q in cq]
+    questions = []
+    question_times = []
+    for q in cq:
+        if isinstance(q, dict):
+            questions.append(q.get("text", ""))
+            question_times.append(q.get("time", getattr(survey, "answer_time_sec", 15) or 15))
+        else:
+            questions.append(str(q))
+            question_times.append(getattr(survey, "answer_time_sec", 15) or 15)
     
     state = exam_service.start_exam(key, questions)
+    state["question_times"] = question_times
 
     if request.user.is_authenticated:
         state["user_id"] = request.user.id
@@ -131,6 +143,7 @@ def exam_start(request: HttpRequest, key: str) -> JsonResponse:
             pass
 
     first_question = questions[0] if questions else ""
+    first_time = question_times[0] if question_times else (getattr(survey, "answer_time_sec", 10) or 10)
     
     if first_question:
         try:
@@ -143,7 +156,7 @@ def exam_start(request: HttpRequest, key: str) -> JsonResponse:
         "question": first_question,
         "idx": 0,
         "total": len(questions),
-        "answer_time_sec": getattr(survey, "answer_time_sec", 10) or 10,
+        "answer_time_sec": first_time,
     })
 @csrf_exempt
 def exam_answer(request: HttpRequest, key: str) -> JsonResponse:

@@ -5,6 +5,7 @@ from .models import (
     UserProfile,
     Student,
     Survey,
+    TestAssignment,
     InterviewSession,
     Answer,
     ActivityLog,
@@ -51,8 +52,16 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(Survey)
 class SurveyAdmin(admin.ModelAdmin):
-    list_display = ("key", "title", "answer_time_sec", "active", "created_at")
-    search_fields = ("key", "title")
+    list_display = ("key", "title", "author", "is_public", "answer_time_sec", "active", "created_at")
+    list_filter = ("active", "is_public")
+    search_fields = ("key", "title", "description", "author__username")
+
+
+@admin.register(TestAssignment)
+class TestAssignmentAdmin(admin.ModelAdmin):
+    list_display = ("id", "survey", "student", "group", "assigned_by", "due_date", "created_at")
+    list_filter = ("group", "due_date")
+    search_fields = ("survey__key", "survey__title", "student__username", "group")
 
 
 class AnswerInline(admin.TabularInline):

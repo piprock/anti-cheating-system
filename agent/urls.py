@@ -3,16 +3,6 @@ URL configuration for agent project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
 from django.urls import path
@@ -42,6 +32,15 @@ from main.auth_views import (
     settings_view,
     review_teacher_application_view,
 )
+from main.survey_views import (
+    tests_list_view,
+    teacher_tests_list_view,
+    teacher_test_create_view,
+    teacher_test_edit_view,
+    teacher_test_delete_view,
+    teacher_test_assign_view,
+    teacher_assignment_delete_view,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -64,14 +63,23 @@ urlpatterns = [
     path('profile/edit/', profile_edit_view, name="profile_edit"),
     path('session/<int:session_id>/', session_detail_view, name="session_detail"),
 
-    # існуюче:
+    # Тести: публічний каталог та панель керування викладача
+    path('tests/', tests_list_view, name='tests_list'),
+    path('teacher/tests/', teacher_tests_list_view, name='teacher_tests_list'),
+    path('teacher/tests/create/', teacher_test_create_view, name='teacher_test_create'),
+    path('teacher/tests/<int:survey_id>/edit/', teacher_test_edit_view, name='teacher_test_edit'),
+    path('teacher/tests/<int:survey_id>/delete/', teacher_test_delete_view, name='teacher_test_delete'),
+    path('teacher/tests/<int:survey_id>/assign/', teacher_test_assign_view, name='teacher_test_assign'),
+    path('teacher/assignments/<int:assignment_id>/delete/', teacher_assignment_delete_view, name='teacher_assignment_delete'),
+
+    # Проходження тестування та моніторинг
     path('exam/<str:key>/', exam_page, name='exam_page'),
     path('gaze/frame/', gaze_frame, name='gaze_frame'),
     path('api/submit_interview/<str:key>/', submit_interview, name='submit_interview'),
     path('api/gaze/stats/<str:sid>/', gaze_stats, name='gaze_stats'),
     path('api/gaze/reset/<str:sid>/', gaze_reset, name='gaze_reset'),
 
-    # НОВЕ: інтерактивний діалог
+    # Інтерактивний діалог
     path('api/exam/start/<str:key>/', exam_start, name='exam_start'),
     path('api/exam/answer/<str:key>/', exam_answer, name='exam_answer'),
     path('api/exam/voice_answer/<str:key>/', exam_extra.exam_voice_answer_upload, name='exam_voice_answer'),

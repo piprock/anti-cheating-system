@@ -1,0 +1,213 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block content %}
+<main class="container dashboard-container">
+    <!-- Шапка панелі керування тестами -->
+    <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-4);">
+        <div class="dashboard-welcome">
+            <h1 style="margin: 0 0 var(--space-1) 0;">Керування тестами та опитуваннями</h1>
+            <p style="color: var(--text-muted); font-size: var(--font-size-sm); margin: 0;">
+                Створюйте, редагуйте тести, налаштовуйте ліміти часу та призначайте завдання окремим студентам або академічним групам.
+            </p>
+        </div>
+
+        <div class="dashboard-actions" style="margin-left: auto;">
+            <a href="{% url 'teacher_test_create' %}" class="table-btn" style="padding: var(--space-3) var(--space-6); font-size: var(--font-size-base); font-weight: bold; background-color: var(--orange); color: #ffffff; border-color: var(--orange); min-height: 44px; display: inline-flex; align-items: center; gap: var(--space-2); border-radius: var(--radius-md);">
+                <svg class="ui-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Створити тест</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Метрики та статистика тестів -->
+    <div class="stats-grid" style="margin-bottom: var(--space-6);">
+        <div class="stat-card">
+            <div class="stat-card__top">
+                <span class="stat-card__label">Всього тестів</span>
+                <span class="stat-card__icon">
+                    <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                </span>
+            </div>
+            <span class="stat-card__value">{{ total_tests }}</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card__top">
+                <span class="stat-card__label">Активних тестів</span>
+                <span class="stat-card__icon" style="color: var(--green);">
+                    <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </span>
+            </div>
+            <span class="stat-card__value" style="color: var(--green);">{{ active_tests }}</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card__top">
+                <span class="stat-card__label">Призначень студентам</span>
+                <span class="stat-card__icon" style="color: var(--orange);">
+                    <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </span>
+            </div>
+            <span class="stat-card__value" style="color: var(--orange);">{{ total_assignments }}</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-card__top">
+                <span class="stat-card__label">Завершених сесій</span>
+                <span class="stat-card__icon">
+                    <svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </span>
+            </div>
+            <span class="stat-card__value">{{ total_sessions }}</span>
+        </div>
+    </div>
+
+    <!-- Таблиця тестів -->
+    <div class="dashboard-card">
+        <div class="dashboard-card__header">
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <h2 class="dashboard-card__title" style="margin: 0;">Список усіх тестів</h2>
+                <span class="ui-tooltip" tabindex="0" role="tooltip" aria-label="Інформація" data-tooltip="Таблиця тестів системи. Ви можете керувати питаннями, призначати тести студентам або переглядати результати">
+                    <svg class="ui-icon ui-tooltip__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                </span>
+            </div>
+
+            <!-- Швидкий пошук -->
+            <form method="get" action="{% url 'teacher_tests_list' %}" style="display: flex; gap: var(--space-2); align-items: center;">
+                <input type="text" name="q" value="{{ q }}" placeholder="Пошук тесту..." style="padding: var(--space-2) var(--space-3); font-size: var(--font-size-xs); min-width: 200px;">
+                <button type="submit" class="table-btn" style="font-size: var(--font-size-xs);">Знайти</button>
+                {% if q %}
+                    <a href="{% url 'teacher_tests_list' %}" class="table-btn" style="font-size: var(--font-size-xs);">Скинути</a>
+                {% endif %}
+            </form>
+        </div>
+
+        {% if surveys %}
+            <div class="history-table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Назва тесту</th>
+                            <th>Код (Key)</th>
+                            <th>Питань</th>
+                            <th>Статус</th>
+                            <th>Доступ</th>
+                            <th>Призначено</th>
+                            <th>Сесій</th>
+                            <th>Сер. бал</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in surveys %}
+                            <tr>
+                                <td><strong>#{{ s.id }}</strong></td>
+                                <td>
+                                    <div>
+                                        <strong>{{ s.title|default:s.key }}</strong>
+                                        {% if s.author %}
+                                            <div style="font-size: var(--font-size-xs); color: var(--text-muted);">
+                                                Автор: {{ s.author.profile.full_name|default:s.author.username }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <code style="background-color: var(--bg-subtle); padding: 2px 6px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 11px;">
+                                        {{ s.key }}
+                                    </code>
+                                </td>
+                                <td>{{ s.question_count }}</td>
+                                <td>
+                                    {% if s.active %}
+                                        <span class="badge" style="background-color: var(--green-subtle); color: var(--green); border-color: var(--green);">Активний</span>
+                                    {% else %}
+                                        <span class="badge" style="background-color: var(--bg-subtle); color: var(--text-muted); border-color: var(--border-color);">Неактивний</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if s.is_public %}
+                                        <span class="badge" style="background-color: var(--green-subtle); color: var(--green); border-color: var(--green); font-size: 11px;">Відкритий</span>
+                                    {% else %}
+                                        <span class="badge" style="background-color: rgba(245, 158, 11, 0.15); color: #F59E0B; border-color: #F59E0B; font-size: 11px;">За списком</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'teacher_test_assign' s.id %}" class="badge" style="background-color: var(--bg-subtle); border-color: var(--border-color); color: var(--text-main);" title="Керувати призначеннями">
+                                        {{ s.assignments_total }} призначень
+                                    </a>
+                                </td>
+                                <td>{{ s.sessions_total }}</td>
+                                <td>
+                                    {% if s.avg_grade %}
+                                        <span class="badge-grade badge-grade--{{ s.avg_grade|floatformat:0 }}">
+                                            {{ s.avg_grade|floatformat:1 }}
+                                        </span>
+                                    {% else %}
+                                        <span style="color: var(--text-muted);">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: var(--space-2); flex-wrap: wrap;">
+                                        <a href="{% url 'teacher_test_assign' s.id %}" class="table-btn" style="background-color: var(--orange-subtle); color: var(--orange); border-color: var(--orange);" title="Призначити студентам або групі">
+                                            <span>Призначити</span>
+                                        </a>
+                                        <a href="{% url 'teacher_test_edit' s.id %}" class="table-btn" title="Редагувати тест">
+                                            <span>Редагувати</span>
+                                        </a>
+                                        <a href="{% url 'exam_page' s.key %}" class="table-btn" title="Пройти як студент" target="_blank">
+                                            <span>Тест</span>
+                                        </a>
+                                        <a href="{% url 'teacher_test_delete' s.id %}" class="table-btn" style="color: var(--red); border-color: var(--red);" title="Видалити або деактивувати">
+                                            <span>Видалити</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state__icon">
+                    <svg class="ui-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <p class="empty-state__text">
+                    {% if q %}За запитом "{{ q }}" тестів не знайдено.{% else %}У вас ще немає створених тестів.{% endif %}
+                </p>
+                <a href="{% url 'teacher_test_create' %}" class="table-btn" style="background-color: var(--orange); color: #ffffff; border-color: var(--orange);">
+                    Створити перший тест
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock content %}

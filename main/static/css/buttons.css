@@ -3,7 +3,7 @@
    Підтримка темної теми та режимів доступності
    ============================================ */
 
-button:where(:not([class])),
+button,
 .btn {
     text-decoration: none;
     color: #ffffff;
@@ -27,28 +27,28 @@ button:where(:not([class])),
     user-select: none;
 }
 
-button:where(:not([class])):hover:not(:disabled),
+button:hover:not(:disabled),
 .btn:hover:not(:disabled) {
     background-color: var(--orange-hover);
     border-color: var(--orange-hover);
     transform: translateY(-1px);
 }
 
-button:where(:not([class])):active:not(:disabled),
+button:active:not(:disabled),
 .btn:active:not(:disabled) {
     background-color: var(--orange-active);
     border-color: var(--orange-active);
     transform: translateY(0);
 }
 
-button:where(:not([class])):focus-visible,
+button:focus-visible,
 .btn:focus-visible {
     outline: 2px solid var(--orange);
     outline-offset: 2px;
 }
 
 /* Виправлення контрасту для вимкнених кнопок */
-button:where(:not([class])):disabled,
+button:disabled,
 .btn:disabled,
 .btn[disabled] {
     background-color: var(--bg-subtle);

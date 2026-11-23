@@ -281,6 +281,7 @@ function buildGazeQueryParams() {
     params.set("thresh", String(gazeState.manualThreshold));
   } else {
     params.set("manual", "0");
+    params.set("thresh", "auto");
   }
 
   // Request eye preview images when preview element exists or manual mode
@@ -371,7 +372,7 @@ function updateGazeUI(data) {
   // Update calibration status
   const calibStatus = data.manual 
     ? "Ручний режим" 
-    : (data.calibrated ? "Відкалібровано" : "Калібрування...");
+    : (data.calibrated ? "Динамічний (Авто)" : "Калібрування...");
   updateElement("calibStatusMetric", calibStatus);
 
   // Update elapsed time
@@ -519,6 +520,10 @@ function disableManual() {
  * Set preset threshold value
  */
 function setThresholdPreset(val) {
+  if (val === "auto" || val === "Auto") {
+    disableManual();
+    return;
+  }
   enableManual();
   gazeState.manualThreshold = val;
   updateElement("threshVal", String(val));

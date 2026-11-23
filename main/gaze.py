@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from .services import GazeService
+from .constants import GAZE_DEFAULT_THRESH
 
 gaze_service = GazeService()
 logger = logging.getLogger(__name__)
@@ -32,23 +33,52 @@ def shape_to_np(shape, dtype="int"):
         coords[i] = (shape.part(i).x, shape.part(i).y)
     return coords
 
-def get_eye_roi(frame, eye_landmarks):
+def get_eye_roi(frame, eye_landmarks, return_mask=False):
     mask = np.zeros(frame.shape[:2], dtype=np.uint8)
     cv2.fillPoly(mask, [eye_landmarks], 255)
     eye_roi = cv2.bitwise_and(frame, frame, mask=mask)
     x, y, w, h = cv2.boundingRect(eye_landmarks)
-    return eye_roi[y:y + h, x:x + w], x, y
+    cropped_roi = eye_roi[y:y + h, x:x + w]
+    cropped_mask = mask[y:y + h, x:x + w]
+    if return_mask:
+        return cropped_roi, cropped_mask, x, y
+    return cropped_roi, x, y
 
-def adaptive_threshold_from_eye(eye_gray):
-    otsu_thresh, _ = cv2.threshold(eye_gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    mean_brightness = eye_gray.mean()
-    return int(0.7 * otsu_thresh + 0.3 * mean_brightness)
+def adaptive_threshold_from_eye(eye_gray, eye_mask=None, ambient_brightness=None):
+    """
+    Dynamically calculate binarization threshold for pupil isolation based on illumination.
+    Target: isolate the dark pupil/iris (~30-35% of the eye area) from the brighter sclera,
+    adapting smoothly to changing lighting conditions.
+    """
+    if eye_gray is None or eye_gray.size == 0:
+        return GAZE_DEFAULT_THRESH
+    if eye_mask is not None:
+        pixels = eye_gray[eye_mask > 0]
+    else:
+        pixels = eye_gray[eye_gray > 0]
+    if len(pixels) < 10:
+        pixels = eye_gray.flatten()
+        if len(pixels) == 0:
+            return GAZE_DEFAULT_THRESH
 
-def gaze_from_sclera(eye_roi_color, thresh_value, center_scale_factor=CENTER_SCALE_FACTOR):
+    # Pupil and iris occupy ~30-35% of the visible eye area.
+    # The 35th percentile segments pupil as white and keeps sclera black.
+    p35 = float(np.percentile(pixels, 35))
+    min_v = float(np.min(pixels))
+    sclera_v = float(np.percentile(pixels, 85))
+    range_t = min_v + 0.42 * (sclera_v - min_v)
+    thresh = 0.7 * p35 + 0.3 * range_t
+    return int(max(15, min(240, round(thresh))))
+
+def gaze_from_sclera(eye_roi_color, thresh_value, center_scale_factor=CENTER_SCALE_FACTOR, eye_mask=None):
     if eye_roi_color is None or eye_roi_color.size == 0:
         return "unknown", 0, 0, None
     gray = cv2.cvtColor(eye_roi_color, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, thresh_value, 255, cv2.THRESH_BINARY_INV)
+    _, raw_thresh = cv2.threshold(gray, thresh_value, 255, cv2.THRESH_BINARY_INV)
+    if eye_mask is not None:
+        thresh = cv2.bitwise_and(raw_thresh, raw_thresh, mask=eye_mask)
+    else:
+        thresh = raw_thresh
     h, w = thresh.shape
     if h == 0 or w == 0:
         return "unknown", 0, 0, None
@@ -56,6 +86,8 @@ def gaze_from_sclera(eye_roi_color, thresh_value, center_scale_factor=CENTER_SCA
     radius = max(int(min(w, h) * 0.25), 3)
     center_mask = np.zeros((h, w), dtype=np.uint8)
     cv2.circle(center_mask, (cx, cy), radius, 255, -1)
+    if eye_mask is not None:
+        center_mask = cv2.bitwise_and(center_mask, eye_mask)
     center_region = cv2.bitwise_and(thresh, thresh, mask=center_mask)
     center_white = cv2.countNonZero(center_region)
     total_circle_pixels = cv2.countNonZero(center_mask)
@@ -67,7 +99,7 @@ def gaze_from_sclera(eye_roi_color, thresh_value, center_scale_factor=CENTER_SCA
     cv2.line(disp, (w//3, 0), (w//3, h), (100, 100, 100), 1)
     cv2.line(disp, (2*w//3, 0), (2*w//3, h), (100, 100, 100), 1)
 
-    if center_white_pct < 85:
+    if center_white_pct < 60:
         left_side = thresh[:, :w//3]
         right_side = thresh[:, 2*w//3:]
         left_white = cv2.countNonZero(left_side)
@@ -106,13 +138,16 @@ def gaze_frame(request):
     sid = _get_sid(request)
     sess = gaze_service.init_session(sid)
 
-    manual_flag = request.GET.get('manual', '').lower() in ('1', 'true', 'on', 'yes')
-    manual_off   = request.GET.get('manual', '') == '0'
+    manual_param = request.GET.get('manual', '').strip().lower()
+    thresh_param = request.GET.get('thresh', '').strip().lower()
+
+    is_auto = (thresh_param == 'auto') or (manual_param in ('0', 'false', 'off', 'no', 'auto'))
+    manual_flag = (not is_auto) and (manual_param in ('1', 'true', 'on', 'yes'))
+    manual_off   = is_auto or (manual_param == '0')
     preview_flag = request.GET.get('preview', '').lower() in ('1', 'true', 'on', 'yes')
-    thresh_param = request.GET.get('thresh')
 
     if manual_flag:
-        if thresh_param is not None:
+        if thresh_param and thresh_param != 'auto':
             try:
                 tv = int(thresh_param)
                 tv = max(1, min(255, tv))
@@ -164,32 +199,42 @@ def gaze_frame(request):
     pts = shape_to_np(landmarks)
     left_eye = pts[36:42]
     right_eye = pts[42:48]
-    left_roi, _, _ = get_eye_roi(frame, left_eye)
-    right_roi, _, _ = get_eye_roi(frame, right_eye)
+    left_roi, left_mask, _, _ = get_eye_roi(frame, left_eye, return_mask=True)
+    right_roi, right_mask, _, _ = get_eye_roi(frame, right_eye, return_mask=True)
 
     if not sess["manual"]:
-        for eye in (left_roi, right_roi):
-            if eye is not None and eye.size > 0:
-                t = adaptive_threshold_from_eye(cv2.cvtColor(eye, cv2.COLOR_BGR2GRAY))
+        face_roi = gray[max(0, face.top()):min(360, face.bottom()), max(0, face.left()):min(640, face.right())]
+        face_brightness = float(np.mean(face_roi)) if face_roi.size > 0 else float(np.mean(gray))
+
+        t_samples = []
+        for eye_roi, eye_mask in ((left_roi, left_mask), (right_roi, right_mask)):
+            if eye_roi is not None and eye_roi.size > 0:
+                t = adaptive_threshold_from_eye(cv2.cvtColor(eye_roi, cv2.COLOR_BGR2GRAY), eye_mask, face_brightness)
+                t_samples.append(t)
                 gaze_service.add_threshold_sample(sid, int(t))
-        
+
         samples = gaze_service.get_threshold_samples(sid)
-        # Keep only last 60 samples
         if len(samples) > 60:
             sess = gaze_service.get_session(sid)
             sess["thresh_samples"] = samples[-60:]
             gaze_service.save_session(sid, sess)
-        
-        # Calibrate after 20 samples
-        if len(samples) >= 20 and not sess.get("calibrated", False):
-            new_thresh = int(np.median(samples))
-            gaze_service.update_calibration(sid, thresh_value=new_thresh, calibrated=True)
-            logger.info("Auto calibration complete sid=%s thresh=%s", sid, new_thresh)
-            sess = gaze_service.get_session(sid)  # Refresh
+            samples = sess["thresh_samples"]
+
+        # Dynamic auto threshold: smooth median over recent window (last 15 samples)
+        recent_samples = samples[-15:] if len(samples) >= 15 else samples
+        if recent_samples:
+            dynamic_thresh = int(round(float(np.median(recent_samples))))
+        elif t_samples:
+            dynamic_thresh = int(round(float(np.mean(t_samples))))
+        else:
+            dynamic_thresh = sess.get("thresh_value", GAZE_DEFAULT_THRESH)
+
+        gaze_service.update_calibration(sid, thresh_value=dynamic_thresh, calibrated=True)
+        sess = gaze_service.get_session(sid)
 
     thresh = sess["thresh_value"]
-    gl, cpL, _, dispL = gaze_from_sclera(left_roi, thresh)
-    gr, cpR, _, dispR = gaze_from_sclera(right_roi, thresh)
+    gl, cpL, _, dispL = gaze_from_sclera(left_roi, thresh, eye_mask=left_mask)
+    gr, cpR, _, dispR = gaze_from_sclera(right_roi, thresh, eye_mask=right_mask)
     is_looking = (gl == "center" and gr == "center")
 
     gaze_service.increment_frame(sid, not_looking=not is_looking)

@@ -801,3 +801,10 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/python,django,venv,pycharm,visualstudio,visualstudiocode
 .playwright-mcp/
+
+
+
+# My ignore
+# ====
+video_test
+# ====
